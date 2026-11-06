@@ -252,9 +252,23 @@
   par secteur, ≈ 35 min sans perte) ; relais au début de chaque passage
   (vie bonus réservée au relais principal). Test T48 ; 48/48.
 
+## 2026-11-06 — Deuxième émulateur : FCEUX
+
+- `tests/run_fceux.js` + `tests/fceux/campagne.lua` : la campagne complète
+  est jouée par script Lua dans FCEUX 2.6.5, avec l'ancien **et** le nouveau
+  moteur PPU (plus précis que jsnes). Pour chaque secteur : 700 images de
+  jeu, extraction VRAM/RAM, vérification des tuiles et attributs contre les
+  cartes de la ROM, apparition du boss, transition bilan → histoire →
+  secteur suivant, fin de campagne et retour au titre.
+- Résultat : 8/8 secteurs et fin OK dans les deux moteurs, 0 image perdue,
+  HUD intact ([RESULTATS_FCEUX.md](RESULTATS_FCEUX.md), captures dans
+  `docs/captures/fceux/`).
+- Toujours **aucun test sur console** : la séparation IRQ réelle, le conflit
+  DPCM/manettes et la PAL restent à valider sur matériel.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
-1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
+1. ~~Deuxième émulateur (FCEUX)~~ (fait) ; validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
    DPCM/manettes, sauvegarde après coupure).
 2. Secteur 1 : ~~décor définitif multi-palettes, décor destructible, point de reprise~~ (faits).
 3. ~~Capacités propres à chaque vaisseau~~ ~~deuxième pouvoir coopératif~~ (faits).

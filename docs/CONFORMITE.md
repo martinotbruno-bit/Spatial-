@@ -60,7 +60,7 @@ Légende :
 | 11.5 | NTSC et PAL | 🟡 | Détection + compensation testées en logique (T21) ; **❌ MAT** PAL |
 | 12 | Architecture logicielle documentée | ✅ | ARCHITECTURE.md, MEMOIRE.md |
 | 13 | Journal, arbitrages, risques | ✅ | JOURNAL.md, RISQUES.md |
-| 15.1 | Tests automatisés, plusieurs émulateurs | 🟡 | 22 tests jsnes ; **un seul émulateur** (Mesen/FCEUX à ajouter) |
+| 15.1 | Tests automatisés, plusieurs émulateurs | ✅ ÉMU | 48 tests jsnes + campagne complète dans **FCEUX 2.6.5** avec ses deux moteurs PPU (`make test-fceux`, RESULTATS_FCEUX.md) ; Mesen non disponible dans l'environnement |
 | 15.2 | Tests matériels | ❌ MAT | Non réalisables sans console |
 | 16.1 | ROM, sources, scripts, instructions | ✅ | `dist/`, `src/`, `Makefile`, README |
 | 16.2 | Sources des ressources | ✅ | `assets/` (texte) + générateur |
@@ -74,8 +74,10 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 47/47 tests |
-| Mesen / FCEUX / Nestopia | ⬜ non testé |
+| jsnes 1.2.1 (NTSC) | ✅ 48/48 tests |
+| FCEUX 2.6.5, ancien PPU (NTSC) | ✅ campagne 8 secteurs : décor/attributs vérifiés, 0 image perdue, boss, transitions, fin |
+| FCEUX 2.6.5, nouveau PPU (NTSC) | ✅ idem |
+| Mesen / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |
 | Famicom / clones | ❌ non testé |

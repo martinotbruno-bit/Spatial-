@@ -3,7 +3,7 @@
 Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 [cahier des charges maître](Cdc%20spatial.md).
 
-> **État : campagne complète jouable (8 secteurs, 2 fins), testée en émulation.**
+> **État : campagne complète jouable (8 secteurs, 2 fins), testée en émulation (jsnes et FCEUX).**
 > Restent : finition, fabrication de la cartouche et tests sur matériel réel. Aucun test sur matériel réel n'a été effectué : voir
 > [docs/CONFORMITE.md](docs/CONFORMITE.md) pour l'état exact de chaque exigence.
 
@@ -60,6 +60,7 @@ Prérequis : `cc65` (ca65/ld65 ≥ 2.18), Python 3, et Node.js ≥ 18 pour les t
 make          # build/spatial.nes (+ carte mémoire et symboles)
 make dist     # copie la ROM dans dist/
 make test     # suite de tests automatisés en émulation (jsnes)
+make test-fceux  # campagne complète dans FCEUX, 2 moteurs PPU (fceux + xvfb-run)
 ```
 
 La compilation est reproductible (test T22 : deux constructions identiques
@@ -100,7 +101,7 @@ En coopération, la manette 1 pilote LANCE et la manette 2 ÉGIDE.
 - [Architecture logicielle et technique](docs/ARCHITECTURE.md)
 - [Cartographie mémoire](docs/MEMOIRE.md)
 - [Budgets de performance](docs/BUDGETS.md)
-- [Résultats des tests](docs/RESULTATS_TESTS.md)
+- [Résultats des tests](docs/RESULTATS_TESTS.md) · [dans FCEUX](docs/RESULTATS_FCEUX.md)
 - [Journal de production](docs/JOURNAL.md)
 - [Équilibrage](docs/EQUILIBRAGE.md)
 - [Risques](docs/RISQUES.md)

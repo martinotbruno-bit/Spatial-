@@ -27,6 +27,10 @@ dist: $(ROM)
 test: $(ROM)
 	cd tests && npm install --silent && node run_tests.js && node make_sheet.js
 
+# Campagne complete dans FCEUX (ancien + nouveau PPU) ; prerequis : fceux, xvfb-run
+test-fceux: $(ROM)
+	cd tests && node run_fceux.js
+
 # Images PRG / CHR a programmer sur cartouche (build/cartouche/)
 cartouche: $(ROM)
 	$(PY) tools/split_rom.py $(ROM) build/cartouche
@@ -38,4 +42,4 @@ audio: $(ROM)
 clean:
 	rm -rf build/*.o build/*.nes build/*.map build/*.lbl build/*.dbg build/*.inc build/*.bin build/*.dmc
 
-.PHONY: all dist test audio cartouche clean
+.PHONY: all dist test test-fceux audio cartouche clean
