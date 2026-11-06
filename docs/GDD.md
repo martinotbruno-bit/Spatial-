@@ -131,6 +131,13 @@ des projectiles (table lente/rapide déjà en place), cadence des tourelles,
 PV des boss, nombre de vies. Progression interne : densité des scripts
 croissante de secteur en secteur.
 
+## 7 bis. Reprise *[prototype]*
+
+Relais à mi-secteur (message « RELAI »). Après un Game Over : écran
+« SUITE ? » avec compte à rebours de 9 s ; START relance au dernier relais
+avec la réserve de vies pleine, armes au niveau 1 et score remis à zéro
+(le record est enregistré avant). 3 crédits par partie.
+
 ## 8. Score et rejouabilité
 
 Score d'équipe à 6 chiffres. Records solo et coop sauvegardés *[prototype]*.

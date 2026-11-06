@@ -90,6 +90,11 @@ pl_abil_t:   .res 2     ; capacite propre active (images restantes)
 pl_abil_cd:  .res 2     ; temps de recharge de la capacite
 pl_lasta:    .res 2     ; images depuis le dernier appui sur A (sature a 255)
 sync_cd:     .res 1
+cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
+continues:   .res 1
+cont_digit:  .res 1
+cont_t:      .res 1
+cont_buf:    .res 4
 story_page:  .res 1
 story_wait:  .res 1
 story_va:    .res 2
@@ -187,6 +192,7 @@ mus_st_hi:   .res 4
 mus_dur:     .res 4
 mus_vol:     .res 4
 mus_env:     .res 4
+mus_inst:    .res 4
 mus_lasthi:  .res 2
 sfx_left:    .res 2     ; 0 = pulse 2, 1 = bruit
 sfx_plo:     .res 2

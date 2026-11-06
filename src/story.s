@@ -16,6 +16,8 @@ story_enter:
     sta beam_t
     sta boss_on
     sta story_wait
+    sta cp_cam              ; nouveau secteur : pas de point de reprise
+    sta cp_cam+1
     lda #ST_STORY
     sta state
     lda #<pal_title

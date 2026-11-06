@@ -27,7 +27,31 @@ function test(id, name, fn) {
   console.log(`${ok ? "OK   " : "ECHEC"} ${id} ${name}${detail ? "  -- " + detail : ""}`);
 }
 
-const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5 };
+const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5, CONT: 6 };
+
+// Verifie que la zone de jeu visible correspond a la carte (H ou V) -> nb d'erreurs
+function vramErrors(m) {
+  let bad = 0;
+  const cam = camOf(m);
+  if (m.peek("orient") === 0) {
+    const ids = m.s("map_h_ids"), tlo = m.s("map_h_tpl_lo"), thi = m.s("map_h_tpl_hi");
+    for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8) && c < 256; c++) {
+      const id = m.romByte(ids + c), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+      const nc = c & 63, base = (nc & 32 ? 0x2400 : 0x2000) + (nc & 31);
+      for (let r = 0; r < 26; r++) if (m.romByte(tp + r) !== m.nt(base + (r + 4) * 32)) bad++;
+    }
+  } else {
+    const ids = m.s("map_v_ids"), tlo = m.s("map_v_tpl_lo"), thi = m.s("map_v_tpl_hi"), vsy = m.peek("vsy");
+    for (let s = 0; s < 26; s++) {
+      const ntrow = ((vsy >> 3) + s) % 30;
+      let r = ((29 - ntrow) % 30 + 30) % 30;
+      while (r < Math.floor(cam / 8) - 2) r += 30;
+      const id = m.romByte(ids + Math.min(r, 231)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+      for (let c = 0; c < 32; c++) if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++;
+    }
+  }
+  return bad;
+}
 const camOf = (m) => m.peek("cam_lo") + 256 * m.peek("cam_hi");
 const invul = (m) => { m.poke("pl_invul", 10); m.poke("pl_invul", 10, 1); };
 
@@ -282,7 +306,9 @@ test("T14", "Perte de vie, reapparition invulnerable, game over et retour au tit
   }
   const over = m.peek("state") === ST.OVER;
   m.frame(260);
-  return { ok: lives0 === 3 && deaths === 4 && over && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, retour titre=${m.peek("state") === 0}` };
+  const cont = m.peek("state") === ST.CONT;
+  m.frame(620);                                   // compte a rebours ecoule sans START
+  return { ok: lives0 === 3 && deaths === 4 && over && cont && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, ecran CONTINUER=${cont}, retour titre=${m.peek("state") === 0}` };
 });
 
 test("T15", "Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> niveau -1", () => {
@@ -587,6 +613,33 @@ test("T30", "Decor destructible : conteneur ancre au decor, detruit en 3 impacts
   const item = m.peekBytes("it_on", 3).some((x) => x);
   const s1 = m.peekBytes("score", 6).join("");
   return { ok: moved === 10 && hp0 === 3 && destroyed > 0 && item && s1 > s0, detail: `defilement suivi=${moved}px/10 img, detruit apres ${destroyed} images de tir, capsule=${item}, score ${s0}->${s1}` };
+});
+
+test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor exact", () => {
+  const res = [];
+  for (const sector of [0, 1]) {
+    const m = startGame({ players: 2, sector });
+    const cp = sector ? 768 : 896;
+    let msg = false;
+    m.frame(cp + 30, (mm) => { invul(mm); if (mm.peek("msg_id") === 6 && mm.peek("msg_t") > 0) msg = true; });
+    const cpCam = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);
+    m.frame(200, invul);
+    // game over force
+    m.poke("lives", 0);
+    for (const p of [0, 1]) { m.poke("pl_alive", 0, p); m.poke("pl_resp", 0, p); }
+    m.frame(205);
+    const inCont = m.peek("state") === ST.CONT;
+    m.tap(0, "START"); m.frame(3);
+    const camAfter = camOf(m);
+    const bad0 = vramErrors(m);
+    let bad = 0;
+    for (let k = 0; k < 6; k++) { m.frame(37, invul); bad += vramErrors(m); }
+    const score = m.peekBytes("score", 6).join("");
+    res.push({ sector, ok: msg && cpCam === cp && inCont && camAfter >= cp && camAfter < cp + 8 && bad0 + bad === 0 && m.peek("lives") === 5 && m.peek("continues") === 2,
+      txt: `${sector ? "V" : "H"}: relais=${cpCam} msg=${msg} CONTINUER=${inCont} reprise cam=${camAfter} erreurs VRAM=${bad0 + bad} vies=${m.peek("lives")} credits=${m.peek("continues")} score=${score}` });
+    if (sector === 1) m.screenshot(path.join(SHOTS, "11_reprise_vertical.png"));
+  }
+  return { ok: res.every((r) => r.ok), detail: res.map((r) => r.txt).join(" ; ") };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

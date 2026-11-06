@@ -97,12 +97,24 @@
   essai débordait de l'OAM sur le tampon VRAM, détecté par les tests.
 - 30/30 tests en émulation.
 
+## 2026-11-06 — Phase 2 : audio et reprise
+
+- Moteur audio : 6 instruments à enveloppes, commande de changement
+  d'instrument dans les partitions ; musique du menu « Escadre » ;
+  enregistrements WAV produits depuis l'émulateur (`make audio`).
+- Point de reprise à mi-secteur et écran CONTINUER (3 crédits) ; reprise
+  exacte du décor en H et en V (T31).
+- Défaut détecté par T26 : l'initialisation des crédits écrasait le numéro
+  de page de l'introduction (page 3 inexistante → texte illisible).
+  Corrigé.
+- 31/31 tests en émulation ; stress 90 % CPU, normal 64 %.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
    DPCM/manettes, sauvegarde après coupure).
-2. Secteur 1 : ~~décor définitif multi-palettes, décor destructible~~ (faits) ; checkpoint.
+2. Secteur 1 : ~~décor définitif multi-palettes, décor destructible, point de reprise~~ (faits).
 3. ~~Capacités propres à chaque vaisseau~~ ~~deuxième pouvoir coopératif~~ (faits).
 4. ~~Séquence narrative d'introduction, écran de fin de secteur avec bilan~~ (faits).
-5. Moteur audio : enveloppes par instrument, musique de menu dédiée.
+5. ~~Moteur audio : enveloppes par instrument, musique de menu dédiée~~ (faits).
 6. ~~Réorganisation des bancs~~ (fait).

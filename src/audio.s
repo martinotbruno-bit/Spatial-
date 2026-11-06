@@ -80,6 +80,8 @@ play_song:
     sta mus_dur,x
     lda #0
     sta mus_vol,x
+    lda ins_default,x
+    sta mus_inst,x
     iny
     iny
     inx
@@ -91,6 +93,8 @@ play_song:
     lda #1
     sta mus_on
     rts
+
+ins_default: .byte 0, 1, 0, 0     ; lead sur pulse 1, arpege sur pulse 2
 
 stop_music:
     lda #0
@@ -159,15 +163,29 @@ mus_fetch:
     sta au_ptr
     lda mus_ptr_hi,x
     sta au_ptr+1
+@read:
     ldy #0
     lda (au_ptr),y
     cmp #$FF
-    bne @ok
+    bne @noloop
     lda mus_st_lo,x         ; fin de sequence : boucle
     sta au_ptr
     lda mus_st_hi,x
     sta au_ptr+1
+    jmp @read
+@noloop:
+    cmp #$FD                ; changement d'instrument
+    bne @ok
+    iny
     lda (au_ptr),y
+    sta mus_inst,x
+    clc
+    lda au_ptr
+    adc #2
+    sta au_ptr
+    bcc @read
+    inc au_ptr+1
+    jmp @read
 @ok:
     sta au_note
     iny
@@ -193,7 +211,8 @@ mus_fetch:
     sta mus_vol,x
     rts
 @pnote:
-    lda pulse_vol0,x
+    ldy mus_inst,x
+    lda ins_vol0,y
     sta mus_vol,x
     cpx #1
     bne @p1
@@ -281,12 +300,13 @@ mus_envelope:
     cpx #2
     beq @done
     bcs @noise
+    ldy mus_inst,x
     inc mus_env,x
     lda mus_env,x
-    and #3
+    and ins_rate,y
     bne @done
     lda mus_vol,x
-    cmp pulse_volmin,x
+    cmp ins_volmin,y
     bcc @done
     beq @done
     dec mus_vol,x
@@ -308,15 +328,17 @@ mus_write_vol:
     bcs @noise
     cpx #1
     beq @p2
+    ldy mus_inst
     lda mus_vol
-    ora #$B0                ; rapport cyclique 50 %, volume constant
+    ora ins_duty,y          ; rapport cyclique de l'instrument, volume constant
     sta APU_P1_CTRL
     rts
 @p2:
     lda sfx_left
     bne @done
+    ldy mus_inst+1
     lda mus_vol+1
-    ora #$70                ; rapport cyclique 25 %
+    ora ins_duty,y
     sta APU_P2_CTRL
 @done:
     rts
@@ -389,8 +411,14 @@ sfx_tick:
     bne @ch
     rts
 
-pulse_vol0:   .byte 10, 5
-pulse_volmin: .byte 4, 2
+; Instruments des canaux pulse : rapport cyclique ($30 = volume constant),
+; volume d'attaque, periode de decroissance (masque : 0 = chaque image,
+; 3 = toutes les 4 images...), volume de maintien.
+;               lead  arp   pluck brass pad   bell
+ins_duty:   .byte $B0,  $70,  $70,  $B0,  $30,  $F0
+ins_vol0:   .byte 10,   5,    12,   12,   7,    13
+ins_rate:   .byte 3,    3,    0,    7,    15,   1
+ins_volmin: .byte 4,    2,    0,    8,    4,    0
 ;               K    S    H
 drum_vol:     .byte 12,  11,  5
 drum_decay:   .byte 3,   1,   2

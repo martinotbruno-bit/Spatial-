@@ -84,7 +84,7 @@ title_enter:
 @np:
     jsr menu_write
     jsr flush_vbuf_direct
-    lda #SONG_STAGE
+    lda #SONG_TITLE
     jsr play_song
     jmp ppu_on
 

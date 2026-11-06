@@ -42,9 +42,11 @@ game_start:
     lda #LIVES_SOLO
     sta lives
 @go:
+    lda #CONTINUES
+    sta continues
     lda sector_sel
     sta stage
-    jmp story_enter         ; page = secteur de depart (0 = introduction)
+    jmp story_enter         ; A = page = secteur de depart (0 = introduction)         ; page = secteur de depart (0 = introduction)
 
 ; -----------------------------------------------------------------------------
 ; Initialisation d'un niveau (ecran coupe pendant le chargement)
@@ -52,9 +54,11 @@ game_start:
 stage_start:
     jsr ppu_off
     jsr clear_entities
-    lda #0
+    lda cp_cam              ; depart au point de reprise (0 = debut)
     sta cam_lo
+    lda cp_cam+1
     sta cam_hi
+    lda #0
     sta boss_on
     sta beam_t
     sta nova_t
@@ -76,6 +80,24 @@ stage_start:
     sta script_ptr
     lda stage_script_hi,x
     sta script_ptr+1
+    jsr cam_div8
+    sta tmp6                ; c0 = premiere colonne/rangee de carte
+    ; saute les apparitions deja passees
+@skip:
+    ldy #0
+    lda (script_ptr),y
+    cmp #$FF
+    beq @sk_done
+    cmp tmp6
+    bcs @sk_done
+    clc
+    lda script_ptr
+    adc #4
+    sta script_ptr
+    bcc @skip
+    inc script_ptr+1
+    bne @skip
+@sk_done:
     lda stage_pal_lo,x
     sta ptr0
     lda stage_pal_hi,x
@@ -86,37 +108,71 @@ stage_start:
     jsr place_players
     lda orient
     bne @v
-    ; --- horizontal : 33 colonnes initiales ---
-    lda #0
+    ; --- horizontal : 33 colonnes initiales a partir de c0 ---
+    lda #33
+    sta tmp7
+    lda tmp6
     sta tmp5
 @hc:
     lda tmp5
     jsr build_column_h
     jsr flush_vbuf_direct
     inc tmp5
-    lda tmp5
-    cmp #33
+    dec tmp7
     bne @hc
     jmp @done
 @v:
-    ; --- vertical : 30 rangees initiales, defilement Y = 32 ---
+    ; --- vertical : 30 rangees initiales a partir de c0 ---
+    ; rangee de carte R -> rangee de table 29 - (R mod 30)
+    ; Y de defilement = (32 - cam) mod 240
+    lda cam_lo
+    sta tmp0
+    lda cam_hi
+    sta tmp1
+@m240:
+    lda tmp1
+    bne @sub
+    lda tmp0
+    cmp #240
+    bcc @m_ok
+@sub:
+    sec
+    lda tmp0
+    sbc #240
+    sta tmp0
+    lda tmp1
+    sbc #0
+    sta tmp1
+    jmp @m240
+@m_ok:
     lda #32
+    sec
+    sbc tmp0
+    bcs @vs
+    adc #240
+@vs:
     sta vsy
-    lda #0
+    lda #30
+    sta tmp7
+    lda tmp6
     sta tmp5
 @vr:
-    lda tmp5                ; rangee de carte r -> rangee de table (29 - r)
+    lda tmp5
     sta tmp4
-    lda #29
+    jsr mod30
+    eor #$FF
     sec
-    sbc tmp5
+    adc #29                 ; 29 - (R mod 30)
     jsr build_row_v
     jsr flush_vbuf_direct
     inc tmp5
-    lda tmp5
-    cmp #30
+    dec tmp7
     bne @vr
-    lda #29                 ; prochaine rangee a remplir : 29 - 30 mod 30 = 29
+    lda tmp6                ; prochaine rangee : 29 - (c0 mod 30)
+    jsr mod30
+    eor #$FF
+    sec
+    adc #29
     sta vrow
 @done:
     jsr update_split
@@ -131,6 +187,28 @@ stage_start:
     lda #ST_PLAY
     sta state
     jmp ppu_on
+
+; A = cam / 8 (camera < 2048)
+cam_div8:
+    lda cam_hi
+    sta tmp0
+    lda cam_lo
+    lsr tmp0
+    ror
+    lsr tmp0
+    ror
+    lsr tmp0
+    ror
+    rts
+
+; A = A mod 30
+mod30:
+    cmp #30
+    bcc @r
+    sbc #30
+    jmp mod30
+@r:
+    rts
 
 stage_orient:    .byte 0, 1
 stage_script_lo: .byte <script_h, <script_v
@@ -419,6 +497,27 @@ scroll_update:
     bne @nc
     inc cam_hi
 @nc:
+    ; point de reprise
+    lda cp_cam
+    ora cp_cam+1
+    bne @nocp
+    ldx orient
+    lda cam_lo
+    cmp cp_lo,x
+    bne @nocp
+    lda cam_hi
+    cmp cp_hi,x
+    bne @nocp
+    sta cp_cam+1
+    lda cam_lo
+    sta cp_cam
+    lda #MSG_CP
+    sta msg_id
+    lda #90
+    sta msg_t
+    lda #SFX_COOPREADY
+    jsr sfx_play
+@nocp:
     lda cam_lo
     and #7
     bne @split
@@ -487,6 +586,8 @@ update_split:
     lda #1
     jmp compute_split
 
+cp_lo: .byte <CP_H, <CP_V
+cp_hi: .byte >CP_H, >CP_V
 cam_stop_lo: .byte <CAM_STOP_H, <CAM_STOP_V
 cam_stop_hi: .byte >CAM_STOP_H, >CAM_STOP_V
 
@@ -689,13 +790,83 @@ clear_update:
 @r:
     rts
 
+; GAME OVER (200 images) puis, s'il reste des credits, compte a rebours
 over_update:
     jsr fx_update
     dec state_t
     bne @r
+    lda continues
+    bne @cont
+    jmp title_enter
+@cont:
+    lda #ST_CONT
+    sta state
+    lda #9
+    sta cont_digit
+    lda #60
+    sta cont_t
+    lda #MSG_CONT
+    sta msg_id
+    lda #255
+    sta msg_t
+    jmp cont_text
+@r:
+    rts
+
+; CONTINUER ? : START relance au dernier point de reprise
+cont_update:
+    lda #255
+    sta msg_t
+    lda pad_new
+    ora pad_new+1
+    and #BTN_START
+    bne continue_game
+    dec cont_t
+    bne @r
+    lda #60
+    sta cont_t
+    lda #SFX_MENU
+    jsr sfx_play
+    dec cont_digit
+    bpl cont_text
     jmp title_enter
 @r:
     rts
+
+cont_text:
+    lda #' '
+    sta cont_buf
+    lda cont_digit
+    ora #'0'
+    sta cont_buf+1
+    lda #' '
+    sta cont_buf+2
+    lda #0
+    sta cont_buf+3
+    rts
+
+continue_game:
+    dec continues
+    ldx #5
+    lda #0
+@s:
+    sta score,x             ; le score repart de zero (record deja enregistre)
+    dex
+    bpl @s
+    sta gauge
+    lda #1
+    sta pl_wlv
+    sta pl_wlv+1
+    lda #LIVES_SOLO
+    ldy nplayers
+    cpy #2
+    bne @l
+    lda #LIVES_COOP
+@l:
+    sta lives
+    lda #SFX_MENU
+    jsr sfx_play
+    jmp stage_start
 
 end_update:
     jsr fx_update

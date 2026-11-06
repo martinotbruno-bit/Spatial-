@@ -80,6 +80,7 @@ ST_CLEAR  = 2
 ST_OVER   = 3
 ST_END    = 4
 ST_STORY  = 5
+ST_CONT   = 6
 
 ; --- Pools d'entites -----------------------------------------------------------
 MAX_EN = 10     ; ennemis
@@ -121,3 +122,7 @@ SPAWN_U       = 250  ; position "avant" d'apparition (hors champ partiel)
 ; Fins de defilement (camera en pixels) avant l'apparition du boss
 CAM_STOP_H = 1760
 CAM_STOP_V = 1536
+; Points de reprise (multiples de 32 : alignes sur les groupes d'attributs)
+CP_H = 896
+CP_V = 768
+CONTINUES = 3

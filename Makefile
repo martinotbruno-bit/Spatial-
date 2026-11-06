@@ -27,7 +27,11 @@ dist: $(ROM)
 test: $(ROM)
 	cd tests && npm install --silent && node run_tests.js && node make_sheet.js
 
+# Enregistrements WAV des musiques (docs/audio/)
+audio: $(ROM)
+	cd tests && node render_audio.js
+
 clean:
 	rm -rf build/*.o build/*.nes build/*.map build/*.lbl build/*.dbg build/*.inc build/*.bin build/*.dmc
 
-.PHONY: all dist test clean
+.PHONY: all dist test audio clean

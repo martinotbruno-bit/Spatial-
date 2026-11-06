@@ -30,7 +30,9 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - 4 familles d'ennemis (drones, chasseurs, tourelles, kamikazes), tirs visés
   sur 16 directions, mini-boss à 2 phases
 - Moteur audio sur les 5 canaux (2 pulse, triangle, bruit, DPCM),
-  4 musiques originales, 15 effets sonores
+  5 musiques originales (écoute : `docs/audio/`), instruments à
+  enveloppes, 15 effets sonores
+- Point de reprise à mi-secteur et 3 crédits « CONTINUER »
 - Sauvegarde des records sur PRG-RAM à pile (double copie + somme de contrôle)
 - Détection NTSC/PAL et compensation de cadence 6/5 en 50 Hz
 

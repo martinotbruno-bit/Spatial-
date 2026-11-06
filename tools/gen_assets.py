@@ -417,12 +417,19 @@ def expand(tokens):
 
 
 DRUMS = {"K": 0, "S": 1, "H": 2}
+# Instruments des canaux pulse (ordre = table ins_* de audio.s)
+INSTRUMENTS = {"lead": 0, "arp": 1, "pluck": 2, "brass": 3, "pad": 4, "bell": 5}
 
 
 def compile_channel(tokens, tempo, chan):
     data = []
     total = 0
     for t in expand(tokens):
+        if t.startswith("@"):
+            if chan not in ("P1", "P2"):
+                raise SystemExit("instrument sur un canal non pulse: " + t)
+            data += [0xFD, INSTRUMENTS[t[1:]]]
+            continue
         name, dur = t.split("/")
         frames = int(dur) * tempo
         total += int(dur)

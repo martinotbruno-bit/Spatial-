@@ -149,7 +149,11 @@ générées (2 vitesses × 16 directions).
 
 ## 6. Audio
 
-- Données compilées depuis `assets/music.txt` (notation texte).
+- Données compilées depuis `assets/music.txt` (notation texte). Commande
+  `$FD n` dans un flux : changement d'instrument.
+- 6 instruments pulse (lead, arpège, pincé, cuivre, nappe, cloche) :
+  rapport cyclique, volume d'attaque, vitesse de décroissance, volume de
+  maintien (tables `ins_*` de `audio.s`).
 - 4 flux (pulse 1 mélodie, pulse 2 harmonie, triangle basse, bruit
   batterie) ; la grosse caisse déclenche aussi un échantillon **DPCM**
   synthétisé (273 octets à `$C000`).
@@ -159,6 +163,15 @@ générées (2 vitesses × 16 directions).
   conservé en PAL par 6 pas audio pour 5 images.
 - Les lectures DMC pouvant corrompre `$4016/$4017`, les manettes sont lues
   jusqu'à obtenir deux lectures identiques.
+
+## 6 bis. Point de reprise
+
+À mi-secteur (H : 896 px, V : 768 px, multiples de 32 pour rester aligné
+sur les groupes d'attributs), la caméra mémorise `cp_cam`. « CONTINUER »
+relance `stage_start` à cette position : script avancé jusqu'au
+déclencheur courant, 33 colonnes (H) ou 30 rangées (V) dessinées depuis
+`cam/8`, et pour le vertical `vsy = (32 − cam) mod 240`,
+`vrow = 29 − (cam/8 mod 30)`. Vérifié par T31 (0 erreur VRAM en H et en V).
 
 ## 7. NTSC / PAL
 

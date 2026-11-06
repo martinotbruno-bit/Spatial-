@@ -613,6 +613,8 @@ MSG_CLEAR = 2
 MSG_OVER  = 3
 MSG_WARN  = 4
 MSG_END   = 5
+MSG_CP    = 6
+MSG_CONT  = 7
 msg_tbl:
     .word str_ready, 0
     .word str_pause, 0
@@ -620,6 +622,8 @@ msg_tbl:
     .word str_game, str_over
     .word str_alert, str_boss
     .word str_bravo, str_fin
+    .word str_relai, 0
+    .word str_suite, cont_buf
 str_ready: .byte "PRET!", 0
 str_pause: .byte "PAUSE", 0
 str_stage: .byte "SECT.", 0
@@ -630,3 +634,5 @@ str_alert: .byte "ALERT", 0
 str_boss:  .byte "BOSS!", 0
 str_bravo: .byte "BRAVO", 0
 str_fin:   .byte " FIN ", 0
+str_relai: .byte "RELAI", 0
+str_suite: .byte "SUITE?", 0
