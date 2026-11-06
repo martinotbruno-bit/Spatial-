@@ -107,9 +107,11 @@ Piste restante : *bouclier partagé* (deuxième usage du LIEN à demi-jauge).
 | Soutien | S'arrête, répare (+2 PV) les ennemis à moins de 40 px toutes les 48 images (ils clignotent) ; cible prioritaire | 5 | 600 |
 | Poseur de mines | S'arrête et largue 8 mines (une toutes les 64 images), puis repart | 6 | 700 |
 | Mine | Dérive avec le décor ; explose en anneau de 8 projectiles après 2,5 s ou à l'approche d'un vaisseau (28 px) ; destructible | 2 | 100 |
+| Émetteur cristallin | Structure défensive ancrée au décor ; cycle de 2 s : fermé (blanc, invulnérable) puis ouvert (vulnérable, tir en croix puis en diagonales) | 8 | 900 |
 | Décor destructible | Conteneur (secteur 1) / rocher minéralier (secteur 3) ancré au décor | 3 | 200 |
 
-*[à produire]* : barrages (réparation, bouclier
+Les 8 familles demandées par le CDC sont présentes (structures défensives :
+tourelles et émetteurs cristallins ; ennemis spécialisés : poseurs de mines). (réparation, bouclier
 de groupe), ennemis spécialisés (mines, poseurs de barrage), structures
 défensives destructibles du décor.
 
@@ -132,6 +134,10 @@ deux tourelles de coque (25 à 50 PV selon la difficulté, +2 000 points
 chacune) protègent le noyau, invulnérable tant qu'une tourelle est debout ;
 elles tirent en gerbe et en ligne. Le noyau exposé tire des anneaux et des
 tirs visés.
+
+**Gardien d'Ancrage** *[secteur 6]* : œil à quatre bras ; phase 1 : croix
+de 4 projectiles tournant d'un cran à chaque salve ; phase 2 : croix plus
+rapide, anneau de 8 toutes les 4 salves et tirs visés.
 
 ## 6. Campagne proposée (durée cible 1 à 2 h)
 

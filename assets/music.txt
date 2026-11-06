@@ -84,3 +84,12 @@ P2: [C4/2 G4/2 C4/2 Ds4/2]x2 [Gs3/2 Ds4/2 Gs3/2 C4/2]x2 [As3/2 F4/2 As3/2 D4/2]x
 TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
 TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
 NO: [K/2 K/2 S/2 H/2 K/2 H/1 H/1 S/2 S/2]x8
+
+# Theme du secteur 6 "Ancrage" - Mi phrygien, mysterieux
+@song ancrage tempo=7
+P1: @bell E5/8 F5/4 E5/4  G5/8 F5/4 E5/4  D5/4 E5/4 F5/4 A5/4  E5/12 r/4
+P1: @pad B5/8 C6/4 B5/4  A5/8 G5/4 F5/4  E5/4 F5/4 G5/4 F5/4  E5/16
+P2: @arp [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4 [E4/1 B4/1 E5/1 B4/1]x4
+P2: [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4 [E4/1 B4/1 E5/1 B4/1]x4
+TR: E2/16 F2/16 D2/16 E2/16 E2/16 F2/16 D2/16 E2/16
+NO: [K/4 H/4 S/4 H/2 H/2]x8

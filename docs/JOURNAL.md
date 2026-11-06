@@ -216,6 +216,14 @@
 - Boss Croiseur à **parties destructibles** (2 tourelles, noyau protégé).
 - Test T41 ; 41/41 en émulation. Bancs fixes : 84 % / 64 %.
 
+## 2026-11-06 — Secteur 6 « Le Premier Ancrage »
+
+- Structure extraterrestre verticale (chitine, veines, runes, cristaux),
+  3 palettes, musique « Ancrage », page narrative.
+- 8e famille : émetteur cristallin (structure défensive, invulnérable
+  fermé) — les 8 familles du CDC sont couvertes.
+- Boss Gardien d'Ancrage (croix tournantes). Test T42 ; 42/42.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

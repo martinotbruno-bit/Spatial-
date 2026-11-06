@@ -112,6 +112,7 @@ EN_HEAVY    = 6     ; unite lourde
 EN_SUPPORT  = 7     ; appareil de soutien (repare les ennemis proches)
 EN_MINER    = 8     ; poseur de mines
 EN_MINE     = 9     ; mine (explose en anneau)
+EN_CRYSTAL  = 10    ; emetteur cristallin (invulnerable quand il est ferme)
 EN_BOSS     = 15    ; marqueur de script uniquement
 
 ; --- Regles --------------------------------------------------------------------

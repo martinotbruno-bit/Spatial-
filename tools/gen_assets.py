@@ -222,7 +222,8 @@ def build_common(consts):
            ("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
            ("fighter", 0x98, True), ("turret", 0xA0, True), ("kamikaze", 0xA8, True),
            ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False),
-           ("support", 0x68, True), ("miner", 0x70, True), ("mine", 0x78, False)]
+           ("support", 0x68, True), ("miner", 0x70, True), ("mine", 0x78, False),
+           ("crystal", 0x7C, False)]
     for name, base, orient in big:
         put_big(spr, consts, art, name, base, orient)
     return bg, spr
@@ -578,6 +579,50 @@ def pal_s5(c, cols, x, y):
     return 0
 
 
+def gen_map_anchor(c):
+    """Secteur 6 : Le Premier Ancrage (vertical). Nef centrale bordee de
+    parois de chitine d'epaisseur variable, veines lumineuses, alcoves a
+    membranes, rangees de runes et grappes de cristaux."""
+    rng = random.Random(9753)
+    nrows = 232
+    rows = []
+    for y in range(nrows):
+        row = [0] * 32
+        if y < 24:
+            if (y * 7) % 5 == 0:
+                row[(y * 13) % 32] = c["T_STAR1"]
+            rows.append(row)
+            continue
+        seg = (y - 24) // 8
+        w = [3, 4, 5, 6, 5, 4, 3, 5, 7, 6, 4, 3][seg % 12]
+        for x in range(w):
+            row[x] = c["T_CHITIN"] if (x + y) % 3 else c["T_CHITIN2"]
+            row[31 - x] = row[x]
+        row[w - 1] = c["T_VEIN_V"]
+        row[32 - w] = c["T_VEIN_V"]
+        yy = (y - 24) % 16
+        if yy == 0:                       # rangee de runes
+            for x in range(w, 32 - w):
+                row[x] = c["T_RUNE"] if x % 4 == 0 else c["T_VEIN_H"]
+        elif seg % 3 == 1 and yy in (5, 6, 7, 8, 9):   # alcoves a membranes
+            for x in (w, w + 1, 30 - w, 31 - w):
+                row[x] = c["T_MEMBRANE"]
+        elif seg % 4 == 2 and yy in (10, 11):          # cristaux
+            for x in (10, 13, 18, 21):
+                row[x] = c["T_CRYSTAL"]
+        rows.append(row)
+    return rows
+
+
+def pal_s6(c, rows, x, y):
+    t = rows[y][x]
+    if t in (c["T_VEIN_V"], c["T_VEIN_H"], c["T_RUNE"]):
+        return 2
+    if t in (c["T_CRYSTAL"], c["T_MEMBRANE"]):
+        return 3
+    return 0
+
+
 # Definition des secteurs (ordre de la campagne)
 SECTORS = [
     dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
@@ -600,12 +645,16 @@ SECTORS = [
          sprites="sprites_s5.txt", spr_set=3, gen=gen_map_yard, palfn=pal_s5,
          loop=(32, 184), reps=5, song="hadar", boss=4,
          pal=[0x0F, 0x00, 0x10, 0x2D, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x07, 0x28, 0x38, 0x0F, 0x01, 0x21, 0x31]),
+    dict(name="s6", title="Le Premier Ancrage", orient=1, bank=7, tiles="tiles_s6.txt",
+         sprites="sprites_s6.txt", spr_set=4, gen=gen_map_anchor, palfn=pal_s6,
+         loop=(24, 176), reps=5, song="ancrage", boss=5,
+         pal=[0x0F, 0x02, 0x13, 0x23, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x0A, 0x1A, 0x3A, 0x0F, 0x04, 0x24, 0x34]),
 ]
 # Palettes de sprites communes
 SPR_PAL = [0x0F, 0x02, 0x21, 0x30, 0x0F, 0x06, 0x27, 0x38, 0x0F, 0x04, 0x14, 0x2A, 0x0F, 0x30, 0x27, 0x16]
 
 ENEMY_NAMES = {"DRONE": 1, "CHASSEUR": 2, "TOURELLE": 3, "KAMIKAZE": 4, "DECOR": 5, "LOURDE": 6,
-               "SOUTIEN": 7, "MINEUR": 8, "BOSS": 15}
+               "SOUTIEN": 7, "MINEUR": 8, "CRISTAL": 10, "BOSS": 15}
 
 
 def load_script(name):

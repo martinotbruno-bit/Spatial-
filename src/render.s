@@ -474,6 +474,7 @@ enemy_tiles:
     .byte S_SUPPORT_H, S_SUPPORT_V
     .byte S_MINER_H, S_MINER_V
     .byte S_MINE_H, S_MINE_V
+    .byte S_CRYSTAL_H, S_CRYSTAL_V
 
 draw_fx:
     lda #2

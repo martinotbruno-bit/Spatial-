@@ -14,7 +14,7 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
   - VAISSEAU (solo) : LANCE ou ÉGIDE.
   - SECTEUR : les secteurs déjà atteints (sauvegardés) peuvent être rejoués :
     1 STATION (horizontal), 2 PLANÈTE (vertical), 3 CEINTURE (horizontal),
-    4 LUMEN (vertical), 5 HADAR (horizontal).
+    4 LUMEN (vertical), 5 HADAR (horizontal), 6 ANCRAGE (vertical).
   - NIVEAU : RECRUE, PILOTE (par défaut) ou VÉTÉRAN ; EXPERT apparaît
     après avoir terminé la campagne. Débutant ? Essayez ÉGIDE en RECRUE.
 - **START** : lancer la partie.

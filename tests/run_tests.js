@@ -143,7 +143,7 @@ test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   m.tap(0, "DOWN");
   m.tap(0, "LEFT");
   const sec = m.peek("sector_sel");
-  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 4, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 5, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
 });
 
 test("T03", "Deux manettes : deplacements independants et simultanes", () => {
@@ -660,7 +660,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   const locked = m.peek("diff") === 0;
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
-  m.poke("story_page", 5); m.tap(0, "START"); m.frame(10);
+  m.poke("story_page", 6); m.tap(0, "START"); m.frame(10);
   const sram = m.sram(64);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
@@ -930,9 +930,47 @@ test("T41", "Secteur 5 Chantiers d'Hadar : decor, mines, boss a tourelles destru
   m.releaseAll();
   const cleared = m.peek("state") === ST.CLEAR;
   m.frame(252, invul);
-  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 5;
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 5;   // arrivee secteur 6
   return { ok: ok0 && vbad === 0 && abad === 0 && miner && mines > 0 && ring >= 8 && mineGone && parts0[0] > 0 && hpWhileParts === hp0 && partsDead > 0 && cleared && epi,
     detail: `secteur charge=${ok0}, VRAM ${vbad}/${abad} erreurs, poseurs=${miner}, mines simultanees=${mines}, explosion -> ${ring} projectiles, tourelles PV=[${parts0}], noyau intact tant que tourelles=${hpWhileParts === hp0}, tourelles detruites apres ${partsDead} img, boss vaincu=${cleared}, epilogue=${epi}` };
+});
+
+test("T42", "Secteur 6 Premier Ancrage (V) : decor, emetteurs cristallins, Gardien d'Ancrage", () => {
+  const m = startGame({ players: 2, sector: 5 });
+  const ok0 = m.peek("stage") === 5 && m.peek("orient") === 1;
+  let vbad = 0, seen = false;
+  for (let k = 0; k < 12; k++) {
+    m.frame(101, (mm) => { invul(mm); if (mm.peekBytes("en_type", 10).includes(10)) seen = true; });
+    vbad += vramErrors(m);
+    if (k === 6) m.screenshot(path.join(SHOTS, "19_secteur6_ancrage.png"));
+  }
+  // emetteur : invulnerable ferme, vulnerable ouvert, tir en croix
+  m.frame(1, (mm) => { invul(mm); clearField(mm); });
+  m.poke("en_type", 10, 0); m.poke("en_hp", 8, 0); m.poke("en_t", 10, 0); m.poke("en_u", 120, 0); m.poke("en_v", 112, 0);
+  m.poke("en_dvhi", 0, 0); m.poke("en_dvlo", 0, 0);
+  m.frame(2);
+  const st1 = m.peek("en_st", 0);
+  m.poke("en_t", 63, 0);
+  m.frame(2, (mm) => { mm.poke("en_u", 120, 0); });
+  const cross = countOn(m, "eb_on", 16);
+  const st2 = m.peek("en_st", 0);
+  // boss
+  jumpToBoss(m);
+  const dirs = new Set();
+  m.press(0, "B"); m.press(1, "B");
+  for (let i = 0; i < 2500 && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1, invul);
+    const bv = m.peek("boss_v");
+    m.poke("pl_v", Math.max(8, bv)); m.poke("pl_v", Math.min(232, bv + 16), 1); m.poke("pl_u", 60); m.poke("pl_u", 60, 1);
+    if (m.peek("boss_on") === 2) for (let e = 0; e < 16; e++) if (m.peek("eb_on", e)) dirs.add(m.peek("eb_duhi", e) * 256 + m.peek("eb_dvhi", e));
+    if (i === 350) m.screenshot(path.join(SHOTS, "20_gardien.png"));
+  }
+  m.releaseAll();
+  const cleared = m.peek("state") === ST.CLEAR;
+  m.frame(252, invul);
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 6;
+  return { ok: ok0 && vbad === 0 && seen && st1 === 1 && st2 === 0 && cross >= 4 && dirs.size >= 6 && cleared && epi,
+    detail: `secteur charge=${ok0}, erreurs VRAM=${vbad}, emetteurs vus=${seen}, ferme=${st1 === 1} puis ouvert=${st2 === 0} avec ${cross} projectiles en croix, directions boss=${dirs.size}, boss vaincu=${cleared}, epilogue=${epi}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

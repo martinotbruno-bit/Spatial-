@@ -3,10 +3,10 @@
 ; Positions en virgule fixe 8.8, vitesses signees 8.8.
 ; =============================================================================
 
-;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE
-en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12,    5,      6,     2
-en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8,     6,      7,     1  ; centaines
-en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5,     3,      4,     1
+;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE CRISTAL
+en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12,    5,      6,     2,   8
+en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8,     6,      7,     1,   9  ; centaines
+en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5,     3,      4,     1,   4
 
 ; Apparition : tmp2 = type, tmp3 = v, tmp4 = parametre
 enemy_spawn:
@@ -44,9 +44,9 @@ enemy_spawn:
     sta en_duhi,x
     rts
 
-;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE
-en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40,   $00,    $C0,   $00
-en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF,   $FF,    $FE,   $FF
+;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE CRISTAL
+en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40,   $00,    $C0,   $00, $00
+en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF,   $FF,    $FE,   $FF, $FF
 
 enemies_update:
     ldx #MAX_EN-1
@@ -72,7 +72,7 @@ enemies_update:
     rts
 
 en_ai_tbl:
-    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1, ai_support-1, ai_miner-1, ai_mine-1
+    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1, ai_support-1, ai_miner-1, ai_mine-1, ai_crystal-1
 
 ; Integration de la position, puis retour a la boucle. Detruit l'ennemi s'il
 ; sort du champ (debordement 8 bits).
@@ -470,6 +470,61 @@ ai_mine:
     jsr sfx_play
     lda #0
     sta en_type,x
+    jmp en_move
+
+; --- EMETTEUR CRISTALLIN : ancre au decor ; cycle de 128 images :
+; 0-63 ferme (blanc, invulnerable), 64-127 ouvert (tir en croix a 64,
+; en diagonales a 96) ---
+ai_crystal:
+    lda #$FF
+    ldy scroll_on
+    bne @s
+    lda #0
+@s:
+    sta en_duhi,x
+    lda en_t,x
+    and #127
+    cmp #64
+    bcs @open
+    lda #2                  ; ferme : palette blanche (meme que le flash)
+    sta en_flash,x
+    lda #1
+    sta en_st,x
+    jmp en_move
+@open:
+    lda #0
+    sta en_st,x
+    lda en_t,x
+    and #127
+    cmp #64
+    beq @cross
+    cmp #96
+    bne @mv
+    lda #2                  ; diagonales
+    jmp @fire
+@cross:
+    lda #0
+@fire:
+    sta tmp2
+    lda en_u,x
+    clc
+    adc #4
+    sta tmp3
+    lda en_v,x
+    clc
+    adc #4
+    sta tmp4
+    lda #4
+    sta tmp0
+@f:
+    jsr eb_spawn
+    lda tmp2
+    clc
+    adc #4
+    sta tmp2
+    dec tmp0
+    bne @f
+@mv:
     jmp en_move
 
 ; --- CONTENEUR : ancre sur la coque, suit le decor, ne tire pas ---
@@ -957,6 +1012,13 @@ items_update:
 ; -----------------------------------------------------------------------------
 enemy_damage:
     sta tmp5
+    lda en_type,x           ; emetteur cristallin ferme : invulnerable
+    cmp #EN_CRYSTAL
+    bne @vuln
+    lda en_st,x
+    beq @vuln
+    rts
+@vuln:
     lda en_hp,x
     sec
     sbc tmp5

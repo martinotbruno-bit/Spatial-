@@ -3,12 +3,12 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **41/41** reussis.
+Resultat : **42/42** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
 | T01 | Demarrage : ecran titre stable, NMI actif, region NTSC detectee | OK | etat=0 nmi/60img=60 region=0 lag=0 |
-| T02 | Menu : choix 1/2 joueurs, vaisseau, secteur | OK | joueurs 1->2->1, vaisseau=1, secteur (GAUCHE depuis 1, boucle)=5 |
+| T02 | Menu : choix 1/2 joueurs, vaisseau, secteur | OK | joueurs 1->2->1, vaisseau=1, secteur (GAUCHE depuis 1, boucle)=6 |
 | T03 | Deux manettes : deplacements independants et simultanes | OK | LANCE du=50 (2.5px x 20), EGIDE dv=35 (1.75px x 20) |
 | T04 | Tirs simultanes des deux vaisseaux (et deplacement pendant le tir) | OK | projectiles LANCE max=4, EGIDE max=6 |
 | T05 | Collision entre joueurs : contact physique, aucun degat, aucun blocage | OK | separation min=12px (corps 12px), vies 7->7, recul libre=25px |
@@ -25,8 +25,8 @@ Resultat : **41/41** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=21 P2=87 TRI=37 BRUIT=36, declenchements DPCM=14, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 7 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27406 moy=23675 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=18860 moy=12868, images perdues=0, vblank utilise max=1530/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27423 moy=23655 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=18859 moy=12871, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -47,7 +47,8 @@ Resultat : **41/41** reussis.
 | T39 | Bombes (SELECT) : munitions, projectiles effaces, degats, invulnerabilite, HUD | OK | bombes 2->1, invulnerable=40 img, ennemis restants=0, projectiles=0, HUD="S1*2 S1*1", sans munition inactif=true, capsule B -> 1 |
 | T40 | Vie bonus tous les 20 000 points (max 9) | OK | score 020000 : vies 5 -> 6 ; plafond : 9 vies, palier=2 |
 | T41 | Secteur 5 Chantiers d'Hadar : decor, mines, boss a tourelles destructibles | OK | secteur charge=true, VRAM 0/0 erreurs, poseurs=true, mines simultanees=2, explosion -> 8 projectiles, tourelles PV=[35,35], noyau intact tant que tourelles=true, tourelles detruites apres 265 img, boss vaincu=true, epilogue=true |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=27350de180bf0cc2... |
+| T42 | Secteur 6 Premier Ancrage (V) : decor, emetteurs cristallins, Gardien d'Ancrage | OK | secteur charge=true, erreurs VRAM=0, emetteurs vus=true, ferme=true puis ouvert=true avec 4 projectiles en croix, directions boss=12, boss vaincu=true, epilogue=true |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=018387c0624a4c38... |
 
 ## Mesures
 
@@ -56,19 +57,19 @@ Resultat : **41/41** reussis.
   "cam_h_end": 7840,
   "maxEnemies": 10,
   "maxEnemyBullets": 6,
-  "stressMaxCycles": 27406,
-  "stressAvgCycles": 23675,
+  "stressMaxCycles": 27423,
+  "stressAvgCycles": 23655,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1530,
-  "normalMaxCycles": 18860,
-  "normalAvgCycles": 12868,
+  "normalMaxCycles": 18859,
+  "normalAvgCycles": 12871,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "27350de180bf0cc205306e94dfd3267b765476548495fd1be75c764272dbd92f",
+  "sha256": "018387c0624a4c38960e4183aa613d3b3dca1c8dac1bcf178ac8c41f9915b0fb",
   "romSize": 294928
 }
 ```

@@ -52,8 +52,8 @@ story_enter:
     jmp ppu_on
 
 ; page k = arrivee dans le secteur k ; page NUM_SECTORS = epilogue
-story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_p4, story_end
-story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_p4, story_end
+story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_end
+story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_end
 
 story_update:
     lda pad_new
@@ -174,10 +174,18 @@ story_p4:
     .byte "DETRUISEZ SES TOURELLES", $0A
     .byte "AVANT QU'IL NE QUITTE", $0A
     .byte "SA CALE !", 0
-story_end:
+story_p5:
     .byte "LE CROISEUR EST DETRUIT.", $0A, $0A
+    .byte "SA ROUTE MENAIT AU", $0A
+    .byte "PREMIER ANCRAGE, BATI", $0A
+    .byte "AVANT LES HOMMES.", $0A, $0A
+    .byte "SES CRISTAUX SE FERMENT", $0A
+    .byte "SOUS LE FEU : VISEZ-LES", $0A
+    .byte "QUAND ILS S'OUVRENT.", 0
+story_end:
+    .byte "LE GARDIEN EST TOMBE.", $0A, $0A
     .byte "MAIS AU LOIN, LES ANCRAGES", $0A
     .byte "S'EVEILLENT UN A UN...", $0A, $0A, $0A
-    .byte "  A SUIVRE : SECTEUR 6", $0A, $0A
+    .byte "  A SUIVRE : SECTEUR 7", $0A, $0A
     .byte "   MERCI D'AVOIR JOUE !", 0
 

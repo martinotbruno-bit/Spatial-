@@ -126,6 +126,10 @@ boss_fight:
     bne @k3
     jmp boss4_fire
 @k3:
+    cmp #5
+    bne @k4
+    jmp boss5_fire
+@k4:
     lda boss_hp
     cmp boss_ph2
     bcc @phase2
@@ -444,6 +448,67 @@ part_hit:
     bpl @l
     clc
     rts
+
+; -----------------------------------------------------------------------------
+; Boss 5 : GARDIEN D'ANCRAGE (secteur 6) - croix tournantes
+;   Phase 1 : croix de 4 projectiles qui tourne d'un cran a chaque salve
+;   Phase 2 : croix tournante plus rapide, anneau de 8 toutes les 4 salves,
+;             tirs vises
+; -----------------------------------------------------------------------------
+boss5_fire:
+    ldx diff
+    lda boss_hp
+    cmp boss_ph2
+    bcc @p2
+    lda boss_t
+    and boss5_m1,x
+    bne @r
+    jmp boss_cross
+@p2:
+    lda boss_t
+    and #63
+    cmp #30
+    bne @nai
+    jmp boss_aim
+@nai:
+    lda boss_t
+    and boss5_m2,x
+    bne @r
+    lda boss_burst
+    and #3
+    bne @x
+    lda boss_burst
+    lsr
+    lsr
+    and #1
+    jsr boss_ring
+@x:
+    jmp boss_cross
+@r:
+    rts
+
+; Croix de 4 projectiles lents, rotation d'une direction a chaque appel
+boss_cross:
+    jsr boss3_origin
+    lda boss_burst
+    inc boss_burst
+    and #3
+    sta tmp2
+    lda #4
+    sta tmp0
+@l:
+    jsr eb_spawn
+    lda tmp2
+    clc
+    adc #4
+    sta tmp2
+    dec tmp0
+    bne @l
+    rts
+
+;              RECRUE PILOTE VETERAN EXPERT
+boss5_m1: .byte 31,    15,    15,     7
+boss5_m2: .byte 15,    15,    7,      7
 
 ; Anneau de 8 projectiles, directions A, A+2, ..., A+14 (A+16 : rapides)
 boss_ring:
