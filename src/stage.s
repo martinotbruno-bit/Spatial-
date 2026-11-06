@@ -828,10 +828,7 @@ scroll_update:
     bne @nc
     inc cam_hi
 @nc:
-    ; point de reprise
-    lda cp_cam
-    ora cp_cam+1
-    bne @nocp
+    ; relais principal (milieu du secteur) : vie bonus
     lda cam_lo
     cmp sec_hdr+SH_CP
     bne @nocp
@@ -948,6 +945,16 @@ script_update:
     sta script_ptr
     lda sc_loop_ptr+1
     sta script_ptr+1
+    ; relais au debut de chaque passage (camera alignee sur les blocs
+    ; d'attributs : debut du corps et longueur multiples de 4 / 2)
+    lda cam_lo
+    sta cp_cam
+    lda cam_hi
+    sta cp_cam+1
+    lda #MSG_CP
+    sta msg_id
+    lda #60
+    sta msg_t
 @next:
     ldy #0
     lda (script_ptr),y

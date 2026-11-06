@@ -246,6 +246,12 @@
 - Défauts trouvés à la capture : lignes de classement qui se chevauchaient,
   sous-titre coupé. Tests T46, T47 ; 47/47.
 
+## 2026-11-06 — Durée de campagne
+
+- Corps des secteurs joué 8 à 10 fois (2 min 50 à 3 min 30 de défilement
+  par secteur, ≈ 35 min sans perte) ; relais au début de chaque passage
+  (vie bonus réservée au relais principal). Test T48 ; 48/48.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

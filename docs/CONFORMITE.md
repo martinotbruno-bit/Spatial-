@@ -37,7 +37,7 @@ Légende :
 | 2.2 | Niveaux horizontaux et verticaux | ✅ ÉMU | 1 secteur de chaque |
 | 2.3 | Coop 2 joueurs, vaisseaux différents, vies communes | ✅ ÉMU | T03-T09 |
 | 2.3 | Solo complet, sans passage imposant 2 joueurs | 🟡 | Solo jouable avec les 2 vaisseaux, Nova de remplacement ; campagne non produite |
-| 2.4 | Campagne de 1 à 2 h | 🟡 | **8 secteurs sur 8** enchaînés (T45) ; ≈ 22-25 min sans perte, davantage avec reprises : **en dessous de la cible de 1 à 2 h** (augmenter le nombre de passages du corps de chaque secteur est un réglage de données) |
+| 2.4 | Campagne de 1 à 2 h | 🟡 | 8 secteurs enchaînés (T45) de 2 min 50 à 3 min 30 de défilement chacun : ≈ 35 min sans perte (boss et séquences compris), relais à chaque passage (T48). Durée d'une **première** progression estimée à 1 h environ avec pertes et reprises ; **à confirmer par des parties humaines** |
 | 3.1 | 8 directions, contrôles précis | ✅ ÉMU | Déplacement sub-pixel 8.8, sans inertie |
 | 3.2 | Vaisseaux distincts et complémentaires | ✅ ÉMU | Vitesse, armes, cadence, capacités propres (Surcharge / Bouclier, T23-T24) |
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |

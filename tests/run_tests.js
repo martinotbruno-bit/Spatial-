@@ -626,6 +626,7 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
     bonus = m.peek("lives") === l0 + 1;
     const cpCam = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);
     m.frame(200, invul);
+    const cpLast = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);   // dernier relais atteint
     // game over force
     m.poke("lives", 0);
     for (const p of [0, 1]) { m.poke("pl_alive", 0, p); m.poke("pl_resp", 0, p); }
@@ -637,8 +638,8 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
     let bad = 0;
     for (let k = 0; k < 6; k++) { m.frame(37, invul); bad += vramErrors(m); }
     const score = m.peekBytes("score", 6).join("");
-    res.push({ sector, ok: msg && bonus && cpCam === cp && inCont && camAfter >= cp && camAfter < cp + 8 && bad0 + bad === 0 && m.peek("lives") === 7 && m.peek("continues") === 2,
-      txt: `${sector ? "V" : "H"}: relais=${cpCam} msg=${msg} vie bonus=${bonus} CONTINUER=${inCont} reprise cam=${camAfter} erreurs VRAM=${bad0 + bad} vies=${m.peek("lives")} credits=${m.peek("continues")} score=${score}` });
+    res.push({ sector, ok: msg && bonus && cpCam === cp && inCont && camAfter >= cpLast && camAfter < cpLast + 8 && bad0 + bad === 0 && m.peek("lives") === 7 && m.peek("continues") === 2,
+      txt: `${sector ? "V" : "H"}: relais=${cpCam} msg=${msg} vie bonus=${bonus} CONTINUER=${inCont} dernier relais=${cpLast} reprise cam=${camAfter} erreurs VRAM=${bad0 + bad} vies=${m.peek("lives")} credits=${m.peek("continues")} score=${score}` });
     if (sector === 1) m.screenshot(path.join(SHOTS, "11_reprise_vertical.png"));
   }
   return { ok: res.every((r) => r.ok), detail: res.map((r) => r.txt).join(" ; ") };
@@ -1101,6 +1102,24 @@ test("T47", "Classements : insertion triee, secteur et difficulte, sauvegarde, e
   m3.screenshot(path.join(SHOTS, "26_classements.png"));
   const ok = JSON.stringify(scores) === JSON.stringify(["042420", "005000", "004500", "004000", "003000"]) && r[6] === 1 && r[7] === 1 && m3.peek("state") === ST.RANK && line1.startsWith("1.  042420  S1");
   return { ok, detail: `classement solo=${scores.join(" > ")}, secteur/difficulte 1re entree=${r[6]}/${r[7]}, ecran : "${line1.trim()}"` };
+});
+
+test("T48", "Relais a chaque passage du corps : reprise exacte apres CONTINUER (H et V)", () => {
+  const res = [];
+  for (const sector of [0, 1]) {
+    const m = startGame({ players: 2, sector });
+    const A = hdr(m, 22), L = hdr(m, 23), want = (A + L) * 8;     // debut du 2e passage
+    m.frame(want + 20, invul);
+    const cp = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);
+    m.poke("lives", 0);
+    for (const p of [0, 1]) { m.poke("pl_alive", 0, p); m.poke("pl_resp", 0, p); }
+    m.frame(205);
+    m.tap(0, "START"); m.frame(3);
+    let bad = vramErrors(m);
+    for (let k = 0; k < 4; k++) { m.frame(53, invul); bad += vramErrors(m); }
+    res.push({ ok: cp === want && bad === 0 && m.peek("state") === ST.PLAY, t: `${sector ? "V" : "H"}: relais=${cp} (attendu ${want}), erreurs VRAM apres reprise=${bad}` });
+  }
+  return { ok: res.every((r) => r.ok), detail: res.map((r) => r.t).join(" ; ") };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

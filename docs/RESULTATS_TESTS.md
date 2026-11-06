@@ -3,7 +3,7 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **47/47** reussis.
+Resultat : **48/48** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
@@ -16,8 +16,8 @@ Resultat : **47/47** reussis.
 | T07 | Attaque combinee : FAISCEAU DE LIAISON entre les deux vaisseaux | OK | beam_t=148, points v=[75,90,105,120,135,150,165,180], ennemi detruit=true |
 | T08 | Solo : la jauge pleine declenche la NOVA (aucun partenaire requis) | OK | nova_t=22, ennemis restants=0, projectiles=0 |
 | T09 | Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie | OK | EGIDE en vol=1 |
-| T10 | Scrolling horizontal : decor VRAM conforme a la carte sur tout le secteur (corps repete) | OK | 81 controles, 0 erreurs, camera finale=7840 (fin 7840, 6 passages du corps) |
-| T11 | Scrolling vertical : decor et attributs VRAM conformes sur tout le secteur (corps repete) | OK | 65 controles, 0 erreurs (tuiles + attributs), HUD intact=true, camera=6528 (fin 6528) |
+| T10 | Scrolling horizontal : decor VRAM conforme a la carte sur tout le secteur (corps repete) | OK | 131 controles, 0 erreurs, camera finale=12704 (fin 12704, 10 passages du corps) |
+| T11 | Scrolling vertical : decor et attributs VRAM conformes sur tout le secteur (corps repete) | OK | 102 controles, 0 erreurs (tuiles + attributs), HUD intact=true, camera=10272 (fin 10272) |
 | T12 | Ennemis et projectiles : 4 familles + conteneurs destructibles, tirs ennemis | OK | familles vues=[1,2,3,4,5], ennemis simultanes max=10, projectiles ennemis max=6 |
 | T13 | Mini-boss : apparition, 2 phases, destruction, niveau libere | OK | apparu=true, phase2=true, projectiles max=16, etat apres destruction=2, enchainement secteur 2=true |
 | T14 | Perte de vie, reapparition invulnerable, game over et retour au titre | OK | vies initiales=7, pertes=8, game over=true, ecran CONTINUER=true, retour titre=true |
@@ -25,8 +25,8 @@ Resultat : **47/47** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=21 P2=87 TRI=37 BRUIT=36, declenchements DPCM=14, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 7 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27502 moy=23732 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=19047 moy=12949, images perdues=0, vblank utilise max=1530/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27489 moy=23716 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=19026 moy=12948, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -34,9 +34,9 @@ Resultat : **47/47** reussis.
 | T26 | Sequence narrative : texte affiche lettre par lettre, START pour passer | OK | etat=5, 1re ligne="AN 2291 - BRAS D'ORION", musique=1, apres START etat=1 |
 | T27 | Attaque synchronisee : appuis sur A a moins de 8 images -> salve puissante | OK | salve=6 projectiles, recharge=59, appuis trop espaces -> 0, ennemi 8 PV detruit=true |
 | T28 | Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vies | OK | etat bilan=true, vaisseaux sortis=true, texte="CIBLES 42", score 010000 -> 013000 (+3 vies x 1000) |
-| T29 | Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1 | OK | 81 controles, erreurs d'attributs=0, palettes de decor utilisees=[0,2,3], HUD intact=true |
+| T29 | Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1 | OK | 131 controles, erreurs d'attributs=0, palettes de decor utilisees=[0,2,3], HUD intact=true |
 | T30 | Decor destructible : conteneur ancre au decor, detruit en 3 impacts, butin | OK | defilement suivi=10px/10 img, detruit apres 28 images de tir, capsule=true, score 000000->000200 |
-| T31 | Point de reprise + CONTINUER : relance au relais (H et V), decor exact | OK | H: relais=3904 msg=true vie bonus=true CONTINUER=true reprise cam=3907 erreurs VRAM=0 vies=7 credits=2 score=000000 ; V: relais=3264 msg=true vie bonus=true CONTINUER=true reprise cam=3266 erreurs VRAM=0 vies=7 credits=2 score=000000 |
+| T31 | Point de reprise + CONTINUER : relance au relais (H et V), decor exact | OK | H: relais=6336 msg=true vie bonus=true CONTINUER=true dernier relais=6464 reprise cam=6467 erreurs VRAM=0 vies=7 credits=2 score=000000 ; V: relais=5120 msg=true vie bonus=true CONTINUER=true dernier relais=5264 reprise cam=5266 erreurs VRAM=0 vies=7 credits=2 score=000000 |
 | T32 | Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloque et sauvegarde | OK | [diff, vies solo, vitesse visee, masque tourelles, PV boss] = [[0,9,0,127,150],[1,7,0,127,200],[2,4,16,63,250]] ; EXPERT verrouille=true, debloque apres l'epilogue et relu=true |
 | T33 | Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim-mere, epilogue | OK | secteur charge=true, erreurs VRAM decor=0 attributs=0, unites lourdes=true (tirent=true), drones laches par le boss=3, projectiles max=16, boss vaincu=true, epilogue=true |
 | T34 | Secteurs debloques : sauvegardes, seuls les debloques sont proposes au menu | OK | sauvegarde vierge : secteur 2 inaccessible=true ; apres secteur 1 : masque=3, menu -> secteur 2 puis 1 |
@@ -53,28 +53,29 @@ Resultat : **47/47** reussis.
 | T45 | Campagne complete enchainee : secteurs 1 a 8, histoire, deblocages, fin | OK | secteurs joues=0,1,2,3,4,5,6,7, page finale=8 (LIAISON), secteurs debloques=11111111, retour titre=true |
 | T46 | Encyclopedie : fiches decouvertes en jeu, sauvegardees, consultables | OK | sauvegarde vierge : fiches=11 ; apres 200 images de jeu : 111 ; fiche 1="LANCE", fiche 3="DRONE", fiche 4 (non vue)="????", retour titre=true |
 | T47 | Classements : insertion triee, secteur et difficulte, sauvegarde, ecran | OK | classement solo=042420 > 005000 > 004500 > 004000 > 003000, secteur/difficulte 1re entree=1/1, ecran : "1.  042420  S1   PILOT" |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=78715e26ca32d61f... |
+| T48 | Relais a chaque passage du corps : reprise exacte apres CONTINUER (H et V) | OK | H: relais=1600 (attendu 1600), erreurs VRAM apres reprise=0 ; V: relais=1520 (attendu 1520), erreurs VRAM apres reprise=0 |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=f65e0aab7eccb964... |
 
 ## Mesures
 
 ```json
 {
-  "cam_h_end": 7840,
+  "cam_h_end": 12704,
   "maxEnemies": 10,
   "maxEnemyBullets": 6,
-  "stressMaxCycles": 27502,
-  "stressAvgCycles": 23732,
+  "stressMaxCycles": 27489,
+  "stressAvgCycles": 23716,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1530,
-  "normalMaxCycles": 19047,
-  "normalAvgCycles": 12949,
+  "normalMaxCycles": 19026,
+  "normalAvgCycles": 12948,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "78715e26ca32d61fc5752d35da4df5b95f01386d779299cc47d1c74810a427aa",
+  "sha256": "f65e0aab7eccb964873b6262c91b291dca73f1f0e0528d9e5cdab9d30646586e",
   "romSize": 327696
 }
 ```

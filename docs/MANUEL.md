@@ -77,7 +77,8 @@ de 1000 points par vie restante.
 
 ## Relais et crédits
 
-À mi-secteur, le message RELAI indique un point de reprise. Après un
+Le message RELAI indique un point de reprise (environ toutes les 25 s) ;
+celui du milieu du secteur donne aussi une vie. Après un
 GAME OVER, l'écran SUITE ? laisse 9 secondes : START relance au dernier
 relais (3 crédits par partie, score remis à zéro).
 
