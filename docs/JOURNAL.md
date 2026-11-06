@@ -194,6 +194,9 @@
   et tourelles deux fois moins rapides ; PV des boss réduits en RECRUE et
   PILOTE. Tests T14, T31 (vie bonus), T32 mis à jour : 39/39.
 - Module coopération déplacé en `$E000` (banc `$C000` : 98 % → 83 %).
+- Mesures sur le secteur long : la coopération réussissait, pas le solo →
+  vie bonus tous les 20 000 points (T40), solo 9 / 7 / 4 vies, et en solo un
+  tir visé ennemi sur deux annulé. Résultats dans EQUILIBRAGE.md.
 
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 

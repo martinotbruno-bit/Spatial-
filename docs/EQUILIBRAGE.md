@@ -109,6 +109,60 @@ principal chantier d'équilibrage restant, à arbitrer avec des parties
 humaines (densité des scripts, réserve de projectiles, vitesse des tirs
 selon le rang du secteur).
 
+## Secteurs longs — secteur 1 complet (≈ 2 min 10 + boss), joueur moyen
+
+Trois étapes de réglage, mesurées chacune sur 27 parties.
+
+**Étape 1** — vies +2/+1, vie bonus au relais, PILOTE adouci :
+
+| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |
+|---|---|---|---|---|---|---|---|
+| Solo LANCE | RECRUE | 7 | 5.3 | 2/3 | 67 s | 79 | 3.2 / 11 |
+| Solo LANCE | PILOTE | 5 | 6.0 | 0/3 | - | 79 | 4.4 / 16 |
+| Solo LANCE | VETERAN | 3 | 4.0 | 0/3 | - | 81 | 3.2 / 16 |
+| Solo EGIDE | RECRUE | 7 | 6.7 | 1/3 | 13 s | 78 | 3.3 / 11 |
+| Solo EGIDE | PILOTE | 5 | 5.3 | 1/3 | 17 s | 78 | 5.9 / 16 |
+| Solo EGIDE | VETERAN | 3 | 4.0 | 1/3 | 48 s | 88 | 4.0 / 16 |
+| Coop | RECRUE | 9 | 3.0 | 3/3 | 27 s | 99 | 2.0 / 11 |
+| Coop | PILOTE | 7 | 5.7 | 3/3 | 36 s | 99 | 3.4 / 16 |
+| Coop | VETERAN | 5 | 6.3 | 2/3 | 43 s | 99 | 3.7 / 16 |
+
+**Étape 2** — + vie bonus tous les 20 000 points, solo 9 / 7 / 4 vies :
+
+| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |
+|---|---|---|---|---|---|---|---|
+| Solo LANCE | RECRUE | 9 | 6.7 | 3/3 | 85 s | 79 | 3.6 / 11 |
+| Solo LANCE | PILOTE | 7 | 10.3 | 0/3 | - | 79 | 6.8 / 16 |
+| Solo LANCE | VETERAN | 4 | 8.3 | 0/3 | - | 81 | 5.1 / 16 |
+| Solo EGIDE | RECRUE | 9 | 7.7 | 1/3 | 13 s | 78 | 3.5 / 11 |
+| Solo EGIDE | PILOTE | 7 | 6.3 | 1/3 | 17 s | 78 | 6.5 / 16 |
+| Solo EGIDE | VETERAN | 4 | 6.0 | 2/3 | 57 s | 88 | 5.2 / 16 |
+| Coop | RECRUE | 9 | 3.0 | 3/3 | 27 s | 99 | 2.0 / 11 |
+| Coop | PILOTE | 7 | 5.7 | 3/3 | 35 s | 99 | 3.3 / 16 |
+| Coop | VETERAN | 5 | 7.7 | 2/3 | 43 s | 99 | 3.9 / 16 |
+
+**Étape 3 (version actuelle)** — + en solo, un tir visé ennemi sur deux
+annulé (motifs des boss inchangés) :
+
+| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |
+|---|---|---|---|---|---|---|---|
+| Solo LANCE | RECRUE | 9 | 4.7 | 2/3 | 27 s | 137 | 2.4 / 10 |
+| Solo LANCE | PILOTE | 7 | 7.0 | 1/3 | 20 s | 137 | 4.1 / 16 |
+| Solo LANCE | VETERAN | 4 | 8.3 | 0/3 | - | 88 | 5.3 / 16 |
+| Solo EGIDE | RECRUE | 9 | 1.7 | 3/3 | 31 s | 85 | 1.6 / 11 |
+| Solo EGIDE | PILOTE | 7 | 6.7 | 1/3 | 17 s | 85 | 6.1 / 16 |
+| Solo EGIDE | VETERAN | 4 | 8.0 | 0/3 | - | 82 | 6.5 / 16 |
+| Coop | RECRUE | 9 | 3.0 | 3/3 | 27 s | 99 | 2.0 / 11 |
+| Coop | PILOTE | 7 | 5.7 | 3/3 | 35 s | 99 | 3.3 / 16 |
+| Coop | VETERAN | 5 | 7.7 | 2/3 | 43 s | 99 | 3.9 / 16 |
+
+Bilan : la **coopération** est bien dosée (RECRUE et PILOTE réussis à
+chaque fois, VÉTÉRAN 2 fois sur 3). En **solo**, RECRUE est maintenant
+abordable (2-3/3) et PILOTE réussi 1 fois sur 3 par ce bot, qui réagit
+avec ~200 ms de retard et 25 % de décisions erronées sur plus de 2 minutes :
+c'est probablement plus sévère qu'un joueur humain habitué, mais ce point
+doit être vérifié en jouant. VÉTÉRAN reste réservé aux joueurs aguerris.
+
 ## Constats et décisions
 
 1. **Avant réglage**, 49 pertes sur 57 avaient lieu pendant le combat contre

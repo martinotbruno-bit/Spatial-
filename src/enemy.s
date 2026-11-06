@@ -451,6 +451,16 @@ nearest_player:
 ; Tir vise depuis l'ennemi X (vitesse rapide)
 ; -----------------------------------------------------------------------------
 fire_aimed:
+    ; en solo, un tir vise sur deux est annule (les motifs des boss, eux,
+    ; restent complets)
+    lda nplayers
+    cmp #2
+    beq @go
+    inc solo_skip
+    lda solo_skip
+    and #1
+    beq @r
+@go:
     jsr nearest_player
     bcc @r
     ; du = (pu - eu) / 2, dv = (pv - ev) / 2  (centres identiques : 16x16)

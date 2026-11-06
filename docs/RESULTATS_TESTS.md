@@ -25,8 +25,8 @@ Resultat : **40/40** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=21 P2=87 TRI=37 BRUIT=36, declenchements DPCM=14, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 7 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27392 moy=23676 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=18881 moy=12952, images perdues=0, vblank utilise max=1530/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27426 moy=23691 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=18899 moy=12967, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -46,7 +46,7 @@ Resultat : **40/40** reussis.
 | T38 | Missiles a tete chercheuse : recalage lateral sur la cible | OK | arme M, cible a +50 px lateralement : 4 PV infliges (2 par missile) |
 | T39 | Bombes (SELECT) : munitions, projectiles effaces, degats, invulnerabilite, HUD | OK | bombes 2->1, invulnerable=40 img, ennemis restants=0, projectiles=0, HUD="S1*2 S1*1", sans munition inactif=true, capsule B -> 1 |
 | T40 | Vie bonus tous les 20 000 points (max 9) | OK | score 020000 : vies 5 -> 6 ; plafond : 9 vies, palier=2 |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=a3ad657c81f6a55a... |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=798b82be5eed70ea... |
 
 ## Mesures
 
@@ -55,19 +55,19 @@ Resultat : **40/40** reussis.
   "cam_h_end": 7840,
   "maxEnemies": 10,
   "maxEnemyBullets": 6,
-  "stressMaxCycles": 27392,
-  "stressAvgCycles": 23676,
+  "stressMaxCycles": 27426,
+  "stressAvgCycles": 23691,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1530,
-  "normalMaxCycles": 18881,
-  "normalAvgCycles": 12952,
+  "normalMaxCycles": 18899,
+  "normalAvgCycles": 12967,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "a3ad657c81f6a55aece4e78c9b4ae38b5d4fc59da0d0c63f0acef0ac40a5ccfd",
+  "sha256": "798b82be5eed70ea7ae3db9b2fa35f3ba6df139b411fca1304935fe31f556086",
   "romSize": 98320
 }
 ```

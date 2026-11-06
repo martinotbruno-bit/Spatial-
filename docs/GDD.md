@@ -165,6 +165,10 @@ Relais à mi-secteur (message « RELAI »). Après un Game Over : écran
 avec la réserve de vies pleine, armes au niveau 1 et score remis à zéro
 (le record est enregistré avant). 3 crédits par partie.
 
+**Aides** *[prototype]* : vie bonus au relais (sauf EXPERT) et tous les
+20 000 points (max 9 vies) ; en solo, les ennemis tirent deux fois moins de
+tirs visés (les motifs des boss restent complets).
+
 ## 8. Score et rejouabilité
 
 Score d'équipe à 6 chiffres. Records solo et coop sauvegardés *[prototype]*.
