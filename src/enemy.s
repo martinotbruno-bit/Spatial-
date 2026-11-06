@@ -154,6 +154,13 @@ ai_fighter:
     jsr fire_aimed
 @n20:
     lda en_t,x
+    cmp #32
+    bne @n32
+    lda fighter_x3          ; VETERAN/EXPERT : tir supplementaire
+    beq @mv
+    jsr fire_aimed
+    jmp @mv
+@n32:
     cmp #44
     bne @mv
     jsr fire_aimed
@@ -178,8 +185,8 @@ ai_turret:
     sta en_duhi,x           ; -1 px/image = vitesse du decor
 @f:
     lda en_t,x
-    and #63
-    cmp #32
+    and turret_mask         ; periode selon la difficulte
+    cmp #16
     bne @mv
     lda en_u,x
     cmp #232
@@ -309,7 +316,7 @@ fire_aimed:
     eor #$80
     sta tmp1
     jsr atan16              ; -> A = direction 0-15
-    ora #16                 ; vitesse rapide
+    ora aim_speed           ; vitesse selon la difficulte
     sta tmp2
     lda en_u,x
     clc

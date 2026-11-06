@@ -115,6 +115,14 @@ story_done:
     lda story_page
     cmp #2
     bne @play
+    ; campagne terminee : mode EXPERT debloque
+    lda unlocked
+    ora #1
+    cmp unlocked
+    beq @t
+    sta unlocked
+    jsr save_write
+@t:
     jmp title_enter
 @play:
     jmp stage_start

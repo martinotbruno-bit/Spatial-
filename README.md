@@ -33,6 +33,9 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
   5 musiques originales (écoute : `docs/audio/`), instruments à
   enveloppes, 15 effets sonores
 - Point de reprise à mi-secteur et 3 crédits « CONTINUER »
+- 3 difficultés + mode EXPERT à débloquer, équilibrage mesuré par un pilote
+  automatique ([docs/EQUILIBRAGE.md](docs/EQUILIBRAGE.md))
+- Sprites dédiés « vue de dessus » pour les niveaux verticaux
 - Sauvegarde des records sur PRG-RAM à pile (double copie + somme de contrôle)
 - Détection NTSC/PAL et compensation de cadence 6/5 en 50 Hz
 
@@ -81,5 +84,6 @@ En coopération, la manette 1 pilote LANCE et la manette 2 ÉGIDE.
 - [Budgets de performance](docs/BUDGETS.md)
 - [Résultats des tests](docs/RESULTATS_TESTS.md)
 - [Journal de production](docs/JOURNAL.md)
+- [Équilibrage](docs/EQUILIBRAGE.md)
 - [Risques](docs/RISQUES.md)
 - [Manuel du joueur](docs/MANUEL.md)

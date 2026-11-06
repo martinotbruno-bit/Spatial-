@@ -7,7 +7,7 @@
 boss_spawn:
     lda #1
     sta boss_on
-    lda #BOSS_HP
+    lda boss_hp0
     sta boss_hp
     lda #SPAWN_U
     sta boss_u
@@ -67,7 +67,7 @@ boss_update:
 boss_fight:
     ; --- oscillation laterale ---
     lda boss_hp
-    cmp #BOSS_PHASE2
+    cmp boss_ph2
     lda #1
     bcs @p1
     lda #3
@@ -102,10 +102,12 @@ boss_fight:
 @ok2:
     ; --- tirs ---
     lda boss_hp
-    cmp #BOSS_PHASE2
+    cmp boss_ph2
     bcc @phase2
+    ; phase 1 : gerbe de 3 au debut du cycle, tir vise a mi-cycle
+    ldx diff
     lda boss_t
-    and #63
+    and boss_p1_mask,x
     bne @nf1
     lda #7
     ldy #3
@@ -115,28 +117,43 @@ boss_fight:
     bne @r
     jmp boss_aim
 @phase2:
+    ; phase 2 : cycle de boss_p2_len images, gerbe de boss_p2_fan projectiles,
+    ; puis boss_p2_aims tirs vises espaces de 6 images
+    ldx diff
     lda boss_t
-    cmp #40
+    cmp boss_p2_len,x
     bcc @t
     lda #0
     sta boss_t
 @t:
     lda boss_t
     bne @nf2
-    lda #6
-    ldy #5
+    lda boss_p2_dir,x
+    ldy boss_p2_fan,x
     jmp boss_fan
 @nf2:
+    ldy boss_p2_aims,x
     cmp #12
     beq @aim
+    cpy #2
+    bcc @r
     cmp #18
     beq @aim
+    cpy #3
+    bcc @r
     cmp #24
     bne @r
 @aim:
     jmp boss_aim
 @r:
     rts
+
+; Parametres de tir par difficulte : RECRUE PILOTE VETERAN EXPERT
+boss_p1_mask: .byte 127, 63, 63, 63
+boss_p2_len:  .byte 72,  56, 40, 34
+boss_p2_fan:  .byte 3,   5,  5,  5
+boss_p2_dir:  .byte 7,   6,  6,  6      ; premiere direction (gerbe centree sur 8)
+boss_p2_aims: .byte 1,   2,  3,  3
 
 ; Gerbe : A = premiere direction, Y = nombre (vitesse lente)
 boss_fan:
@@ -194,7 +211,7 @@ boss_aim:
     eor #$80
     sta tmp1
     jsr atan16
-    ora #16
+    ora aim_speed
     sta tmp2
     lda boss_u
     clc

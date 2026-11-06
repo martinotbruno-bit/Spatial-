@@ -30,8 +30,6 @@ game_start:
     sta pl_pad
     lda #1
     sta pl_pad+1
-    lda #LIVES_COOP
-    sta lives
     jmp @go
 @solo:
     ldx solo_ship
@@ -39,9 +37,20 @@ game_start:
     sta pl_on,x
     lda #0
     sta pl_pad,x
-    lda #LIVES_SOLO
-    sta lives
 @go:
+    jsr set_full_lives
+    ; parametres de difficulte
+    ldx diff
+    lda diff_aim,x
+    sta aim_speed
+    lda diff_tmask,x
+    sta turret_mask
+    lda diff_bosshp,x
+    sta boss_hp0
+    lda diff_bossph2,x
+    sta boss_ph2
+    lda diff_fx3,x
+    sta fighter_x3
     lda #CONTINUES
     sta continues
     lda sector_sel
@@ -187,6 +196,27 @@ stage_start:
     lda #ST_PLAY
     sta state
     jmp ppu_on
+
+; Reserve de vies pleine selon le mode et la difficulte
+set_full_lives:
+    ldx diff
+    lda diff_lives_solo,x
+    ldy nplayers
+    cpy #2
+    bne @s
+    lda diff_lives_coop,x
+@s:
+    sta lives
+    rts
+
+; Tables de difficulte :        RECRUE PILOTE VETERAN EXPERT
+diff_lives_solo: .byte          5,     3,     2,      2
+diff_lives_coop: .byte          7,     5,     4,      3
+diff_aim:        .byte          0,     16,    16,     16   ; vitesse des tirs vises
+diff_tmask:      .byte          127,   63,    63,     31   ; periode des tourelles
+diff_bosshp:     .byte          180,   250,   250,    250
+diff_bossph2:    .byte          90,    125,   125,    170  ; seuil de la phase 2
+diff_fx3:        .byte          0,     0,     1,      1    ; 3e tir des chasseurs
 
 ; A = cam / 8 (camera < 2048)
 cam_div8:
@@ -857,13 +887,7 @@ continue_game:
     lda #1
     sta pl_wlv
     sta pl_wlv+1
-    lda #LIVES_SOLO
-    ldy nplayers
-    cpy #2
-    bne @l
-    lda #LIVES_COOP
-@l:
-    sta lives
+    jsr set_full_lives
     lda #SFX_MENU
     jsr sfx_play
     jmp stage_start

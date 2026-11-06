@@ -123,7 +123,7 @@ perte et ~1 h 15 – 1 h 45 en première progression.
 Deux fins : *Fin de Liaison* (partie terminée avec ≥ 1 vie et ≥ 60 % des
 Ancrages sauvés — compteur de performance) et *Fin de Rupture* (sinon).
 
-## 7. Difficulté *[à produire]*
+## 7. Difficulté *[prototype — voir EQUILIBRAGE.md]*
 
 Trois niveaux sélectionnables (Recrue / Pilote / Vétéran) + **Expert**
 débloqué après une fin (bit réservé dans la sauvegarde). Leviers : vitesse

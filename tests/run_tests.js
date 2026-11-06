@@ -642,6 +642,30 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
   return { ok: res.every((r) => r.ok), detail: res.map((r) => r.txt).join(" ; ") };
 });
 
+test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloque et sauvegarde", () => {
+  const out = [];
+  for (const d of [0, 1, 2]) {
+    const m = new Machine();
+    m.frame(40); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "DOWN");
+    if (d === 0) m.tap(0, "LEFT"); if (d === 2) m.tap(0, "RIGHT");
+    m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(2);
+    out.push([m.peek("diff"), m.peek("lives"), m.peek("aim_speed"), m.peek("turret_mask"), m.peek("boss_hp0")]);
+  }
+  const ok1 = JSON.stringify(out) === JSON.stringify([[0, 5, 0, 127, 180], [1, 3, 16, 63, 250], [2, 2, 16, 63, 250]]);
+  // EXPERT indisponible sans deblocage : DROITE depuis VETERAN revient a RECRUE
+  const m = new Machine();
+  m.frame(40); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT"); m.tap(0, "RIGHT");
+  const locked = m.peek("diff") === 0;
+  // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
+  m.tap(0, "START"); m.frame(2);
+  m.poke("story_page", 2); m.tap(0, "START"); m.frame(10);
+  const sram = m.sram(64);
+  const m2 = new Machine({ sram });
+  m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
+  const expert = m2.peek("diff") === 3 && m2.peek("unlocked") === 1;
+  return { ok: ok1 && locked && expert, detail: `[diff, vies solo, vitesse visee, masque tourelles, PV boss] = ${JSON.stringify(out)} ; EXPERT verrouille=${locked}, debloque apres l'epilogue et relu=${expert}` };
+});
+
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
   const { execSync } = require("child_process");
   const rom = path.join(ROOT, "build", "spatial.nes");

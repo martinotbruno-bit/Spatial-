@@ -109,6 +109,18 @@
   Corrigé.
 - 31/31 tests en émulation ; stress 90 % CPU, normal 64 %.
 
+## 2026-11-06 — Phase 2 : vues de dessus et équilibrage
+
+- Retour utilisateur : vaisseaux « étranges » en vertical. Cause : la vue
+  de profil tournée de 90° ne donne pas une vue de dessus. → Sprites dédiés
+  `ship_a_top`, `ship_b_top`, `fighter_top` (l'outil les préfère à la
+  rotation quand ils existent). Cratères du sol assombris : ils se
+  confondaient avec des projectiles.
+- Difficultés RECRUE/PILOTE/VÉTÉRAN + EXPERT déblocable (sauvegardé) ; test T32.
+- Pilote automatique et mesures d'équilibrage : 49/57 pertes au boss →
+  motifs du boss paramétrés par difficulté (EQUILIBRAGE.md).
+- 32/32 tests en émulation ; stress 91 % CPU, normal 64 %.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

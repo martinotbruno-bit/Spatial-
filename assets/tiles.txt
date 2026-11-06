@@ -105,6 +105,8 @@
 ..1231..
 
 # --- Secteur 2 : surface planetaire (niveau vertical) ---
+# Pas de pixel de couleur 3 (vive) dans les tuiles de sol : ne pas les
+# confondre avec des projectiles.
 @ground 8 8
 11111111
 11121111
@@ -127,13 +129,13 @@
 
 @crater 8 8
 11122111
-11222211
-12233221
-12333321
-12333321
-11233211
+11211211
+12111121
+21111112
+21111112
+12111121
+11211211
 11122111
-11111111
 
 @ridge 8 8
 11111111

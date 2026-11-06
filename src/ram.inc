@@ -92,6 +92,13 @@ pl_lasta:    .res 2     ; images depuis le dernier appui sur A (sature a 255)
 sync_cd:     .res 1
 cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
 continues:   .res 1
+diff:        .res 1     ; 0 RECRUE, 1 PILOTE, 2 VETERAN, 3 EXPERT
+unlocked:    .res 1     ; bit 0 : mode EXPERT debloque (sauvegarde)
+aim_speed:   .res 1     ; 0 = tirs vises lents, 16 = rapides
+turret_mask: .res 1
+boss_hp0:    .res 1
+boss_ph2:    .res 1
+fighter_x3:  .res 1
 cont_digit:  .res 1
 cont_t:      .res 1
 cont_buf:    .res 4

@@ -76,6 +76,8 @@ save_load:
     inx
     cpx #12                 ; hi_solo puis hi_coop (contigus)
     bne @l
+    lda (ptr0),y            ; y = 17
+    sta unlocked
     rts
 
 default_hi: .byte 0, 0, 5, 0, 0, 0
@@ -114,7 +116,7 @@ save_write_one:
     inx
     cpx #12
     bne @d
-    lda #0                  ; octet 17 : deblocages (reserve)
+    lda unlocked            ; octet 17 : deblocages (bit 0 = EXPERT)
     sta (ptr0),y
     jsr save_sum
     ldy #SAVE_LEN

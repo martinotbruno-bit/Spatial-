@@ -50,7 +50,7 @@ Légende :
 | 7 | Direction artistique | 🟡 | Secteur 1 en 3 palettes de décor par blocs 16×16 (T29), décor destructible (T30) ; secteur 2 encore en palette unique |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM, 6 instruments ; 5 musiques (menu, histoire, niveau, boss, fin de secteur), WAV dans `docs/audio/` |
-| 9.1 | Difficultés sélectionnables, mode expert | ⬜ | Bit réservé en sauvegarde |
+| 9.1 | Difficultés sélectionnables, mode expert | ✅ ÉMU | RECRUE/PILOTE/VÉTÉRAN + EXPERT débloqué en fin de campagne et sauvegardé (T32) ; progression mesurée par pilote automatique (EQUILIBRAGE.md) |
 | 9.2 | Classements et sauvegarde non volatile | 🟡 | Records solo/coop sauvegardés (T18) ; classement complet à produire |
 | 10 | Menus et présentation | 🟡 | Titre animé, menu, présentation des vaisseaux, écran de bilan de fin de secteur (T28) ; sélection de difficulté, encyclopédie, classements à produire |
 | 11 | Compatibilité NES d'origine, sans matériel additionnel | 🟡 | Conçu pour MMC3 standard ; **❌ MAT** |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 31/31 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 32/32 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

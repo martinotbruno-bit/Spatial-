@@ -81,6 +81,7 @@ title_enter:
     bne @np
     lda #1
     sta nplayers
+    sta diff                ; premiere visite : PILOTE
 @np:
     jsr menu_write
     jsr flush_vbuf_direct
@@ -100,6 +101,8 @@ title_strings:
     .word str_t_m2
     .dbyt $2206
     .word str_t_m3
+    .dbyt $2246
+    .word str_t_m4
     .dbyt $2286
     .word str_t_r1
     .dbyt $22A6
@@ -114,6 +117,7 @@ str_t_sub:  .byte " PROTOTYPE TECHNIQUE - PHASE 1", 0
 str_t_m1:   .byte "  JOUEURS  :", 0
 str_t_m2:   .byte "  VAISSEAU :", 0
 str_t_m3:   .byte "  SECTEUR  :", 0
+str_t_m4:   .byte "  NIVEAU   :", 0
 str_t_r1:   .byte "RECORD SOLO", 0
 str_t_r2:   .byte "RECORD COOP", 0
 str_t_copy: .byte "2026 - PROJET SPATIAL", 0
@@ -129,7 +133,7 @@ menu_write:
     sta ptr1
     lda #$21
     cpy #2
-    bne @c1
+    bcc @c1
     lda #$22
 @c1:
     sta ptr1+1
@@ -144,7 +148,7 @@ menu_write:
     inx
     jsr vbuf_close
     iny
-    cpy #3
+    cpy #4
     bne @cur
     ; nombre de joueurs
     lda #$93
@@ -196,9 +200,25 @@ menu_write:
     sta ptr1
     lda #$22
     sta ptr1+1
+    jsr vbuf_str11
+    ; difficulte
+    ldx diff
+    lda diff_str_lo,x
+    sta ptr0
+    lda diff_str_hi,x
+    sta ptr0+1
+    lda #$53
+    sta ptr1
     jmp vbuf_str11
 
-menu_cursor_lo: .byte $86, $C6, $06
+diff_str_lo: .lobytes str_d0, str_d1, str_d2, str_d3
+diff_str_hi: .hibytes str_d0, str_d1, str_d2, str_d3
+str_d0: .byte "RECRUE     "
+str_d1: .byte "PILOTE     "
+str_d2: .byte "VETERAN    "
+str_d3: .byte "EXPERT !   "
+
+menu_cursor_lo: .byte $86, $C6, $06, $46
 
 ; Copie 11 caracteres de ptr0 vers ptr1 via le tampon VRAM
 vbuf_str11:
@@ -224,7 +244,9 @@ title_update:
     lda pad_new
     ora pad_new+1
     sta tmp0
-    beq @r
+    bne @input
+    jmp @r
+@input:
     and #BTN_START
     beq @nostart
     lda #SFX_MENU
@@ -236,7 +258,7 @@ title_update:
     beq @nd
     inc menu_sel
     lda menu_sel
-    cmp #3
+    cmp #4
     bcc @chg
     lda #0
     sta menu_sel
@@ -247,13 +269,15 @@ title_update:
     beq @nu
     dec menu_sel
     bpl @chg
-    lda #2
+    lda #3
     sta menu_sel
     bne @chg
 @nu:
     lda tmp0
     and #BTN_LEFT | BTN_RIGHT
-    beq @r
+    bne @lr
+    jmp @r
+@lr:
     lda menu_sel
     bne @n1
     lda nplayers            ; 1 <-> 2
@@ -268,9 +292,35 @@ title_update:
     sta solo_ship
     jmp @chg
 @n2:
+    cmp #2
+    bne @n3
     lda sector_sel
     eor #1
     sta sector_sel
+    jmp @chg
+@n3:
+    ; difficulte : DROITE +1, GAUCHE -1 ; EXPERT seulement si debloque
+    lda unlocked
+    and #1
+    clc
+    adc #3
+    sta tmp1                ; nombre de niveaux disponibles (3 ou 4)
+    lda tmp0
+    and #BTN_RIGHT
+    beq @dl
+    inc diff
+    lda diff
+    cmp tmp1
+    bcc @chg
+    lda #0
+    sta diff
+    beq @chg
+@dl:
+    dec diff
+    bpl @chg
+    ldx tmp1
+    dex
+    stx diff
 @chg:
     lda #SFX_MENU
     jsr sfx_play

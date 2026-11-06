@@ -203,7 +203,8 @@ def build_chr():
             spr[base + k] = t
         consts["S_" + name.upper() + "_H"] = base
         if orient:
-            ts2 = split_tiles(rot_ccw(img))
+            # vue de dessus dediee si elle existe, sinon rotation de 90 degres
+            ts2 = split_tiles(art[name + "_top"] if name + "_top" in art else rot_ccw(img))
             vbase = base + len(ts)
             for k, t in enumerate(ts2):
                 spr[vbase + k] = t
