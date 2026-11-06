@@ -27,10 +27,11 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - Ressource coopérative **LIEN** et trois pouvoirs : **Faisceau de Liaison**
   (attaque combinée dépendant du placement des deux vaisseaux),
   **Transfert d'énergie** (ramène un partenaire sans vie), **Nova** (solo)
-- 4 secteurs : **Station Vesta** (horizontal, 3 palettes, conteneurs
+- 5 secteurs : **Station Vesta** (horizontal, 3 palettes, conteneurs
   destructibles), **Surface de Kéra** (vertical), **Ceinture brisée**
   (horizontal, astéroïdes, unités lourdes, boss Essaim-mère), **Cité de
-  Lumen** (vertical, appareils de soutien, boss Garde-ciel)
+  Lumen** (vertical, appareils de soutien, boss Garde-ciel), **Chantiers
+  d'Hadar** (horizontal, poseurs de mines, croiseur à tourelles destructibles)
 - Secteurs débloqués sauvegardés et rejouables, secteur 2 en **défilement vertical**,
   HUD fixe par séparation d'écran (IRQ de ligne MMC3)
 - 4 familles d'ennemis (drones, chasseurs, tourelles, kamikazes), tirs visés

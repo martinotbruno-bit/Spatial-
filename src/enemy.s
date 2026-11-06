@@ -3,10 +3,10 @@
 ; Positions en virgule fixe 8.8, vitesses signees 8.8.
 ; =============================================================================
 
-;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN
-en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12,    5
-en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8,     6  ; centaines de points
-en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5,     3
+;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE
+en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12,    5,      6,     2
+en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8,     6,      7,     1  ; centaines
+en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5,     3,      4,     1
 
 ; Apparition : tmp2 = type, tmp3 = v, tmp4 = parametre
 enemy_spawn:
@@ -44,9 +44,9 @@ enemy_spawn:
     sta en_duhi,x
     rts
 
-;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN
-en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40,   $00
-en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF,   $FF ; ... -1
+;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN MINEUR MINE
+en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40,   $00,    $C0,   $00
+en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF,   $FF,    $FE,   $FF
 
 enemies_update:
     ldx #MAX_EN-1
@@ -72,7 +72,7 @@ enemies_update:
     rts
 
 en_ai_tbl:
-    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1, ai_support-1
+    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1, ai_support-1, ai_miner-1, ai_mine-1
 
 ; Integration de la position, puis retour a la boucle. Detruit l'ennemi s'il
 ; sort du champ (debordement 8 bits).
@@ -344,6 +344,132 @@ ai_support:
     dey
     bpl @l
 @mv:
+    jmp en_move
+
+; --- POSEUR DE MINES : s'arrete a u = parametre, largue une mine toutes les
+; 64 images (8 fois), puis repart ---
+ai_miner:
+    lda en_st,x
+    bne @hold
+    lda en_u,x
+    cmp en_p0,x
+    bcc @stop
+    jmp en_move
+@stop:
+    lda #1
+    sta en_st,x
+    lda #0
+    sta en_t,x
+    sta en_p0,x
+    sta en_dulo,x
+    sta en_duhi,x
+@hold:
+    cmp #2
+    beq @mv
+    lda en_t,x
+    cmp #64
+    bcc @mv
+    lda #0
+    sta en_t,x
+    inc en_p0,x
+    lda en_p0,x
+    cmp #9
+    bcc @drop
+    lda #2
+    sta en_st,x
+    lda #$80
+    sta en_dulo,x
+    lda #$FE
+    sta en_duhi,x
+    jmp en_move
+@drop:
+    txa
+    pha
+    lda en_u,x
+    pha
+    lda #EN_MINE
+    sta tmp2
+    lda en_v,x
+    sta tmp3
+    lda #0
+    sta tmp4
+    jsr enemy_spawn
+    pla
+    cpx #MAX_EN
+    bcs @full
+    sec
+    sbc #8                  ; largue derriere le poseur
+    sta en_u,x
+@full:
+    pla
+    tax
+@mv:
+    jmp en_move
+
+; --- MINE : derive avec le decor ; explose en anneau de 8 projectiles apres
+; 150 images ou quand un vaisseau passe a moins de 28 px ---
+ai_mine:
+    lda #$FF
+    ldy scroll_on
+    bne @s
+    lda #0
+@s:
+    sta en_duhi,x
+    lda en_t,x
+    cmp #150
+    bcs @boom
+    ldy #1
+@p:
+    lda pl_alive,y
+    beq @np
+    lda pl_u,y
+    sec
+    sbc en_u,x
+    clc
+    adc #28
+    cmp #56
+    bcs @np
+    lda pl_v,y
+    sec
+    sbc en_v,x
+    clc
+    adc #28
+    cmp #56
+    bcc @boom
+@np:
+    dey
+    bpl @p
+    jmp en_move
+@boom:
+    lda en_u,x
+    clc
+    adc #4
+    sta tmp3
+    lda en_v,x
+    clc
+    adc #4
+    sta tmp4
+    lda #0
+    sta tmp2
+    lda #8
+    sta tmp0
+@ring:
+    jsr eb_spawn
+    lda tmp2
+    clc
+    adc #2
+    sta tmp2
+    dec tmp0
+    bne @ring
+    lda en_u,x
+    sta tmp0
+    lda en_v,x
+    sta tmp1
+    jsr fx_spawn
+    lda #SFX_HIT
+    jsr sfx_play
+    lda #0
+    sta en_type,x
     jmp en_move
 
 ; --- CONTENEUR : ancre sur la coque, suit le decor, ne tire pas ---

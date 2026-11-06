@@ -208,6 +208,14 @@
   code fixe. Garde ajoutée au banc de test contre ce type d'erreur.
 - 40/40 tests.
 
+## 2026-11-06 — Secteur 5 « Chantiers d'Hadar »
+
+- Chantier naval (échafaudages, couples de coque, grues, soudures),
+  3 palettes, musique « Hadar », page narrative.
+- 7e famille : poseur de mines, mines explosant en anneau.
+- Boss Croiseur à **parties destructibles** (2 tourelles, noyau protégé).
+- Test T41 ; 41/41 en émulation. Bancs fixes : 84 % / 64 %.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

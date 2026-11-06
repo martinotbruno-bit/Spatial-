@@ -110,6 +110,8 @@ EN_KAMIKAZE = 4
 EN_POD      = 5     ; objet de decor destructible (conteneur, rocher...)
 EN_HEAVY    = 6     ; unite lourde
 EN_SUPPORT  = 7     ; appareil de soutien (repare les ennemis proches)
+EN_MINER    = 8     ; poseur de mines
+EN_MINE     = 9     ; mine (explose en anneau)
 EN_BOSS     = 15    ; marqueur de script uniquement
 
 ; --- Regles --------------------------------------------------------------------

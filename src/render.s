@@ -472,6 +472,8 @@ enemy_tiles:
     .byte S_POD_H, S_POD_V
     .byte S_HEAVY_H, S_HEAVY_V
     .byte S_SUPPORT_H, S_SUPPORT_V
+    .byte S_MINER_H, S_MINER_V
+    .byte S_MINE_H, S_MINE_V
 
 draw_fx:
     lda #2
@@ -591,9 +593,41 @@ draw_boss:
     lda #3
 @nf:
     sta d_attr
-    jmp draw_obj
+    jsr draw_obj
+    ; boss 4 : tourelles de coque (au-dessus et au-dessous de la coque)
+    lda sec_hdr+SH_BOSS
+    cmp #4
+    bne @r
+    ldx #1
+@pt:
+    lda part_hp,x
+    beq @np
+    lda #2
+    sta d_size
+    lda #S_PART_H
+    sta d_tile
+    lda #2
+    ldy part_flash,x
+    beq @pf
+    lda #3
+@pf:
+    sta d_attr
+    lda boss_u
+    clc
+    adc #8
+    sta d_u
+    lda boss_v
+    clc
+    adc part_dv,x
+    sta d_v
+    jsr draw_obj
+@np:
+    dex
+    bpl @pt
 @r:
     rts
+
+part_dv: .byte <-12, 28          ; decalage lateral des 2 tourelles
 
 ; Message central (READY, PAUSE, ...) sur deux lignes de 5 caracteres max.
 draw_message:

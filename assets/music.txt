@@ -74,3 +74,13 @@ P2: [E4/1 B4/1]x8 [D4/1 A4/1]x8 [C4/1 G4/1]x8 [B3/1 Ds4/1]x8
 TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
 TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
 NO: [K/2 H/1 H/1 S/2 H/2 K/1 K/1 H/2 S/2 H/2]x8
+
+# Theme du secteur 5 "Hadar" - Do mineur, industriel
+@song hadar tempo=6
+P1: @brass C5/4 r/2 C5/2 Ds5/4 F5/4  G5/6 F5/2 Ds5/4 D5/4  C5/4 r/2 C5/2 G4/4 As4/4  C5/12 r/4
+P1: @lead Ds5/4 G5/4 C6/4 As5/4  Gs5/6 G5/2 F5/8  G5/4 F5/4 Ds5/4 D5/4  C5/8 G4/8
+P2: @pluck [C4/2 G4/2 C4/2 Ds4/2]x2 [Gs3/2 Ds4/2 Gs3/2 C4/2]x2 [As3/2 F4/2 As3/2 D4/2]x2 [G3/2 D4/2 G3/2 B3/2]x2
+P2: [C4/2 G4/2 C4/2 Ds4/2]x2 [Gs3/2 Ds4/2 Gs3/2 C4/2]x2 [As3/2 F4/2 As3/2 D4/2]x2 [G3/2 D4/2 G3/2 B3/2]x2
+TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
+TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
+NO: [K/2 K/2 S/2 H/2 K/2 H/1 H/1 S/2 S/2]x8

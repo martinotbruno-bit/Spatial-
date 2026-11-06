@@ -176,6 +176,24 @@ shockwave:
     bpl @b
     lda tmp2
     jsr boss_damage
+    lda part_hp             ; boss 4 : 8 degats a chaque tourelle
+    beq @p1
+    sec
+    sbc #8
+    bcs @s0
+    lda #0
+@s0:
+    sta part_hp
+@p1:
+    lda part_hp+1
+    beq @p2
+    sec
+    sbc #8
+    bcs @s1
+    lda #0
+@s1:
+    sta part_hp+1
+@p2:
     ldx tmp4
     rts
 
@@ -392,6 +410,11 @@ pb_consume:
 col_pb_boss:
     lda boss_on
     beq @r
+    lda sec_hdr+SH_BOSS
+    cmp #4
+    bne @nb4
+    jsr col_pb_parts
+@nb4:
     lda frame
     and #1
     ora #MAX_PB-2
@@ -459,6 +482,24 @@ col_shield:
     lda #0
     sta pl_abil_t+1         ; bouclier epuise
     rts
+@nb:
+    dey
+    bpl @b
+@r:
+    rts
+
+; Boss 4 : projectiles joueurs contre les tourelles de coque
+col_pb_parts:
+    lda part_hp
+    ora part_hp+1
+    beq @r
+    ldy #MAX_PB-1
+@b:
+    lda pb_on,y
+    beq @nb
+    jsr part_hit
+    bcc @nb
+    jsr pb_consume
 @nb:
     dey
     bpl @b

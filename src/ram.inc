@@ -205,6 +205,8 @@ lives:       .res 1
 ext_done:    .res 1     ; paliers de 20 000 points deja recompenses
 ext_t:       .res 1
 solo_skip:   .res 1
+part_hp:     .res 2     ; boss 4 : tourelles de coque (0 = detruite)
+part_flash:  .res 2
 hud_dirty:   .res 1
 hud_wait:    .res 1
 scroll_du:   .res 1     ; vitesse de defilement (px/image), 0 pendant le boss

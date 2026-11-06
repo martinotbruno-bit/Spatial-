@@ -52,8 +52,8 @@ story_enter:
     jmp ppu_on
 
 ; page k = arrivee dans le secteur k ; page NUM_SECTORS = epilogue
-story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_end
-story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_end
+story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_p4, story_end
+story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_p4, story_end
 
 story_update:
     lda pad_new
@@ -166,10 +166,18 @@ story_p3:
     .byte "REPARENT LES ESCADRES.", $0A
     .byte "ABATTEZ-LES EN PREMIER !", $0A, $0A
     .byte "AU SOMMET : LE GARDE-CIEL.", 0
-story_end:
+story_p4:
     .byte "LUMEN EST LIBEREE.", $0A, $0A
+    .byte "AUX CHANTIERS D'HADAR,", $0A
+    .byte "LA CONCORDANCE ACHEVE", $0A
+    .byte "UN CROISEUR DE GUERRE.", $0A, $0A
+    .byte "DETRUISEZ SES TOURELLES", $0A
+    .byte "AVANT QU'IL NE QUITTE", $0A
+    .byte "SA CALE !", 0
+story_end:
+    .byte "LE CROISEUR EST DETRUIT.", $0A, $0A
     .byte "MAIS AU LOIN, LES ANCRAGES", $0A
     .byte "S'EVEILLENT UN A UN...", $0A, $0A, $0A
-    .byte "  A SUIVRE : SECTEUR 5", $0A, $0A
+    .byte "  A SUIVRE : SECTEUR 6", $0A, $0A
     .byte "   MERCI D'AVOIR JOUE !", 0
 

@@ -143,7 +143,7 @@ test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   m.tap(0, "DOWN");
   m.tap(0, "LEFT");
   const sec = m.peek("sector_sel");
-  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 3, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 4, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
 });
 
 test("T03", "Deux manettes : deplacements independants et simultanes", () => {
@@ -660,7 +660,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   const locked = m.peek("diff") === 0;
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
-  m.poke("story_page", m.romByte ? 4 : 4); m.tap(0, "START"); m.frame(10);
+  m.poke("story_page", 5); m.tap(0, "START"); m.frame(10);
   const sram = m.sram(64);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
@@ -787,7 +787,7 @@ test("T36", "Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparen
   m.releaseAll();
   const cleared = m.peek("state") === ST.CLEAR;
   m.frame(252, invul);
-  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 4;
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 4;   // arrivee secteur 5
   return { ok: ok0 && vbad === 0 && support && repaired && dirs.size >= 6 && cleared && epi && vb < 2273,
     detail: `secteur charge=${ok0}, erreurs VRAM (tuiles+attributs)=${vbad}, vblank max=${vb}/2273, soutiens=${support}, reparation observee=${repaired}, directions de spirale distinctes=${dirs.size}, boss vaincu=${cleared}, epilogue=${epi}` };
 });
@@ -889,6 +889,50 @@ test("T40", "Vie bonus tous les 20 000 points (max 9)", () => {
   m.frame(3, invul);
   return { ok: s1 === "020000" && l1 === before + 1 && m.peek("lives") === 9 && m.peek("ext_done") === 2,
     detail: `score ${s1} : vies ${before} -> ${l1} ; plafond : ${m.peek("lives")} vies, palier=${m.peek("ext_done")}` };
+});
+
+test("T41", "Secteur 5 Chantiers d'Hadar : decor, mines, boss a tourelles destructibles", () => {
+  const m = startGame({ players: 2, sector: 4 });
+  const ok0 = m.peek("stage") === 4 && m.peek("orient") === 0;
+  let vbad = 0, abad = 0, miner = false, mines = 0, booms = 0;
+  for (let k = 0; k < 14; k++) {
+    m.frame(97, (mm) => {
+      invul(mm);
+      const t = mm.peekBytes("en_type", 10);
+      if (t.includes(8)) miner = true;
+      mines = Math.max(mines, t.filter((x) => x === 9).length);
+    });
+    vbad += vramErrors(m); abad += attrErrors(m);
+    if (k === 6) m.screenshot(path.join(SHOTS, "17_secteur5_hadar.png"));
+  }
+  // explosion d'une mine pres d'un vaisseau : anneau de projectiles
+  for (let i = 0; i < 16; i++) m.poke("eb_on", 0, i);
+  m.poke("en_type", 9, 9); m.poke("en_hp", 2, 9); m.poke("en_t", 0, 9);
+  m.poke("en_u", m.peek("pl_u") + 20, 9); m.poke("en_v", m.peek("pl_v"), 9);
+  m.frame(2, invul);
+  const ring = countOn(m, "eb_on", 16), mineGone = m.peek("en_type", 9) !== 9;
+  // boss : noyau invulnerable tant que les tourelles sont debout
+  jumpToBoss(m);
+  m.frame(260, (mm) => { invul(mm); clearField(mm); });
+  const parts0 = [m.peek("part_hp"), m.peek("part_hp", 1)], hp0 = m.peek("boss_hp");
+  m.press(0, "B"); m.press(1, "B");
+  let hpWhileParts = hp0, partsDead = -1;
+  for (let i = 0; i < 2500 && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1, invul);
+    const bv = m.peek("boss_v");
+    m.poke("pl_u", 100); m.poke("pl_u", 100, 1);
+    m.poke("pl_v", Math.max(40, bv - 16)); m.poke("pl_v", Math.min(208, bv + 28), 1);
+    if (partsDead < 0 && (m.peek("part_hp") || m.peek("part_hp", 1))) hpWhileParts = m.peek("boss_hp");
+    if (partsDead < 0 && !m.peek("part_hp") && !m.peek("part_hp", 1)) partsDead = i;
+    if (i === 60) m.screenshot(path.join(SHOTS, "18_croiseur.png"));
+    if (partsDead > 0) { m.poke("pl_v", Math.max(40, bv)); m.poke("pl_v", Math.min(208, bv + 16), 1); }
+  }
+  m.releaseAll();
+  const cleared = m.peek("state") === ST.CLEAR;
+  m.frame(252, invul);
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 5;
+  return { ok: ok0 && vbad === 0 && abad === 0 && miner && mines > 0 && ring >= 8 && mineGone && parts0[0] > 0 && hpWhileParts === hp0 && partsDead > 0 && cleared && epi,
+    detail: `secteur charge=${ok0}, VRAM ${vbad}/${abad} erreurs, poseurs=${miner}, mines simultanees=${mines}, explosion -> ${ring} projectiles, tourelles PV=[${parts0}], noyau intact tant que tourelles=${hpWhileParts === hp0}, tourelles detruites apres ${partsDead} img, boss vaincu=${cleared}, epilogue=${epi}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

@@ -27,6 +27,18 @@ boss_spawn:
     sta boss_flash
     lda #1
     sta hud_dirty
+    ; boss 4 : 2 tourelles de coque a detruire avant le noyau
+    lda #0
+    sta part_hp
+    sta part_hp+1
+    lda sec_hdr+SH_BOSS
+    cmp #4
+    bne @nopart
+    ldx diff
+    lda boss4_part_hp,x
+    sta part_hp
+    sta part_hp+1
+@nopart:
     lda #MSG_WARN
     sta msg_id
     lda #120
@@ -110,6 +122,10 @@ boss_fight:
     bne @k2
     jmp boss3_fire
 @k2:
+    cmp #4
+    bne @k3
+    jmp boss4_fire
+@k3:
     lda boss_hp
     cmp boss_ph2
     bcc @phase2
@@ -286,6 +302,149 @@ boss3_origin:
 boss3_m1: .byte 15,    7,     7,      3     ; periode de la spirale (masque)
 boss3_m2: .byte 15,    7,     3,      3
 
+; -----------------------------------------------------------------------------
+; Boss 4 : CROISEUR EN CONSTRUCTION (secteur 5) - parties destructibles
+;   Tant qu'une tourelle de coque est debout : chaque tourelle tire (vise
+;   et gerbe de 3) ; le noyau est invulnerable.
+;   Tourelles detruites : le noyau expose tire des anneaux et des tirs vises.
+; -----------------------------------------------------------------------------
+boss4_fire:
+    ldx #1
+@fl:
+    lda part_flash,x
+    beq @nf
+    dec part_flash,x
+@nf:
+    dex
+    bpl @fl
+    lda part_hp
+    ora part_hp+1
+    beq @core
+    ; tourelles : tir alterne toutes les 32 images, gerbe toutes les 96
+    lda boss_t
+    and #31
+    bne @r
+    lda boss_t
+    and #32
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    tax                     ; tourelle 0 ou 1
+    lda part_hp,x
+    beq @r
+    lda boss_u
+    clc
+    adc #12
+    sta tmp3
+    lda boss_v
+    clc
+    adc part_dv,x
+    clc
+    adc #4
+    sta tmp4
+    lda boss_t
+    and #64
+    beq @aim
+    lda #7
+    sta tmp2
+    jsr eb_spawn
+    inc tmp2
+    jsr eb_spawn
+    inc tmp2
+    jmp eb_spawn
+@aim:
+    lda #8                  ; vers l'arriere (rapide selon difficulte)
+    ora aim_speed
+    sta tmp2
+    jmp eb_spawn
+@core:
+    ldx diff
+    lda boss_t
+    and boss2_p1_mask,x
+    bne @c2
+    lda boss_burst
+    inc boss_burst
+    and #1
+    jmp boss_ring
+@c2:
+    cmp #24
+    bne @r
+    jmp boss_aim
+@r:
+    rts
+
+;                RECRUE PILOTE VETERAN EXPERT
+boss4_part_hp: .byte 25, 35, 45, 50
+
+; Degats aux tourelles du boss 4 : projectile joueur Y (appele par les
+; collisions). C=1 si une tourelle a ete touchee (projectile consomme).
+part_hit:
+    ldx #1
+@l:
+    lda part_hp,x
+    beq @n
+    lda pb_u,y
+    sec
+    sbc boss_u
+    sec
+    sbc #8
+    clc
+    adc #10-4               ; centre tourelle +8, R = 3+7
+    cmp #20
+    bcs @n
+    lda boss_v
+    clc
+    adc part_dv,x
+    sta tmp0
+    lda pb_v,y
+    sec
+    sbc tmp0
+    clc
+    adc #10-4
+    cmp #20
+    bcs @n
+    jsr pb_damage
+    sta tmp0
+    lda part_hp,x
+    sec
+    sbc tmp0
+    bcs @alive
+    lda #0
+@alive:
+    sta part_hp,x
+    bne @flash
+    ; tourelle detruite
+    lda boss_u
+    clc
+    adc #8
+    sta tmp0
+    lda boss_v
+    clc
+    adc part_dv,x
+    sta tmp1
+    jsr fx_spawn
+    lda #SFX_EXPLODE
+    jsr sfx_play
+    sty tmp4
+    lda #2
+    ldy #2                  ; +2 000 points
+    jsr add_score
+    ldy tmp4
+    sec
+    rts
+@flash:
+    lda #4
+    sta part_flash,x
+    sec
+    rts
+@n:
+    dex
+    bpl @l
+    clc
+    rts
+
 ; Anneau de 8 projectiles, directions A, A+2, ..., A+14 (A+16 : rapides)
 boss_ring:
     sta tmp2
@@ -403,6 +562,15 @@ boss_damage:
     ldy boss_on
     cpy #2
     bne @r
+    ; boss 4 : noyau protege tant qu'une tourelle de coque est debout
+    ldy sec_hdr+SH_BOSS
+    cpy #4
+    bne @hit
+    ldy part_hp
+    bne @r
+    ldy part_hp+1
+    bne @r
+@hit:
     sta tmp5
     lda boss_hp
     sec

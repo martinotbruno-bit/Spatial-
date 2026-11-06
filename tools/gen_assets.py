@@ -222,7 +222,7 @@ def build_common(consts):
            ("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
            ("fighter", 0x98, True), ("turret", 0xA0, True), ("kamikaze", 0xA8, True),
            ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False),
-           ("support", 0x68, True)]
+           ("support", 0x68, True), ("miner", 0x70, True), ("mine", 0x78, False)]
     for name, base, orient in big:
         put_big(spr, consts, art, name, base, orient)
     return bg, spr
@@ -236,6 +236,8 @@ def build_sector_sprites(fname):
     tmp = blank_tiles(256)
     put_big(tmp, c, art, "boss", 0xC0, True)
     put_big(tmp, c, art, "pod", 0xE0, False)
+    if "part" in art:                       # partie destructible du boss (secteur 5)
+        put_big(tmp, c, art, "part", 0xE4, False)
     return tmp[0xC0:0x100]
 
 
@@ -515,6 +517,67 @@ def pal_s4(c, rows, x, y):
     return 0
 
 
+def gen_map_yard(c):
+    """Secteur 5 : Chantiers d'Hadar. Bandes d'echafaudages haute/basse,
+    poutres, couples de coque en construction sur les cales, grues et
+    points de soudure. Motifs par segments de 16 colonnes."""
+    rng = random.Random(1357)
+    ncols = 256
+    stars = []
+    for _ in range(4):
+        col = [0] * 26
+        for y in range(26):
+            r = rng.random()
+            if r < 0.04:
+                col[y] = c["T_STAR1"]
+            elif r < 0.07:
+                col[y] = c["T_STAR2"]
+        stars.append(col)
+    cols = []
+    for x in range(ncols):
+        col = list(stars[(x * 5) % 4])
+        if 32 <= x < 216:
+            seg = (x - 32) // 16
+            top = [3, 2, 4, 3, 2, 3, 4, 2, 3, 4, 2, 3][seg % 12]
+            bot = [2, 3, 3, 4, 2, 2, 3, 4, 2, 3, 3, 2][seg % 12]
+            for y in range(top):
+                col[y] = c["T_TRUSS"]
+            col[top] = c["T_HAZARD"]
+            for y in range(26 - bot, 26):
+                col[y] = c["T_TRUSS"]
+            col[25 - bot] = c["T_HAZARD"]
+            xx = (x - 32) % 16
+            kind = seg % 4
+            if kind == 0 and xx in (4, 5, 6, 7, 8, 9, 10, 11):
+                for y in (8, 17):              # poutres horizontales
+                    col[y] = c["T_BEAM_H"]
+            elif kind == 1 and xx in (3, 12):  # poutres verticales
+                for y in range(top + 1, 25 - bot):
+                    col[y] = c["T_BEAM_V"]
+            elif kind == 2 and xx % 3 == 0:    # couples de coque (navire en cale)
+                for y in range(9, 17):
+                    col[y] = c["T_RIB"] if y in (9, 16) else c["T_BEAM_V"]
+                col[12] = c["T_PLATE"]
+                col[13] = c["T_PLATE"]
+            elif kind == 3 and xx in (6, 7, 8):  # grue suspendue
+                for y in range(top + 1, top + 5):
+                    col[y] = c["T_BEAM_V"] if xx == 7 else 0
+                col[top + 5] = c["T_CRANE"]
+            if (x * 7 + seg) % 11 == 0:
+                col[rng.choice((7, 12, 18))] = c["T_WELD"]
+        cols.append(col)
+    return cols
+
+
+def pal_s5(c, cols, x, y):
+    t = cols[x][y]
+    if t in (c["T_HAZARD"], c["T_CRANE"]):
+        return 2
+    if t == c["T_WELD"]:
+        return 3
+    return 0
+
+
 # Definition des secteurs (ordre de la campagne)
 SECTORS = [
     dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
@@ -533,12 +596,16 @@ SECTORS = [
          sprites="sprites_s4.txt", spr_set=2, gen=gen_map_city, palfn=pal_s4,
          loop=(24, 168), reps=5, song="lumen", boss=3,
          pal=[0x0F, 0x00, 0x01, 0x11, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x03, 0x14, 0x35, 0x0F, 0x09, 0x19, 0x2A]),
+    dict(name="s5", title="Chantiers d'Hadar", orient=0, bank=6, tiles="tiles_s5.txt",
+         sprites="sprites_s5.txt", spr_set=3, gen=gen_map_yard, palfn=pal_s5,
+         loop=(32, 184), reps=5, song="hadar", boss=4,
+         pal=[0x0F, 0x00, 0x10, 0x2D, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x07, 0x28, 0x38, 0x0F, 0x01, 0x21, 0x31]),
 ]
 # Palettes de sprites communes
 SPR_PAL = [0x0F, 0x02, 0x21, 0x30, 0x0F, 0x06, 0x27, 0x38, 0x0F, 0x04, 0x14, 0x2A, 0x0F, 0x30, 0x27, 0x16]
 
 ENEMY_NAMES = {"DRONE": 1, "CHASSEUR": 2, "TOURELLE": 3, "KAMIKAZE": 4, "DECOR": 5, "LOURDE": 6,
-               "SOUTIEN": 7, "BOSS": 15}
+               "SOUTIEN": 7, "MINEUR": 8, "BOSS": 15}
 
 
 def load_script(name):
@@ -804,6 +871,7 @@ def main():
     consts["S_BOSS_V"] = 0xD0
     consts["S_POD_H"] = 0xE0
     consts["S_POD_V"] = 0xE0
+    consts["S_PART_H"] = 0xE4             # partie destructible du boss 4
 
     out = ["; Fichier genere par tools/gen_assets.py - ne pas modifier a la main", ""]
     for k in sorted(consts):
