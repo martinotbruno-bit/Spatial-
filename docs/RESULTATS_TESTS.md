@@ -42,7 +42,7 @@ Resultat : **36/36** reussis.
 | T34 | Secteurs debloques : sauvegardes, seuls les debloques sont proposes au menu | OK | sauvegarde vierge : secteur 2 inaccessible=true ; apres secteur 1 : masque=3, menu -> secteur 2 puis 1 |
 | T35 | Acces libre (B au titre) : secteur 3 jouable sans sauvegarde, sauvegarde inchangee | OK | sans acces libre : verrouille=true ; avec B : secteur 3, texte="ACCES LIBRE : ACTIF", partie secteur 3 lancee=true, sauvegarde intacte=true |
 | T36 | Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparent, Garde-ciel, epilogue | OK | secteur charge=true, erreurs VRAM (tuiles+attributs)=0, vblank max=1341/2273, soutiens=true, reparation observee=true, directions de spirale distinctes=13, boss vaincu=true, epilogue=true |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=8f9faf7edbbb6c99... |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=6343c2bf28f72a7d... |
 
 ## Mesures
 
@@ -63,7 +63,7 @@ Resultat : **36/36** reussis.
   "normalAvgCycles": 13361,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "8f9faf7edbbb6c992952a97005b5c268c50a521ceff3ce22062cde7c7cbba813",
+  "sha256": "6343c2bf28f72a7dd85b8271d7a9517adc78602162cd519904babd58a8e94554",
   "romSize": 98320
 }
 ```

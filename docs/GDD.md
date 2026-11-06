@@ -39,8 +39,8 @@ palette ocre/or), la flotte humaine en déroute (alliée, séquences narratives)
 Aucun des deux n'est supérieur : LANCE inflige plus de dégâts par seconde sur
 une cible unique, ÉGIDE couvre plus d'espace.
 
-**Capacités propres** *[prototype]* — bouton B quand la jauge LIEN n'est pas
-pleine (jauge pleine : B déclenche le pouvoir coopératif) :
+**Capacités propres** *[prototype]* — bouton A quand la jauge LIEN n'est pas
+pleine (jauge pleine : A déclenche le pouvoir coopératif) :
 
 | | LANCE — Surcharge | ÉGIDE — Bouclier frontal |
 |---|---|---|
@@ -57,12 +57,12 @@ pleine (jauge pleine : B déclenche le pouvoir coopératif) :
   Remplissage : destructions (+2 à +4 selon l'ennemi, +8 pour un boss) et
   **vol en formation** (+1 toutes les 16 images lorsque les deux vaisseaux
   sont à moins de 48 px). Un signal sonore annonce la jauge pleine.
-- **Faisceau de Liaison** (B, jauge pleine, deux vaisseaux en vol) : rayon
+- **Faisceau de Liaison** (A, jauge pleine, deux vaisseaux en vol) : rayon
   tendu entre les deux vaisseaux pendant 2,5 s. Il blesse tout ennemi qui le
   traverse et absorbe les projectiles ennemis (+1 point chacun). Son efficacité
   dépend directement du **placement relatif** : écartés, les pilotes balaient
   une large bande ; rapprochés, ils concentrent l'attaque.
-- **Transfert d'énergie** (B, jauge pleine, partenaire sans vie) : le
+- **Transfert d’énergie** (A, jauge pleine, partenaire sans vie) : le
   partenaire revient immédiatement. Évite qu'un joueur pénalise durablement
   l'autre quand la réserve commune est vide.
 - **Nova** (solo, ou partenaire en cours de réapparition) : onde de choc qui
@@ -71,7 +71,7 @@ pleine (jauge pleine : B déclenche le pouvoir coopératif) :
 - **Collisions entre vaisseaux** : contact physique (corps 12×12 px),
   séparation immédiate selon l'axe de moindre pénétration, jamais de dégâts.
 
-- **Salve synchronisée** *[prototype]* : les deux pilotes appuient sur A à
+- **Salve synchronisée** *[prototype]* : les deux pilotes appuient sur le bouton de tir (B) à
   moins de 8 images d'intervalle → chaque vaisseau tire 3 projectiles
   lourds (4 dégâts chacun). Recharge 1 s, aucune jauge consommée : le
   pouvoir récompense le timing, pas l'accumulation.

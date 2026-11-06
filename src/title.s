@@ -230,7 +230,7 @@ menu_write:
     bne @fl
     jmp vbuf_close
 
-str_free_off: .byte "B : TOUS LES SECTEURS "
+str_free_off: .byte "A : TOUS LES SECTEURS "
 str_free_on:  .byte "ACCES LIBRE : ACTIF   "
 
 diff_str_lo: .lobytes str_d0, str_d1, str_d2, str_d3
@@ -273,9 +273,9 @@ title_update:
     bne @input
     jmp @r
 @input:
-    and #BTN_B
+    and #BTN_POWER
     beq @nob
-    ; B : acces libre a tous les secteurs pour la session (non sauvegarde)
+    ; A : acces libre a tous les secteurs pour la session (non sauvegarde)
     lda test_access
     eor #$FF
     sta test_access

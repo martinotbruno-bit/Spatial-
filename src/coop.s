@@ -2,7 +2,7 @@
 ; coop.s - Systemes cooperatifs
 ;   Ressource LIEN (0-64) : +kills, +1 toutes les 16 images quand les deux
 ;   vaisseaux volent a moins de 48 px l'un de l'autre (vol en formation).
-;   B avec jauge pleine :
+;   POUVOIR (bouton A, voir BTN_POWER) avec jauge pleine :
 ;     - deux vaisseaux en vol   -> FAISCEAU DE LIAISON : rayon tendu entre
 ;       les deux vaisseaux, 8 points de contact ; detruit les projectiles et
 ;       blesse les ennemis qui le traversent. Son efficacite depend du

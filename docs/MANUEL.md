@@ -18,7 +18,7 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
   - NIVEAU : RECRUE, PILOTE (par défaut) ou VÉTÉRAN ; EXPERT apparaît
     après avoir terminé la campagne. Débutant ? Essayez ÉGIDE en RECRUE.
 - **START** : lancer la partie.
-- **B** (prototype) : **accès libre** à tous les secteurs pour la session,
+- **A** (prototype) : **accès libre** à tous les secteurs pour la session,
   sans modifier la sauvegarde. Sans lui, un secteur n'est proposé qu'après
   avoir terminé le précédent.
 
@@ -27,8 +27,8 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 | Bouton | Action |
 |---|---|
 | Croix | Déplacement dans 8 directions |
-| A (maintenu) | Tir automatique |
-| B | Capacité du vaisseau (LANCE : Surcharge, ÉGIDE : Bouclier) ; pouvoir coopératif si la jauge LIEN est pleine |
+| B (maintenu) | Tir automatique |
+| A | Capacité du vaisseau (LANCE : Surcharge, ÉGIDE : Bouclier) ; pouvoir coopératif si la jauge LIEN est pleine |
 | START | Pause |
 
 - **LANCE** (manette 1) : rapide, tir concentré.
@@ -41,7 +41,7 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 ## La jauge LIEN
 
 Elle se remplit en détruisant des ennemis et en **volant en formation**
-(vaisseaux proches). Pleine, appuyez sur B :
+(vaisseaux proches). Pleine, appuyez sur A :
 
 - à deux : **Faisceau de Liaison** — un rayon relie les deux vaisseaux et
   détruit tout ce qui le traverse ; placez-vous de part et d'autre des
@@ -52,7 +52,7 @@ Elle se remplit en détruisant des ennemis et en **volant en formation**
 
 ## Salve synchronisée
 
-À deux, appuyez sur A **en même temps** que votre partenaire (moins de
+À deux, appuyez sur B (tir) **en même temps** que votre partenaire (moins de
 8 images d'écart) : les deux vaisseaux tirent une salve lourde. Une salve
 par seconde au maximum.
 

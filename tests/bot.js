@@ -75,7 +75,7 @@ class Bot {
     for (let p = 0; p < 2; p++) {
       if (!m.peek("pl_on", p)) continue;
       const pad = m.peek("pl_pad", p);
-      for (const b of ["UP", "DOWN", "LEFT", "RIGHT", "B"]) m.release(pad, b);
+      for (const b of ["UP", "DOWN", "LEFT", "RIGHT", "A"]) m.release(pad, b);
       if (!m.peek("pl_alive", p)) continue;
       const pos = { u: m.peek("pl_u", p) + 8, v: m.peek("pl_v", p) + 8 };
       const spd = p === 0 ? 2.5 : 1.75;
@@ -89,13 +89,13 @@ class Bot {
         this.dirs[p] = bestD;
         // danger imminent : capacite propre (ou pouvoir coop si jauge pleine)
         const near = w.eb.some((b) => Math.hypot(b.u + b.du * 4 - pos.u, b.v + b.dv * 4 - pos.v) < 14);
-        if ((near && !m.peek("pl_abil_cd", p)) || m.peek("gauge") === 64) m.press(pad, "B");
+        if ((near && !m.peek("pl_abil_cd", p)) || m.peek("gauge") === 64) m.press(pad, "A");
       }
       const d = this.dirs[p];
       if (d[0] > 0) m.press(pad, btn.fwd); else if (d[0] < 0) m.press(pad, btn.back);
       if (d[1] > 0) m.press(pad, btn.vp); else if (d[1] < 0) m.press(pad, btn.vm);
       // tir continu, relache toutes les 40 images (salve synchronisee en coop)
-      if (coop && this.t % 40 === 0) m.release(pad, "A"); else m.press(pad, "A");
+      if (coop && this.t % 40 === 0) m.release(pad, "B"); else m.press(pad, "B");
     }
   }
 }

@@ -190,18 +190,18 @@ player_update:
     lda lim_vmin,y
     sta pl_v,x
 @nm:
-    ; --- attaque synchronisee : appuis sur A des deux pilotes a moins de
+    ; --- attaque synchronisee : appuis sur TIR des deux pilotes a moins de
     ; SYNC_WINDOW images d'intervalle ---
     lda tmp6
-    and #BTN_A
+    and #BTN_FIRE
     beq @nosync
     lda #0
     sta pl_lasta,x
     jsr sync_check
 @nosync:
-    ; --- tir (A maintenu) ---
+    ; --- tir (bouton TIR maintenu) ---
     lda tmp7
-    and #BTN_A
+    and #BTN_FIRE
     beq @nofire
     lda pl_cool,x
     bne @nofire
@@ -209,9 +209,9 @@ player_update:
     sta pl_cool,x
     jsr player_fire
 @nofire:
-    ; --- B : pouvoir cooperatif si la jauge est pleine, sinon capacite propre
+    ; --- POUVOIR : pouvoir cooperatif si la jauge est pleine, sinon capacite propre
     lda tmp6
-    and #BTN_B
+    and #BTN_POWER
     beq @nob
     lda gauge
     cmp #GAUGE_MAX

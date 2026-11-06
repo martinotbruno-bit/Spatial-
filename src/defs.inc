@@ -72,6 +72,9 @@ BTN_UP     = $08
 BTN_DOWN   = $04
 BTN_LEFT   = $02
 BTN_RIGHT  = $01
+; Affectation des boutons en jeu (modifiable ici uniquement)
+BTN_FIRE   = BTN_B      ; tir (maintenu) - attaque synchronisee (appui)
+BTN_POWER  = BTN_A      ; capacite du vaisseau / pouvoir cooperatif
 
 ; --- Etats du jeu --------------------------------------------------------------
 ST_TITLE  = 0

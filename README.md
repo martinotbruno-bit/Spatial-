@@ -19,7 +19,7 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - Capacités propres : **Surcharge** (LANCE, esquive rapide) et **Bouclier
   frontal** (ÉGIDE, absorbe 4 projectiles)
 - Collisions physiques entre joueurs, sans dégâts ni blocage
-- **Salve synchronisée** : les deux pilotes appuient sur A ensemble
+- **Salve synchronisée** : les deux pilotes appuient sur B (tir) ensemble
 - Séquences narratives entre les secteurs, écran de bilan de fin de secteur
 - Ressource coopérative **LIEN** et trois pouvoirs : **Faisceau de Liaison**
   (attaque combinée dépendant du placement des deux vaisseaux),
@@ -60,11 +60,14 @@ octet pour octet).
 | Action | Manette |
 |---|---|
 | Déplacement 8 directions | Croix |
-| Tir (maintenu) | A |
-| Capacité du vaisseau / pouvoir coopératif (jauge LIEN pleine) | B |
+| Tir (maintenu) | B |
+| Capacité du vaisseau / pouvoir coopératif (jauge LIEN pleine) | A |
 | Pause | START |
 | Menu : ligne / valeur / départ | Haut-Bas / Gauche-Droite / START |
-| Menu : accès libre à tous les secteurs (prototype) | B |
+| Menu : accès libre à tous les secteurs (prototype) | A |
+
+L'affectation des boutons est définie en un seul endroit (`BTN_FIRE`,
+`BTN_POWER` dans `src/defs.inc`).
 
 En coopération, la manette 1 pilote LANCE et la manette 2 ÉGIDE.
 

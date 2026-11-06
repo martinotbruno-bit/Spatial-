@@ -128,7 +128,7 @@ test("T03", "Deux manettes : deplacements independants et simultanes", () => {
 test("T04", "Tirs simultanes des deux vaisseaux (et deplacement pendant le tir)", () => {
   const m = startGame({ players: 2 });
   m.frame(10, invul);
-  m.press(0, "A"); m.press(1, "A"); m.press(0, "UP"); m.press(1, "RIGHT");
+  m.press(0, "B"); m.press(1, "B"); m.press(0, "UP"); m.press(1, "RIGHT");
   let maxA = 0, maxB = 0;
   m.frame(30, (mm) => {
     invul(mm);
@@ -182,7 +182,7 @@ test("T07", "Attaque combinee : FAISCEAU DE LIAISON entre les deux vaisseaux", (
   // ennemi place sur la trajectoire du faisceau
   m.poke("en_type", 1, 0); m.poke("en_hp", 20, 0); m.poke("en_u", 60, 0); m.poke("en_v", 112, 0);
   m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0);
-  m.tap(1, "B", 2, 0);
+  m.tap(1, "A", 2, 0);
   const beam = m.peek("beam_t");
   const pts = m.peekBytes("beam_v", 8);
   let killed = false;
@@ -198,7 +198,7 @@ test("T08", "Solo : la jauge pleine declenche la NOVA (aucun partenaire requis)"
   m.poke("gauge", 64);
   for (let i = 0; i < 4; i++) { m.poke("en_type", 1, i); m.poke("en_hp", 1, i); m.poke("en_u", 150, i); m.poke("en_v", 60 + 30 * i, i); }
   for (let i = 0; i < 8; i++) { m.poke("eb_on", 1, i); m.poke("eb_u", 200, i); m.poke("eb_v", 100, i); }
-  m.tap(0, "B", 2, 0);
+  m.tap(0, "A", 2, 0);
   const nova = m.peek("nova_t");
   const enemies = countOn(m, "en_type", 10), bullets = countOn(m, "eb_on", 16);
   return { ok: nova > 0 && enemies === 0 && bullets === 0, detail: `nova_t=${nova}, ennemis restants=${enemies}, projectiles=${bullets}` };
@@ -208,7 +208,7 @@ test("T09", "Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie", () => {
   const m = startGame({ players: 2 });
   m.frame(5);
   m.poke("lives", 0); m.poke("pl_alive", 0, 1); m.poke("pl_resp", 0, 1); m.poke("gauge", 64);
-  m.tap(0, "B", 2, 0);
+  m.tap(0, "A", 2, 0);
   m.frame(3);
   return { ok: m.peek("pl_alive", 1) === 1 && m.peek("state") === ST.PLAY, detail: `EGIDE en vol=${m.peek("pl_alive", 1)}` };
 });
@@ -279,7 +279,7 @@ test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () =
   const sp = m.s("s1_script");
   let p = sp; while (m.romByte(p) !== 220) p += 4;
   m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
-  m.press(0, "A"); m.press(1, "A");
+  m.press(0, "B"); m.press(1, "B");
   let appeared = false, phase2 = false, state2 = false, fanSeen = 0;
   for (let i = 0; i < 4000 && m.peek("state") === ST.PLAY; i++) {
     m.frame(1, invul);
@@ -331,7 +331,7 @@ test("T15", "Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> n
   m.poke("it_on", 1, 0); m.poke("it_u", m.peek("pl_u") + 4, 0); m.poke("it_v", m.peek("pl_v") + 4, 0);
   m.frame(2, invul);
   const lv = m.peek("pl_wlv");
-  m.press(0, "A");
+  m.press(0, "B");
   let maxShots = 0;
   m.poke("it_on", 1, 0); m.poke("it_u", m.peek("pl_u") + 4, 0); m.poke("it_v", m.peek("pl_v") + 4, 0);
   m.frame(40, (mm) => { invul(mm); maxShots = Math.max(maxShots, countOn(mm, "pb_on", 16)); });
@@ -360,8 +360,8 @@ test("T17", "Effets sonores : plusieurs SFX distincts declenches en jeu", () => 
   const entry = m.s("sfx_play");
   const cpu = m.nes.cpu, emu = cpu.emulate;
   cpu.emulate = () => { if (((cpu.REG_PC + 1) & 0xffff) === entry) sfx.set(cpu.REG_ACC, (sfx.get(cpu.REG_ACC) || 0) + 1); return emu(); };
-  m.press(0, "A"); m.press(1, "A");
-  m.frame(1200, (mm, i) => { if (i < 1100) invul(mm); if (i === 500) mm.poke("gauge", 64); if (i === 502) mm.press(0, "B"); if (i === 506) mm.release(0, "B"); });
+  m.press(0, "B"); m.press(1, "B");
+  m.frame(1200, (mm, i) => { if (i < 1100) invul(mm); if (i === 500) mm.poke("gauge", 64); if (i === 502) mm.press(0, "A"); if (i === 506) mm.release(0, "A"); });
   cpu.emulate = emu;
   const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "DASH", "SHIELD", "SYNC", "COOPREADY"];
   const seen = [...sfx.keys()].sort((a, b) => a - b).map((k) => names[k] || k);
@@ -398,7 +398,7 @@ test("T19", "Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs 
   const m = startGame({ players: 2 });
   m.frame(100, invul);
   m.poke("pl_wlv", 3); m.poke("pl_wlv", 3, 1);
-  m.press(0, "A"); m.press(1, "A");
+  m.press(0, "B"); m.press(1, "B");
   const lag0 = m.peek("lag_count");
   m.frameCycles.length = 0;
   m.vblankUse.length = 0;
@@ -434,7 +434,7 @@ test("T19", "Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs 
 
 test("T20", "Performances : partie normale (secteur 1 complet a 2 joueurs)", () => {
   const m = startGame({ players: 2 });
-  m.press(0, "A"); m.press(1, "A");
+  m.press(0, "B"); m.press(1, "B");
   m.frame(5, invul);
   m.frameCycles.length = 0;
   m.vblankUse.length = 0;
@@ -463,7 +463,7 @@ test("T23", "Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge
   m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
   m.poke("pl_u", 40); m.poke("pl_v", 120); m.poke("gauge", 0);
   m.press(0, "RIGHT");
-  m.tap(0, "B", 1, 0);
+  m.tap(0, "A", 1, 0);
   const u0 = m.peek("pl_u");
   let hitFree = true;
   m.frame(14, (mm) => {
@@ -476,7 +476,7 @@ test("T23", "Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge
   const du = m.peek("pl_u") - u0;
   m.releaseAll();
   const cd = m.peek("pl_abil_cd");
-  m.tap(0, "B", 1, 0);
+  m.tap(0, "A", 1, 0);
   const cd2 = m.peek("pl_abil_cd");
   return { ok: du >= 60 && hitFree && cd > 0 && cd2 === cd - 1, detail: `deplacement ${du}px en 14 images (normal 35), indemne=${hitFree}, recharge=${cd} images, 2e appui pendant la recharge ignore=${cd2 === cd - 1}` };
 });
@@ -485,7 +485,7 @@ test("T24", "Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles", 
   const m = startGame({ players: 2 });
   m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
   m.poke("pl_u", 60, 1); m.poke("pl_v", 120, 1); m.poke("gauge", 0); m.poke("pl_invul", 0, 1);
-  m.tap(1, "B", 1, 0);
+  m.tap(1, "A", 1, 0);
   const on = m.peek("pl_abil_t", 1);
   let absorbed = 0;
   for (let k = 0; k < 5; k++) {
@@ -516,7 +516,7 @@ test("T25", "Affichage : tuiles des vaisseaux conformes a l'orientation (H et V)
     const rel = new Set();
     for (let i = 0; i < 64; i++) {
       if (oam[i * 4] >= 239 || oam[i * 4 + 2] > 1) continue;
-      rel.add((oam[i * 4 + 2] ? "B" : "A") + (oam[i * 4 + 1] - (oam[i * 4 + 2] ? b : a)));
+      rel.add((oam[i * 4 + 2] ? "A" : "B") + (oam[i * 4 + 1] - (oam[i * 4 + 2] ? b : a)));
     }
     const ok = a >= 0x80 && b >= 0x80 && ["A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"].every((k) => rel.has(k)) && rel.size === 8;
     res.push({ o: sector ? "V" : "H", a, b, ok });
@@ -546,12 +546,12 @@ test("T27", "Attaque synchronisee : appuis sur A a moins de 8 images -> salve pu
   const m = startGame({ players: 2 });
   m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
   // appuis decales de 3 images
-  m.press(0, "A"); m.frame(3); m.press(1, "A"); m.frame(1);
+  m.press(0, "B"); m.frame(3); m.press(1, "B"); m.frame(1);
   const syncShots = m.peekBytes("pb_on", 16).filter((x) => x === 3).length;
   const cd = m.peek("sync_cd");
   m.releaseAll(); m.frame(70);
   // appuis decales de 20 images : pas de salve
-  m.press(0, "A"); m.frame(20); m.press(1, "A"); m.frame(1);
+  m.press(0, "B"); m.frame(20); m.press(1, "B"); m.frame(1);
   const none = m.peekBytes("pb_on", 16).filter((x) => x === 3).length;
   m.releaseAll();
   // degats : un ennemi a 8 PV detruit par 2 projectiles synchronises
@@ -559,7 +559,7 @@ test("T27", "Attaque synchronisee : appuis sur A a moins de 8 images -> salve pu
   for (let i = 0; i < 16; i++) m.poke("pb_on", 0, i);
   m.poke("en_type", 1, 0); m.poke("en_hp", 8, 0); m.poke("en_u", m.peek("pl_u") + 30, 0); m.poke("en_v", m.peek("pl_v"), 0);
   m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0);
-  m.press(0, "A"); m.press(1, "A"); m.frame(1); m.release(0, "A"); m.release(1, "A");
+  m.press(0, "B"); m.press(1, "B"); m.frame(1); m.release(0, "B"); m.release(1, "B");
   let killed = false;
   m.frame(12, (mm) => { if (!mm.peek("en_type", 0)) killed = true; mm.poke("en_dvhi", 0, 0); mm.poke("en_dvlo", 0, 0); });
   return { ok: syncShots === 6 && cd > 0 && none === 0 && killed, detail: `salve=${syncShots} projectiles, recharge=${cd}, appuis trop espaces -> ${none}, ennemi 8 PV detruit=${killed}` };
@@ -620,7 +620,7 @@ test("T30", "Decor destructible : conteneur ancre au decor, detruit en 3 impacts
   const moved = 200 - m.peek("en_u", 0);            // suit le decor : 1 px/image
   const hp0 = m.peek("en_hp", 0);
   const s0 = m.peekBytes("score", 6).join("");
-  m.press(0, "A");
+  m.press(0, "B");
   let destroyed = -1;
   m.frame(80, (mm, i) => { invul(mm); if (destroyed < 0 && mm.peek("en_type", 0) === 0) destroyed = i; });
   m.releaseAll();
@@ -707,7 +707,7 @@ test("T33", "Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim
   }
   // boss : drones laches et anneaux de 8 projectiles
   let drones = 0, ring = 0;
-  m.press(0, "A"); m.press(1, "A");
+  m.press(0, "B"); m.press(1, "B");
   for (let i = 0; i < 1200 && m.peek("state") === ST.PLAY; i++) {
     const before = m.peekBytes("en_type", 10).filter((x) => x === 1).length;
     m.frame(1, invul);
@@ -749,7 +749,7 @@ test("T35", "Acces libre (B au titre) : secteur 3 jouable sans sauvegarde, sauve
   m.frame(40);
   m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT");
   const locked = m.peek("sector_sel") === 0;
-  m.tap(0, "B");
+  m.tap(0, "A");
   m.tap(0, "RIGHT"); m.tap(0, "RIGHT");
   const sel = m.peek("sector_sel");
   let txt = ""; for (let i = 0; i < 20; i++) txt += String.fromCharCode(m.nt(0x2327 + i));
@@ -785,7 +785,7 @@ test("T36", "Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparen
   }
   const vb = Math.max(...m.vblankUse);
   let dirs = new Set();
-  m.press(0, "A"); m.press(1, "A");
+  m.press(0, "B"); m.press(1, "B");
   for (let i = 0; i < 1500 && m.peek("state") === ST.PLAY; i++) {
     m.frame(1, invul);
     const bv = m.peek("boss_v");
