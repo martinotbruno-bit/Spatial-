@@ -19,9 +19,13 @@ HUD, sauvegarde) sont couverts ; le MMC5 n'apporterait que des confort
 (attributs fins, multiplication) au prix d'un risque de fabrication et de
 compatibilité plus élevé. Rappel : aucun mapper n'accélère le CPU.
 
-Configuration du prototype : PRG 64 Kio (8 bancs de 8 Kio), CHR-ROM 32 Kio,
-PRG-RAM 8 Kio sur pile. Cible finale proposée : PRG 256–512 Kio,
-CHR 128–256 Kio, même carte.
+Configuration actuelle : PRG 256 Kio (32 bancs de 8 Kio), CHR-ROM 32 Kio,
+PRG-RAM 8 Kio sur pile. Bancs fixes : 30 (`$C000`) et 31 (`$E000`).
+L'écran titre et les séquences narratives tournent depuis un banc commutable
+(banc 5, mappé en `$8000` à la place des données de secteur) ; des tremplins
+du code fixe (`title_enter_far`, `story_enter_far`) le mappent avant d'y
+entrer. Le banc de test vérifie à chaque instruction qu'aucun code ne
+s'exécute en `$8000-$9FFF` si ce banc n'y est pas mappé.
 
 ### Contraintes de configuration MMC3 respectées
 

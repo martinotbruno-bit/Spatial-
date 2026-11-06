@@ -12,7 +12,7 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 
 ## Contenu du prototype
 
-- ROM NES MMC3 (TKROM) de 96 Kio : `dist/spatial.nes`
+- ROM NES MMC3 (TKROM), 256 Kio de PRG + 32 Kio de CHR : `dist/spatial.nes`
 - Coopération à 2 joueurs simultanés (2 manettes) **et** mode solo complet
 - Deux vaisseaux différents : **LANCE** (intercepteur rapide, tir concentré)
   et **ÉGIDE** (vaisseau lourd, tir en éventail)

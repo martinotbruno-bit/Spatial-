@@ -198,6 +198,16 @@
   vie bonus tous les 20 000 points (T40), solo 9 / 7 / 4 vies, et en solo un
   tir visé ennemi sur deux annulé. Résultats dans EQUILIBRAGE.md.
 
+## 2026-11-06 — Extension de la ROM
+
+- PRG 64 → 256 Kio (32 bancs, MMC3/TKROM standard). Écran titre et
+  séquences narratives déplacés dans un banc commutable (tremplins dans le
+  code fixe) : banc `$E000` de 88 % à 60 %.
+- Défaut détecté : le bilan de fin de secteur (dans `story.s`) était appelé
+  pendant le jeu alors que son banc n'était pas mappé → déplacé dans le
+  code fixe. Garde ajoutée au banc de test contre ce type d'erreur.
+- 40/40 tests.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

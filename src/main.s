@@ -9,7 +9,7 @@
 ; --- En-tete iNES --------------------------------------------------------------
 .segment "HEADER"
     .byte "NES", $1A
-    .byte 4             ; PRG-ROM : 4 x 16 Kio = 64 Kio
+    .byte 16            ; PRG-ROM : 16 x 16 Kio = 256 Kio
     .byte 4             ; CHR-ROM : 4 x 8 Kio  = 32 Kio
     .byte $42           ; mapper 4 (bits bas), PRG-RAM sauvegardee par pile
     .byte $00           ; mapper 4 (bits hauts)
@@ -99,7 +99,7 @@ reset:
     sta ctrl_shadow
     sta PPUCTRL
     cli                     ; autorise l'IRQ MMC3 (separation HUD)
-    jsr title_enter
+    jsr title_enter_far
     jmp main_loop
 
 mmc3_init_banks:
@@ -513,8 +513,6 @@ state_drw_tbl:
 
 .include "audio.s"
 .include "save.s"
-.include "title.s"
-.include "story.s"
 .include "hud.s"
 .include "data.s"
 .include "boss.s"
@@ -526,6 +524,37 @@ state_drw_tbl:
 .include "stage.s"
 .include "player.s"
 .include "enemy.s"
+
+; -----------------------------------------------------------------------------
+; Interface en banc commutable (banc UI_BANK en $8000) : l'ecran titre et les
+; sequences narratives ne tournent que lorsqu'aucun secteur n'est charge.
+; Les tremplins ci-dessous (banc fixe) mappent le banc avant d'y sauter ;
+; story_done quitte le banc par un saut vers stage_start (banc fixe), qui
+; remappe le secteur.
+; -----------------------------------------------------------------------------
+UI_BANK = 5
+.segment "CODE7"
+map_ui:
+    lda #6
+    sta MMC3_BANKSEL
+    lda #UI_BANK
+    sta MMC3_BANKDATA
+    rts
+
+title_enter_far:
+    jsr map_ui
+    jmp title_enter
+
+; A = page
+story_enter_far:
+    pha
+    jsr map_ui
+    pla
+    jmp story_enter
+
+.segment "UI"
+.include "title.s"
+.include "story.s"
 
 .segment "VECTORS"
     .word nmi, reset, irq

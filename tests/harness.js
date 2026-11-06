@@ -46,7 +46,17 @@ class Machine {
     this.held = [new Set(), new Set()];
     const cpu = this.nes.cpu;
     const emu = cpu.emulate.bind(cpu);
-    cpu.emulate = () => { const c = emu(); this.cycles += c; return c; };
+    // Garde : du code ne peut s'executer en 8000-9FFF que si le banc
+    // interface (UI_BANK) y est mappe (les bancs de secteur ne contiennent
+    // que des donnees). Detecte les appels entre bancs mal places.
+    this.r6 = 0; this.bankSel = 0;
+    const uiBank = 5;
+    cpu.emulate = () => {
+      const pc = (cpu.REG_PC + 1) & 0xffff;
+      if (pc >= 0x8000 && pc < 0xa000 && this.r6 !== uiBank && this.frameNo > 0)
+        throw new Error("code execute en " + pc.toString(16) + " avec le banc " + this.r6 + " mappe (banc interface attendu)");
+      const c = emu(); this.cycles += c; return c;
+    };
     // jsnes compte le DMA OAM (513 cycles) comme cycles d'arret hors emulate()
     const halt = cpu.haltCycles.bind(cpu);
     cpu.haltCycles = (c) => { this.cycles += c; return halt(c); };
@@ -55,6 +65,8 @@ class Machine {
     const mm = this.nes.mmap;
     const wr = mm.write.bind(mm);
     mm.write = (a, v) => {
+      if (a === 0x8000) this.bankSel = v & 7;
+      else if (a === 0x8001 && this.bankSel === 6) this.r6 = v;
       // $5FF1 : debut du travail (juste apres le NMI) ; $5FF0 : fin du travail.
       // Mesure = cycles ecoules depuis le NMI qui a lance l'image (NMI inclus).
       if (a === 0x5ff1) this.workNmi = this.nmiAt;

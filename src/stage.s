@@ -62,7 +62,7 @@ game_start:
     sta continues
     lda sector_sel
     sta stage
-    jmp story_enter         ; A = page = secteur de depart (0 = introduction)         ; page = secteur de depart (0 = introduction)
+    jmp story_enter_far         ; A = page = secteur de depart (0 = introduction)         ; page = secteur de depart (0 = introduction)
 
 ; -----------------------------------------------------------------------------
 ; Initialisation d'un niveau (ecran coupe pendant le chargement)
@@ -1135,10 +1135,10 @@ clear_update:
     jsr save_write
 @known:
     lda stage
-    jmp story_enter
+    jmp story_enter_far
 @end:
     lda #NUM_SECTORS        ; epilogue
-    jmp story_enter
+    jmp story_enter_far
 @r:
     rts
 
@@ -1149,7 +1149,7 @@ over_update:
     bne @r
     lda continues
     bne @cont
-    jmp title_enter
+    jmp title_enter_far
 @cont:
     lda #ST_CONT
     sta state
@@ -1181,7 +1181,7 @@ cont_update:
     jsr sfx_play
     dec cont_digit
     bpl cont_text
-    jmp title_enter
+    jmp title_enter_far
 @r:
     rts
 
@@ -1225,7 +1225,7 @@ end_update:
     jsr fx_update
     dec state_t
     bne @r
-    jmp title_enter
+    jmp title_enter_far
 @r:
     rts
 
