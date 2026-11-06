@@ -79,6 +79,28 @@ difficulté d'un secteur à l'autre doit être confirmée par des parties
 humaines ; pistes si besoin : réserve de projectiles portée à 20 (coût CPU à
 mesurer), densité des scripts, vitesse des anneaux dès la phase 1.
 
+## Mesures — secteur 4 « Cité de Lumen », joueur moyen
+
+| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |
+|---|---|---|---|---|---|---|---|
+| Solo LANCE | RECRUE | 5 | 2.0 | 3/3 | 43 s | 42 | 7.5 / 16 |
+| Solo LANCE | PILOTE | 3 | 2.7 | 2/3 | 48 s | 39 | 8.6 / 16 |
+| Solo LANCE | VETERAN | 2 | 1.0 | 2/3 | 36 s | 39 | 7.5 / 16 |
+| Solo EGIDE | RECRUE | 5 | 2.0 | 3/3 | 36 s | 52 | 7.2 / 16 |
+| Solo EGIDE | PILOTE | 3 | 2.3 | 3/3 | 54 s | 50 | 9.8 / 16 |
+| Solo EGIDE | VETERAN | 2 | 1.7 | 1/3 | 50 s | 50 | 8.1 / 16 |
+| Coop | RECRUE | 7 | 2.3 | 3/3 | 25 s | 54 | 6.1 / 16 |
+| Coop | PILOTE | 5 | 2.7 | 3/3 | 38 s | 52 | 8.7 / 16 |
+| Coop | VETERAN | 4 | 3.3 | 3/3 | 40 s | 50 | 9.1 / 16 |
+
+Les appareils de soutien réduisent nettement le nombre d'ennemis abattus
+(≈ 39-54 contre ≈ 60-70) : réparés, les ennemis survivent plus longtemps.
+La réussite reste du même ordre que dans les secteurs précédents : **la
+courbe de difficulté entre secteurs est encore plate pour ce bot**. C'est le
+principal chantier d'équilibrage restant, à arbitrer avec des parties
+humaines (densité des scripts, réserve de projectiles, vitesse des tirs
+selon le rang du secteur).
+
 ## Constats et décisions
 
 1. **Avant réglage**, 49 pertes sur 57 avaient lieu pendant le combat contre

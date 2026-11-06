@@ -11,7 +11,7 @@ const SECTOR = Number(process.argv[3] || 0);
 function run({ players, ship = 0, diff, seed, profile }) {
   const m = new Machine();
   m.frame(40);
-  m.poke("sectors_unl", 7);
+  m.poke("sectors_unl", 255);
   if (players === 2) m.tap(0, "RIGHT");
   m.tap(0, "DOWN");
   if (players === 1 && ship) m.tap(0, "RIGHT");
@@ -22,6 +22,7 @@ function run({ players, ship = 0, diff, seed, profile }) {
   if (diff === 0) m.tap(0, "LEFT");
   for (let i = 1; i < diff; i++) m.tap(0, "RIGHT");
   m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(2);
+  if (m.peek("stage") !== SECTOR) throw new Error(`secteur ${SECTOR + 1} non selectionne (stage=${m.peek("stage")})`);
   const bot = new Bot(m, { seed, ...profile });
   const lives0 = m.peek("lives");
   let deaths = 0, prev = [1, 1], bossStart = 0, bossEnd = 0, frames = 0, ebSum = 0, ebMax = 0;
