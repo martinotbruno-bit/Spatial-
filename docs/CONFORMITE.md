@@ -67,7 +67,7 @@ Légende :
 | 16.3 | GDD, bible artistique, fiches | 🟡 | GDD ébauche ; bible et fiches à produire |
 | 16.4 | Documentation technique | 🟡 | Architecture, mémoire, budgets, manuel ; spécification mapper/PCB finale à produire |
 | 16.5 | Rapports de tests, matrice de compatibilité | 🟡 | RESULTATS_TESTS.md ; matrice matériel vide (aucun test matériel) |
-| 16.6 | Fichiers de fabrication de cartouche | ⬜ | Phase 5 |
+| 16.6 | Fichiers de fabrication de cartouche | 🟡 | Images PRG/CHR + sommes de contrôle (`tools/split_rom.py`), nomenclature indicative, procédures de programmation et de validation (FABRICATION.md) ; **schéma PCB, BOM validée et Gerber non produits** |
 | 18 | Originalité (références non copiées) | ✅ | Univers, vaisseaux, ennemis, musique, graphismes créés pour le projet |
 
 ## Matrice de compatibilité

@@ -104,4 +104,5 @@ En coopération, la manette 1 pilote LANCE et la manette 2 ÉGIDE.
 - [Journal de production](docs/JOURNAL.md)
 - [Équilibrage](docs/EQUILIBRAGE.md)
 - [Risques](docs/RISQUES.md)
+- [Fabrication de la cartouche](docs/FABRICATION.md)
 - [Manuel du joueur](docs/MANUEL.md)
