@@ -1,0 +1,441 @@
+// Suite de tests automatises du prototype (Phase 1) - execution en EMULATION
+// (jsnes 1.2.1). Ces tests ne remplacent pas la validation sur materiel reel.
+// Usage : node run_tests.js   (depuis tests/, apres "make")
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const { Machine, ROOT } = require("./harness");
+
+const SHOTS = path.join(ROOT, "docs", "captures");
+const results = [];
+const metrics = {};
+
+function test(id, name, fn) {
+  const t0 = Date.now();
+  let ok = false;
+  let detail = "";
+  try {
+    const r = fn();
+    ok = r.ok;
+    detail = r.detail || "";
+  } catch (e) {
+    ok = false;
+    detail = "EXCEPTION : " + e.message;
+  }
+  results.push({ id, name, ok, detail, ms: Date.now() - t0 });
+  console.log(`${ok ? "OK   " : "ECHEC"} ${id} ${name}${detail ? "  -- " + detail : ""}`);
+}
+
+const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4 };
+const camOf = (m) => m.peek("cam_lo") + 256 * m.peek("cam_hi");
+const invul = (m) => { m.poke("pl_invul", 10); m.poke("pl_invul", 10, 1); };
+
+// Demarre une partie depuis l'ecran titre. players = 1|2, ship = 0|1, sector = 0|1
+function startGame({ players = 2, ship = 0, sector = 0, sound = false } = {}) {
+  const m = new Machine({ sound });
+  m.frame(40);
+  if (players === 2) m.tap(0, "RIGHT");
+  m.tap(0, "DOWN");
+  if (ship === 1 && players === 1) m.tap(0, "RIGHT");
+  m.tap(0, "DOWN");
+  if (sector === 1) m.tap(0, "RIGHT");
+  m.tap(0, "START");
+  m.frame(2);
+  return m;
+}
+
+function countOn(m, arr, n) { return m.peekBytes(arr, n).filter((x) => x !== 0).length; }
+
+// ---------------------------------------------------------------------------
+test("T01", "Demarrage : ecran titre stable, NMI actif, region NTSC detectee", () => {
+  const m = new Machine();
+  m.frame(180);
+  const nmi1 = m.peek("nmi_count");
+  m.frame(60);
+  const nmi2 = m.peek("nmi_count");
+  m.screenshot(path.join(SHOTS, "01_titre.png"));
+  const ok = m.peek("state") === ST.TITLE && ((nmi2 - nmi1) & 0xff) === 60 && m.peek("region") === 0 && m.peek("lag_count") === 0;
+  return { ok, detail: `etat=${m.peek("state")} nmi/60img=${(nmi2 - nmi1) & 0xff} region=${m.peek("region")} lag=${m.peek("lag_count")}` };
+});
+
+test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
+  const m = new Machine();
+  m.frame(40);
+  m.tap(0, "RIGHT");
+  const np = m.peek("nplayers");
+  m.tap(0, "RIGHT");
+  const np2 = m.peek("nplayers");
+  m.tap(0, "DOWN");
+  m.tap(0, "RIGHT");
+  const ship = m.peek("solo_ship");
+  m.tap(0, "DOWN");
+  m.tap(0, "LEFT");
+  const sec = m.peek("sector_sel");
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 1, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur=${sec}` };
+});
+
+test("T03", "Deux manettes : deplacements independants et simultanes", () => {
+  const m = startGame({ players: 2 });
+  m.frame(30, invul);
+  const u0 = [m.peek("pl_u"), m.peek("pl_u", 1)], v0 = [m.peek("pl_v"), m.peek("pl_v", 1)];
+  m.press(0, "RIGHT"); m.press(1, "DOWN");
+  m.frame(20, invul);
+  m.releaseAll();
+  const u1 = [m.peek("pl_u"), m.peek("pl_u", 1)], v1 = [m.peek("pl_v"), m.peek("pl_v", 1)];
+  const ok = u1[0] - u0[0] === 50 && v1[0] === v0[0] && u1[1] === u0[1] && v1[1] - v0[1] === 35;
+  return { ok, detail: `LANCE du=${u1[0] - u0[0]} (2.5px x 20), EGIDE dv=${v1[1] - v0[1]} (1.75px x 20)` };
+});
+
+test("T04", "Tirs simultanes des deux vaisseaux (et deplacement pendant le tir)", () => {
+  const m = startGame({ players: 2 });
+  m.frame(10, invul);
+  m.press(0, "A"); m.press(1, "A"); m.press(0, "UP"); m.press(1, "RIGHT");
+  let maxA = 0, maxB = 0;
+  m.frame(30, (mm) => {
+    invul(mm);
+    const on = mm.peekBytes("pb_on", 16);
+    maxA = Math.max(maxA, on.filter((x) => x === 1).length);
+    maxB = Math.max(maxB, on.filter((x) => x === 2).length);
+  });
+  m.screenshot(path.join(SHOTS, "02_tirs_cooperation.png"));
+  return { ok: maxA >= 3 && maxB >= 3, detail: `projectiles LANCE max=${maxA}, EGIDE max=${maxB}` };
+});
+
+test("T05", "Collision entre joueurs : contact physique, aucun degat, aucun blocage", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("pl_u", 100); m.poke("pl_v", 120); m.poke("pl_u", 100, 1); m.poke("pl_v", 120, 1);
+  m.poke("pl_invul", 0); m.poke("pl_invul", 0, 1);
+  const lives0 = m.peek("lives");
+  let minDist = 999, alive = true;
+  m.press(0, "DOWN"); m.press(1, "UP");
+  m.frame(40, (mm) => {
+    mm.poke("en_type", 0); for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i);
+    for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i);
+    const du = Math.abs(mm.peek("pl_u") - mm.peek("pl_u", 1)), dv = Math.abs(mm.peek("pl_v") - mm.peek("pl_v", 1));
+    minDist = Math.min(minDist, Math.max(du, dv));
+    alive = alive && mm.peek("pl_alive") === 1 && mm.peek("pl_alive", 1) === 1;
+  });
+  m.releaseAll();
+  // le controle reste immediat : chacun peut s'eloigner
+  const vA = m.peek("pl_v");
+  m.press(0, "UP"); m.frame(10); m.releaseAll();
+  const moved = vA - m.peek("pl_v");
+  const ok = alive && m.peek("lives") === lives0 && minDist >= 10 && moved >= 20;
+  return { ok, detail: `separation min=${minDist}px (corps 12px), vies ${lives0}->${m.peek("lives")}, recul libre=${moved}px` };
+});
+
+test("T06", "Ressource cooperative LIEN : remplissage par destructions et vol en formation", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("pl_u", 60); m.poke("pl_v", 100); m.poke("pl_u", 60, 1); m.poke("pl_v", 130, 1);
+  const g0 = m.peek("gauge");
+  m.frame(160, (mm) => { invul(mm); for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i); });
+  const g1 = m.peek("gauge");
+  return { ok: g1 - g0 >= 9, detail: `jauge ${g0}->${g1} en 160 images de vol en formation (attendu ~10)` };
+});
+
+test("T07", "Attaque combinee : FAISCEAU DE LIAISON entre les deux vaisseaux", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("pl_u", 60); m.poke("pl_v", 60); m.poke("pl_u", 60, 1); m.poke("pl_v", 180, 1);
+  m.poke("gauge", 64);
+  // ennemi place sur la trajectoire du faisceau
+  m.poke("en_type", 1, 0); m.poke("en_hp", 20, 0); m.poke("en_u", 60, 0); m.poke("en_v", 112, 0);
+  m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0);
+  m.tap(1, "B", 2, 0);
+  const beam = m.peek("beam_t");
+  const pts = m.peekBytes("beam_v", 8);
+  let killed = false;
+  m.frame(60, (mm) => { invul(mm); if (mm.peek("en_type", 0) === 0) killed = true; mm.poke("en_u", 60, 0); });
+  m.screenshot(path.join(SHOTS, "03_faisceau_liaison.png"));
+  const between = pts.every((v) => v > 68 && v < 188);
+  return { ok: beam > 100 && between && killed && m.peek("gauge") < 16, detail: `beam_t=${beam}, points v=[${pts.join(",")}], ennemi detruit=${killed}` };
+});
+
+test("T08", "Solo : la jauge pleine declenche la NOVA (aucun partenaire requis)", () => {
+  const m = startGame({ players: 1 });
+  m.frame(5);
+  m.poke("gauge", 64);
+  for (let i = 0; i < 4; i++) { m.poke("en_type", 1, i); m.poke("en_hp", 1, i); m.poke("en_u", 150, i); m.poke("en_v", 60 + 30 * i, i); }
+  for (let i = 0; i < 8; i++) { m.poke("eb_on", 1, i); m.poke("eb_u", 200, i); m.poke("eb_v", 100, i); }
+  m.tap(0, "B", 2, 0);
+  const nova = m.peek("nova_t");
+  const enemies = countOn(m, "en_type", 10), bullets = countOn(m, "eb_on", 16);
+  return { ok: nova > 0 && enemies === 0 && bullets === 0, detail: `nova_t=${nova}, ennemis restants=${enemies}, projectiles=${bullets}` };
+});
+
+test("T09", "Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("lives", 0); m.poke("pl_alive", 0, 1); m.poke("pl_resp", 0, 1); m.poke("gauge", 64);
+  m.tap(0, "B", 2, 0);
+  m.frame(3);
+  return { ok: m.peek("pl_alive", 1) === 1 && m.peek("state") === ST.PLAY, detail: `EGIDE en vol=${m.peek("pl_alive", 1)}` };
+});
+
+test("T10", "Scrolling horizontal : contenu VRAM conforme a la carte sur tout le niveau", () => {
+  const m = startGame({ players: 2 });
+  let bad = 0, checks = 0;
+  const ids = m.s("map_h_ids"), tlo = m.s("map_h_tpl_lo"), thi = m.s("map_h_tpl_hi");
+  for (let k = 0; k < 19; k++) {
+    m.frame(97, invul);
+    const cam = camOf(m);
+    // colonnes visibles uniquement (la colonne suivante est en cours d'envoi)
+    for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8) && c < 256; c++) {
+      const id = m.romByte(ids + c), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+      const nc = c & 63, base = (nc & 32 ? 0x2400 : 0x2000) + (nc & 31);
+      for (let r = 0; r < 26; r++) { checks++; if (m.romByte(tp + r) !== m.nt(base + (r + 4) * 32)) bad++; }
+    }
+    if (k === 5) m.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png"));
+  }
+  metrics.cam_h_end = camOf(m);
+  return { ok: bad === 0 && camOf(m) === 1760, detail: `${checks} tuiles verifiees, ${bad} erreurs, camera finale=${camOf(m)}` };
+});
+
+test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le niveau", () => {
+  const m = startGame({ players: 2, sector: 1 });
+  let bad = 0, checks = 0;
+  const ids = m.s("map_v_ids"), tlo = m.s("map_v_tpl_lo"), thi = m.s("map_v_tpl_hi");
+  for (let k = 0; k < 16; k++) {
+    m.frame(101, invul);
+    const cam = camOf(m), vsy = m.peek("vsy");
+    for (let s = 0; s < 26; s++) {
+      const ntrow = ((vsy >> 3) + s) % 30;
+      let r = ((29 - ntrow) % 30 + 30) % 30;
+      while (r < Math.floor(cam / 8) - 2) r += 30;
+      const id = m.romByte(ids + Math.min(r, 231)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+      for (let c = 0; c < 32; c++) { checks++; if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++; }
+    }
+    if (k === 6) m.screenshot(path.join(SHOTS, "05_secteur2_vertical.png"));
+  }
+  // le HUD ne doit jamais etre ecrase
+  let hudOk = true;
+  const row1 = " SCORE ";
+  for (let i = 0; i < row1.length; i++) if (m.nt(0x2020 + i) !== row1.charCodeAt(i)) hudOk = false;
+  return { ok: bad === 0 && hudOk && camOf(m) === 1536, detail: `${checks} tuiles verifiees, ${bad} erreurs, HUD intact=${hudOk}, camera=${camOf(m)}` };
+});
+
+test("T12", "Ennemis et projectiles : apparition des 4 familles, tirs ennemis", () => {
+  const m = startGame({ players: 2 });
+  const seen = new Set();
+  let maxEn = 0, maxEb = 0;
+  m.frame(1500, (mm) => {
+    invul(mm);
+    const t = mm.peekBytes("en_type", 10);
+    t.forEach((x) => x && seen.add(x));
+    maxEn = Math.max(maxEn, t.filter((x) => x).length);
+    maxEb = Math.max(maxEb, countOn(mm, "eb_on", 16));
+  });
+  metrics.maxEnemies = maxEn; metrics.maxEnemyBullets = maxEb;
+  return { ok: seen.size === 4 && maxEb > 0, detail: `familles vues=[${[...seen].sort().join(",")}], ennemis simultanes max=${maxEn}, projectiles ennemis max=${maxEb}` };
+});
+
+test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () => {
+  const m = startGame({ players: 2 });
+  m.poke("cam_lo", 1744 & 255); m.poke("cam_hi", 1744 >> 8);
+  m.poke("script_ptr", 0); // le script se recale ci-dessous
+  // recale le script sur l'entree du boss
+  const sp = m.s("script_h");
+  let p = sp; while (m.romByte(p) !== 220) p += 4;
+  m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
+  m.press(0, "A"); m.press(1, "A");
+  let appeared = false, phase2 = false, state2 = false, fanSeen = 0;
+  for (let i = 0; i < 4000 && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1, invul);
+    // vaisseaux face au boss
+    const bv = m.peek("boss_v");
+    m.poke("pl_v", Math.max(40, bv)); m.poke("pl_v", Math.min(208, bv + 16), 1);
+    m.poke("pl_u", 120); m.poke("pl_u", 120, 1);
+    if (m.peek("boss_on")) appeared = true;
+    if (m.peek("boss_on") === 2) state2 = true;
+    if (m.peek("boss_on") === 2 && m.peek("boss_hp") < 125) phase2 = true;
+    fanSeen = Math.max(fanSeen, countOn(m, "eb_on", 16));
+    if (i === 400) m.screenshot(path.join(SHOTS, "06_miniboss.png"));
+  }
+  m.releaseAll();
+  const st = m.peek("state");
+  // enchainement vers le secteur 2 (vertical)
+  m.frame(260, invul);
+  const next = m.peek("state") === ST.PLAY && m.peek("stage") === 1 && m.peek("orient") === 1;
+  return { ok: appeared && state2 && phase2 && st === ST.CLEAR && next, detail: `apparu=${appeared}, phase2=${phase2}, projectiles max=${fanSeen}, etat apres destruction=${st}, enchainement secteur 2=${next}` };
+});
+
+test("T14", "Perte de vie, reapparition invulnerable, game over et retour au titre", () => {
+  const m = startGame({ players: 1 });
+  m.frame(80);
+  const lives0 = m.peek("lives");
+  let deaths = 0, prev = 1;
+  for (let i = 0; i < 3000 && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1);
+    m.poke("pl_invul", 0);
+    // projectile ennemi force sur le vaisseau
+    m.poke("eb_on", 1, 0); m.poke("eb_u", m.peek("pl_u") + 4, 0); m.poke("eb_v", m.peek("pl_v") + 4, 0);
+    m.poke("eb_duhi", 0, 0); m.poke("eb_dulo", 0, 0); m.poke("eb_dvhi", 0, 0); m.poke("eb_dvlo", 0, 0);
+    const a = m.peek("pl_alive");
+    if (prev === 1 && a === 0) deaths++;
+    prev = a;
+  }
+  const over = m.peek("state") === ST.OVER;
+  m.frame(260);
+  return { ok: lives0 === 3 && deaths === 4 && over && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, retour titre=${m.peek("state") === 0}` };
+});
+
+test("T15", "Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> niveau -1", () => {
+  const m = startGame({ players: 1 });
+  m.frame(10, invul);
+  m.poke("it_on", 1, 0); m.poke("it_u", m.peek("pl_u") + 4, 0); m.poke("it_v", m.peek("pl_v") + 4, 0);
+  m.frame(2, invul);
+  const lv = m.peek("pl_wlv");
+  m.press(0, "A");
+  let maxShots = 0;
+  m.poke("it_on", 1, 0); m.poke("it_u", m.peek("pl_u") + 4, 0); m.poke("it_v", m.peek("pl_v") + 4, 0);
+  m.frame(40, (mm) => { invul(mm); maxShots = Math.max(maxShots, countOn(mm, "pb_on", 16)); });
+  const lv3 = m.peek("pl_wlv");
+  m.releaseAll();
+  m.poke("pl_invul", 0);
+  m.poke("eb_on", 1, 0); m.poke("eb_u", m.peek("pl_u") + 4, 0); m.poke("eb_v", m.peek("pl_v") + 4, 0);
+  m.frame(2);
+  const lvAfter = m.peek("pl_wlv");
+  return { ok: lv === 2 && lv3 === 3 && lvAfter === 2 && maxShots >= 10, detail: `niveaux 1->${lv}->${lv3}, apres perte=${lvAfter}, projectiles max (niv.3)=${maxShots}` };
+});
+
+test("T16", "Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM", () => {
+  const m = startGame({ players: 2, sound: true });
+  m.frame(400, invul);
+  const regs = new Set(m.apuLog.map((e) => e[1]));
+  const notes = (a) => m.apuLog.filter((e) => e[1] === a).length;
+  const dmc = m.apuLog.filter((e) => e[1] === 0x4015 && (e[2] & 0x10)).length;
+  const ok = notes(0x4002) > 20 && notes(0x4006) > 20 && notes(0x400a) > 20 && notes(0x400e) > 20 && dmc > 5;
+  return { ok, detail: `ecritures periode P1=${notes(0x4002)} P2=${notes(0x4006)} TRI=${notes(0x400a)} BRUIT=${notes(0x400e)}, declenchements DPCM=${dmc}, registres APU utilises=${regs.size}` };
+});
+
+test("T17", "Effets sonores : plusieurs SFX distincts declenches en jeu", () => {
+  const m = startGame({ players: 2 });
+  const sfx = new Map();
+  const entry = m.s("sfx_play");
+  const cpu = m.nes.cpu, emu = cpu.emulate;
+  cpu.emulate = () => { if (((cpu.REG_PC + 1) & 0xffff) === entry) sfx.set(cpu.REG_ACC, (sfx.get(cpu.REG_ACC) || 0) + 1); return emu(); };
+  m.press(0, "A"); m.press(1, "A");
+  m.frame(1200, (mm, i) => { if (i < 1100) invul(mm); if (i === 500) mm.poke("gauge", 64); if (i === 502) mm.press(0, "B"); if (i === 506) mm.release(0, "B"); });
+  cpu.emulate = emu;
+  const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "COOPREADY"];
+  const seen = [...sfx.keys()].sort((a, b) => a - b).map((k) => names[k] || k);
+  return { ok: sfx.size >= 6, detail: `${sfx.size} effets distincts : ${seen.join(", ")}` };
+});
+
+test("T18", "Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree", () => {
+  const m = startGame({ players: 1 });
+  m.frame(5);
+  [0, 1, 2, 3, 4, 5].forEach((i) => m.poke("score", [0, 4, 2, 4, 2, 0][i], i));
+  // force le game over
+  m.poke("lives", 0); m.poke("pl_invul", 0);
+  m.poke("eb_on", 1, 0); m.poke("eb_u", m.peek("pl_u") + 4, 0); m.poke("eb_v", m.peek("pl_v") + 4, 0);
+  m.frame(400);
+  const sram = m.sram(64);
+  const magic = String.fromCharCode(...sram.slice(0, 4));
+  // "coupure" : nouvelle machine avec le contenu de la PRG-RAM
+  const m2 = new Machine({ sram });
+  m2.frame(30);
+  const hi = m2.peekBytes("hi_solo", 6).join("");
+  // corruption de la copie A -> la copie B doit etre utilisee
+  const bad = sram.slice(); bad[7] ^= 0xff;
+  const m3 = new Machine({ sram: bad });
+  m3.frame(30);
+  const hi3 = m3.peekBytes("hi_solo", 6).join("");
+  // aucune sauvegarde : valeurs par defaut
+  const m4 = new Machine({ sram: new Array(64).fill(0) });
+  m4.frame(30);
+  const hi4 = m4.peekBytes("hi_solo", 6).join("");
+  return { ok: magic === "SPTL" && hi === "042420" && hi3 === "042420" && hi4 === "005000", detail: `signature=${magic}, relu=${hi}, copie A corrompue -> ${hi3}, vierge -> ${hi4}` };
+});
+
+test("T19", "Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau)", () => {
+  const m = startGame({ players: 2 });
+  m.frame(100, invul);
+  m.poke("pl_wlv", 3); m.poke("pl_wlv", 3, 1);
+  m.press(0, "A"); m.press(1, "A");
+  const lag0 = m.peek("lag_count");
+  m.frameCycles.length = 0;
+  m.vblankUse.length = 0;
+  let spLineMax = 0, linesOver = 0, framesOver = 0, sprFull = 0;
+  m.poke("boss_on", 2); m.poke("boss_hp", 250); m.poke("boss_u", 176); m.poke("boss_v", 110);
+  m.frame(600, (mm, i) => {
+    invul(mm);
+    mm.poke("boss_hp", 250);
+    mm.poke("pl_u", 40); mm.poke("pl_v", 60); mm.poke("pl_u", 40, 1); mm.poke("pl_v", 190, 1);
+    for (let k = 0; k < 10; k++) if (!mm.peek("en_type", k)) {
+      mm.poke("en_type", 1 + (k % 4), k); mm.poke("en_hp", 50, k); mm.poke("en_u", 120 + (k * 13) % 100, k);
+      mm.poke("en_v", 50 + k * 15, k); mm.poke("en_st", 0, k); mm.poke("en_p0", 100, k); mm.poke("en_t", 0, k);
+      mm.poke("en_duhi", 0, k); mm.poke("en_dulo", 0, k);
+    }
+    for (let k = 0; k < 10; k++) { mm.poke("en_hp", 50, k); if (mm.peek("en_u", k) < 60) mm.poke("en_u", 200, k); }
+    for (let k = 0; k < 16; k++) if (!mm.peek("eb_on", k)) {
+      mm.poke("eb_on", 1, k); mm.poke("eb_u", 230, k); mm.poke("eb_v", 40 + k * 11, k);
+      mm.poke("eb_duhi", 0xff, k); mm.poke("eb_dulo", 0x80, k); mm.poke("eb_dvhi", 0, k); mm.poke("eb_dvlo", 0, k);
+    }
+    if (mm.peek("beam_t") < 2) { mm.poke("gauge", 64); mm.poke("beam_t", 150); }
+    const s = mm.maxSpritesPerLine();
+    spLineMax = Math.max(spLineMax, s.max); linesOver += s.over; if (s.over) framesOver++;
+    if (mm.peek("spr_left") === 0) sprFull++;
+  });
+  m.screenshot(path.join(SHOTS, "07_scene_chargee.png"));
+  const fc = m.frameCycles.slice(5);
+  const max = Math.max(...fc), avg = Math.round(fc.reduce((a, b) => a + b, 0) / fc.length);
+  const lag = (m.peek("lag_count") - lag0) & 0xff;
+  const vb = Math.max(...m.vblankUse);
+  Object.assign(metrics, { stressMaxCycles: max, stressAvgCycles: avg, stressLag: lag, spLineMax, framesOver, sprFull, stressFrames: fc.length, stressVblankMax: vb });
+  return { ok: lag === 0 && max < 29780 && vb < 2273, detail: `vblank utilise max=${vb}/2273 cycles, cycles/image max=${max} moy=${avg} (budget NTSC 29780 = ${(100 * max / 29780).toFixed(0)} %), images perdues=${lag}, sprites/ligne max=${spLineMax}, images avec >8 sprites/ligne=${framesOver}/${fc.length}, OAM saturee=${sprFull}` };
+});
+
+test("T20", "Performances : partie normale (secteur 1 complet a 2 joueurs)", () => {
+  const m = startGame({ players: 2 });
+  m.press(0, "A"); m.press(1, "A");
+  m.frame(5, invul);
+  m.frameCycles.length = 0;
+  m.vblankUse.length = 0;
+  const lag0 = m.peek("lag_count");
+  m.frame(1900, invul);
+  const fc = m.frameCycles;
+  const max = Math.max(...fc), avg = Math.round(fc.reduce((a, b) => a + b, 0) / fc.length);
+  const lag = (m.peek("lag_count") - lag0) & 0xff;
+  const vb = Math.max(...m.vblankUse);
+  Object.assign(metrics, { normalMaxCycles: max, normalAvgCycles: avg, normalLag: lag, normalVblankMax: vb });
+  return { ok: lag === 0 && vb < 2273, detail: `cycles/image max=${max} moy=${avg}, images perdues=${lag}, vblank utilise max=${vb}/2273 cycles` };
+});
+
+test("T21", "PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz)", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5, invul);
+  m.poke("region", 1);
+  const c0 = camOf(m);
+  m.frame(500, invul);
+  const d = camOf(m) - c0;
+  return { ok: d === 600, detail: `camera +${d} px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC.` };
+});
+
+test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
+  const { execSync } = require("child_process");
+  const rom = path.join(ROOT, "build", "spatial.nes");
+  const h1 = crypto.createHash("sha256").update(fs.readFileSync(rom)).digest("hex");
+  execSync("make clean >/dev/null && make >/dev/null", { cwd: ROOT });
+  const h2 = crypto.createHash("sha256").update(fs.readFileSync(rom)).digest("hex");
+  metrics.sha256 = h2;
+  metrics.romSize = fs.statSync(rom).size;
+  return { ok: h1 === h2, detail: `sha256=${h2.slice(0, 16)}...` };
+});
+
+// ---------------------------------------------------------------------------
+const pass = results.filter((r) => r.ok).length;
+console.log(`\n${pass}/${results.length} tests reussis`);
+const out = [];
+out.push("# Resultats des tests automatises (emulation)", "");
+out.push("> Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**");
+out.push("> Aucun test sur materiel reel n'a ete effectue a ce stade.", "");
+out.push(`Resultat : **${pass}/${results.length}** reussis.`, "");
+out.push("| ID | Test | Resultat | Details |", "|---|---|---|---|");
+for (const r of results) out.push(`| ${r.id} | ${r.name} | ${r.ok ? "OK" : "**ECHEC**"} | ${r.detail.replace(/\|/g, "/")} |`);
+out.push("", "## Mesures", "", "```json", JSON.stringify(metrics, null, 2), "```", "");
+fs.writeFileSync(path.join(ROOT, "docs", "RESULTATS_TESTS.md"), out.join("\n"));
+process.exit(pass === results.length ? 0 : 1);

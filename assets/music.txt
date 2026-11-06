@@ -1,0 +1,37 @@
+# Partitions originales - Projet SPATIAL (prototype Phase 1)
+# Compilees par tools/gen_assets.py vers le moteur audio du jeu.
+#
+# Syntaxe :
+#   @song <nom> tempo=<images par double-croche>
+#   P1: / P2: / TR: / NO:  (pulse 1, pulse 2, triangle, bruit+DPCM)
+#   Note : <Nom><Octave>/<duree en double-croches>   ex: A4/4, Cs5/2 (Cs = do diese)
+#   Silence : r/<duree>
+#   Batterie (canal NO) : K = grosse caisse (bruit + echantillon DPCM),
+#                         S = caisse claire, H = charleston
+#   Repetition : [ ... ]x<n>
+#   Chaque canal boucle a la fin de sa sequence.
+
+# Theme de niveau "Ascension" - La mineur, ~150 bpm
+@song stage tempo=6
+P1: A4/4 C5/2 E5/2 D5/4 C5/2 B4/2  C5/6 A4/2 F4/4 A4/4  B4/4 D5/2 G5/2 F5/4 E5/2 D5/2  E5/12 r/4
+P1: A5/4 G5/2 E5/2 C5/4 E5/4  F5/6 E5/2 C5/4 A4/4  D5/4 E5/2 F5/2 G5/4 B5/4  Gs5/8 E5/4 B4/4
+P2: [A3/1 C4/1 E4/1 C4/1]x4 [F3/1 A3/1 C4/1 A3/1]x4 [G3/1 B3/1 D4/1 B3/1]x4 [E3/1 G3/1 B3/1 G3/1]x4
+P2: [A3/1 C4/1 E4/1 C4/1]x4 [F3/1 A3/1 C4/1 A3/1]x4 [G3/1 B3/1 D4/1 B3/1]x4 [E3/1 Gs3/1 B3/1 Gs3/1]x4
+TR: [A2/2 A3/2]x4 [F2/2 F3/2]x4 [G2/2 G3/2]x4 [E2/2 E3/2]x4
+TR: [A2/2 A3/2]x4 [F2/2 F3/2]x4 [G2/2 G3/2]x4 [E2/2 E3/2]x4
+NO: [K/2 H/2 S/2 H/2 K/2 K/2 S/2 H/2]x8
+
+# Theme de boss "Sentinelle" - Re mineur, plus rapide
+@song boss tempo=5
+P1: D5/2 F5/2 A5/2 F5/2 Gs5/2 A5/2 F5/2 D5/2  As4/4 D5/2 F5/2 As5/4 A5/4
+P1: G5/2 E5/2 C5/2 E5/2 G5/2 C6/2 As5/2 G5/2  A5/6 G5/2 F5/2 E5/2 Cs5/4
+P2: [D4/1 A4/1]x8 [As3/1 F4/1]x8 [C4/1 G4/1]x8 [A3/1 E4/1]x4 [Cs4/1 E4/1]x4
+TR: [D2/1 D3/1]x8 [As1/1 As2/1]x8 [C2/1 C3/1]x8 [A1/1 A2/1]x4 [Cs2/1 Cs3/1]x4
+NO: [K/1 H/1 S/1 H/1]x16
+
+# Jingle de fin de niveau (ne boucle pas : se termine par un silence long)
+@song clear tempo=6
+P1: A4/2 C5/2 E5/2 A5/6 G5/2 A5/2 B5/2 C6/8 r/128
+P2: E4/2 A4/2 C5/2 E5/6 D5/2 E5/2 Gs5/2 A5/8 r/128
+TR: A2/2 A3/2 A2/2 A3/6 G2/2 G3/2 E3/2 A2/8 r/128
+NO: K/2 r/2 K/2 S/6 r/2 S/2 S/2 K/8 r/128
