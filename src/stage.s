@@ -288,7 +288,70 @@ build_column_h:
     iny
     cpy #26
     bne @c
-    jmp vbuf_close
+    jsr vbuf_close
+    ; tous les 4 colonnes : colonne d'attributs (7 octets, pas de 8 en VRAM)
+    ; Ecrite avec la 1re colonne du groupe : les 3 suivantes sont encore hors
+    ; champ, l'ancienne colonne recouverte (col - 64) l'est deja.
+    lda tmp0
+    and #3
+    bne @r
+    lda tmp0
+    lsr
+    lsr
+    sta tmp1
+    lda #0
+    sta ptr0+1
+    lda tmp1
+    asl
+    rol ptr0+1
+    asl
+    rol ptr0+1
+    asl
+    rol ptr0+1
+    sec
+    sbc tmp1
+    sta ptr0
+    lda ptr0+1
+    sbc #0
+    sta ptr0+1              ; groupe * 7
+    clc
+    lda ptr0
+    adc #<map_h_attr
+    sta ptr0
+    lda ptr0+1
+    adc #>map_h_attr
+    sta ptr0+1
+    lda tmp0
+    and #32
+    lsr
+    lsr
+    lsr
+    ora #$23
+    sta ptr1+1              ; $23C0 ou $27C0
+    lda tmp0
+    and #31
+    lsr
+    lsr
+    clc
+    adc #$C8                ; rangee d'attributs 1
+    sta ptr1
+    ldy #0
+@a:
+    lda #1
+    jsr vbuf_open
+    lda (ptr0),y
+    sta vbuf,x
+    inx
+    jsr vbuf_close
+    lda ptr1
+    clc
+    adc #8
+    sta ptr1
+    iny
+    cpy #7
+    bne @a
+@r:
+    rts
 
 ; -----------------------------------------------------------------------------
 ; Defilement vertical : rangee de carte tmp4 vers la rangee de table A (0-29)

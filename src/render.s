@@ -76,6 +76,69 @@ draw_obj:
     sbc #0
     sta d_yhi
 @go:
+    ; Chemin rapide 16x16 entierement visible (cas le plus frequent) :
+    ; 4 entrees ecrites d'un bloc, sans boucle ni test par tuile.
+    lda d_size
+    cmp #2
+    bne @gen
+    lda spr_left
+    cmp #4
+    bcc @gen
+    lda oam_idx             ; les 4 entrees ne doivent pas reboucler en fin
+    cmp #$F1                ; d'OAM (l'ecriture deborderait sur $0300)
+    bcs @gen
+    lda d_yhi
+    ora d_xhi
+    bne @gen
+    lda d_xlo
+    cmp #248
+    bcs @gen
+    lda d_ylo
+    cmp #32
+    bcc @gen
+    cmp #232
+    bcs @gen
+    ldy oam_idx
+    sec
+    sbc #1                  ; OAM : y - 1
+    sta $0200,y
+    sta $0204,y
+    clc
+    adc #8
+    sta $0208,y
+    sta $020C,y
+    lda d_tile              ; tuiles < $FC : pas de retenue
+    sta $0201,y
+    clc
+    adc #1
+    sta $0205,y
+    adc #1
+    sta $0209,y
+    adc #1
+    sta $020D,y
+    lda d_attr
+    sta $0202,y
+    sta $0206,y
+    sta $020A,y
+    sta $020E,y
+    lda d_xlo               ; < 248 : pas de retenue
+    sta $0203,y
+    sta $020B,y
+    clc
+    adc #8
+    sta $0207,y
+    sta $020F,y
+    tya
+    clc
+    adc #16
+    sta oam_idx
+    lda spr_left
+    sec
+    sbc #4
+    sta spr_left
+    ldx dsave_x
+    rts
+@gen:
     lda d_tile
     sta tmp6
     lda d_size
@@ -396,6 +459,7 @@ enemy_tiles:
     .byte S_FIGHTER_H, S_FIGHTER_V
     .byte S_TURRET_H, S_TURRET_V
     .byte S_KAMIKAZE_H, S_KAMIKAZE_V
+    .byte S_POD_H, S_POD_V
 
 draw_fx:
     lda #2

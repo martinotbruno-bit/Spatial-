@@ -3,10 +3,10 @@
 ; Positions en virgule fixe 8.8, vitesses signees 8.8.
 ; =============================================================================
 
-;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE
-en_hp_tbl:    .byte 0,   1,      4,       6,       2
-en_score_tbl: .byte 0,   1,      3,       5,       2      ; centaines de points
-en_gauge_tbl: .byte 0,   2,      3,       4,       2
+;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE CONTENEUR
+en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3
+en_score_tbl: .byte 0,   1,      3,       5,       2,       2  ; centaines de points
+en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1
 
 ; Apparition : tmp2 = type, tmp3 = v, tmp4 = parametre
 enemy_spawn:
@@ -44,9 +44,9 @@ enemy_spawn:
     sta en_duhi,x
     rts
 
-;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE
-en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00
-en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE   ; -1.25 -3 -1 -2
+;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE CONTENEUR
+en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00
+en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF ; -1.25 -3 -1 -2 -1
 
 enemies_update:
     ldx #MAX_EN-1
@@ -72,7 +72,7 @@ enemies_update:
     rts
 
 en_ai_tbl:
-    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1
+    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1
 
 ; Integration de la position, puis retour a la boucle. Detruit l'ennemi s'il
 ; sort du champ (debordement 8 bits).
@@ -186,6 +186,16 @@ ai_turret:
     bcs @mv
     jsr fire_aimed
 @mv:
+    jmp en_move
+
+; --- CONTENEUR : ancre sur la coque, suit le decor, ne tire pas ---
+ai_pod:
+    lda #$FF
+    ldy scroll_on
+    bne @s
+    lda #0
+@s:
+    sta en_duhi,x
     jmp en_move
 
 ; --- KAMIKAZE : fonce en se recalant lateralement sur le joueur le plus proche
@@ -678,7 +688,13 @@ enemy_damage:
     jsr fx_spawn
     lda en_type,x
     cmp #EN_FIGHTER
+    beq @drop
+    cmp #EN_POD
     bne @nodrop
+    lda kills               ; un conteneur sur deux contient une capsule
+    and #1
+    bne @nodrop
+@drop:
     jsr item_spawn
 @nodrop:
     lda #0

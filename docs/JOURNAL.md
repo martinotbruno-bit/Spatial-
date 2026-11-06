@@ -80,12 +80,28 @@
   (retour à 1237 cycles max).
 - 28/28 tests en émulation. Stress : 94 % CPU, 0 image perdue.
 
+## 2026-11-06 — Phase 2 : décor définitif du secteur 1
+
+- Attributs de couleur transmis au fil du défilement horizontal :
+  coque grise, sections rouillées et conduites orange, hublots et pylônes
+  d'énergie bleus (palettes 0/2/3). Test T29 (1190 octets d'attributs
+  vérifiés, HUD intact).
+- Décor destructible : conteneurs de fret ancrés sur la coque (type
+  ennemi n°5, 3 PV, une capsule sur deux). Arbitrage : sprites plutôt que
+  tuiles de décor destructibles, pour ne pas ajouter un test
+  projectile/carte coûteux alors que le budget CPU de stress est serré.
+  Test T30.
+- Banc de test : lecture de la VRAM brute (jsnes « déplie » les attributs
+  dans ses structures internes, ce qui faussait la vérification).
+- Optimisation : chemin rapide 16×16 (stress 97 % → 90 %) ; un premier
+  essai débordait de l'OAM sur le tampon VRAM, détecté par les tests.
+- 30/30 tests en émulation.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
    DPCM/manettes, sauvegarde après coupure).
-2. Secteur 1 complet : décor définitif (attributs par paire de colonnes,
-   2-3 palettes), décor interactif/destructible, checkpoint.
+2. Secteur 1 : ~~décor définitif multi-palettes, décor destructible~~ (faits) ; checkpoint.
 3. ~~Capacités propres à chaque vaisseau~~ ~~deuxième pouvoir coopératif~~ (faits).
 4. ~~Séquence narrative d'introduction, écran de fin de secteur avec bilan~~ (faits).
 5. Moteur audio : enveloppes par instrument, musique de menu dédiée.

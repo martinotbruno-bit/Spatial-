@@ -218,7 +218,7 @@ test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le n
   return { ok: bad === 0 && hudOk && camOf(m) === 1536, detail: `${checks} tuiles verifiees, ${bad} erreurs, HUD intact=${hudOk}, camera=${camOf(m)}` };
 });
 
-test("T12", "Ennemis et projectiles : apparition des 4 familles, tirs ennemis", () => {
+test("T12", "Ennemis et projectiles : 4 familles + conteneurs destructibles, tirs ennemis", () => {
   const m = startGame({ players: 2 });
   const seen = new Set();
   let maxEn = 0, maxEb = 0;
@@ -230,7 +230,7 @@ test("T12", "Ennemis et projectiles : apparition des 4 familles, tirs ennemis", 
     maxEb = Math.max(maxEb, countOn(mm, "eb_on", 16));
   });
   metrics.maxEnemies = maxEn; metrics.maxEnemyBullets = maxEb;
-  return { ok: seen.size === 4 && maxEb > 0, detail: `familles vues=[${[...seen].sort().join(",")}], ennemis simultanes max=${maxEn}, projectiles ennemis max=${maxEb}` };
+  return { ok: seen.size === 5 && maxEb > 0, detail: `familles vues=[${[...seen].sort().join(",")}], ennemis simultanes max=${maxEn}, projectiles ennemis max=${maxEb}` };
 });
 
 test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () => {
@@ -542,6 +542,51 @@ test("T28", "Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vi
   m.screenshot(path.join(SHOTS, "10_bilan.png"));
   const s1 = m.peekBytes("score", 6).join("");
   return { ok: cleared && gone && txt === "CIBLES 42" && s1 === "013000" && s0 === "010000", detail: `etat bilan=${cleared}, vaisseaux sortis=${gone}, texte="${txt}", score ${s0} -> ${s1} (+3 vies x 1000)` };
+});
+
+test("T29", "Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1", () => {
+  const m = startGame({ players: 2 });
+  const attr = m.s("map_h_attr");
+  let bad = 0, checks = 0;
+  const pals = new Set();
+  for (let k = 0; k < 19; k++) {
+    m.frame(97, invul);
+    const cam = camOf(m);
+    // groupes de 4 colonnes entierement ou partiellement visibles
+    for (let g = Math.floor(cam / 32); g <= Math.floor((cam + 255) / 32) && g < 64; g++) {
+      const nc = (g * 4) & 63, base = (nc & 32 ? 0x27c0 : 0x23c0) + ((nc & 31) >> 2);
+      for (let r = 1; r < 8; r++) {
+        checks++;
+        const want = m.romByte(attr + g * 7 + r - 1), got = m.nt(base + 8 * r);
+        if (want !== got) bad++;
+        for (let q = 0; q < 4; q++) pals.add((want >> (2 * q)) & 3);
+      }
+    }
+    if (k === 7) m.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png"));
+  }
+  // la rangee d'attributs du HUD n'est jamais modifiee
+  let hud = true;
+  for (let i = 0; i < 8; i++) if (m.nt(0x23c0 + i) !== 0x55) hud = false;
+  return { ok: bad === 0 && hud && pals.size === 3, detail: `${checks} octets d'attributs verifies, ${bad} erreurs, palettes de decor utilisees=[${[...pals].sort()}], HUD intact=${hud}` };
+});
+
+test("T30", "Decor destructible : conteneur ancre au decor, detruit en 3 impacts, butin", () => {
+  const m = startGame({ players: 1 });
+  m.frame(20, invul);
+  for (let i = 0; i < 10; i++) m.poke("en_type", 0, i);
+  m.poke("en_type", 5, 0); m.poke("en_hp", 3, 0); m.poke("en_u", 200, 0); m.poke("en_v", m.peek("pl_v"), 0);
+  m.poke("en_duhi", 0xff, 0); m.poke("en_dulo", 0, 0); m.poke("en_dvhi", 0, 0); m.poke("en_dvlo", 0, 0); m.poke("kills", 0);
+  m.frame(10, invul);
+  const moved = 200 - m.peek("en_u", 0);            // suit le decor : 1 px/image
+  const hp0 = m.peek("en_hp", 0);
+  const s0 = m.peekBytes("score", 6).join("");
+  m.press(0, "A");
+  let destroyed = -1;
+  m.frame(80, (mm, i) => { invul(mm); if (destroyed < 0 && mm.peek("en_type", 0) === 0) destroyed = i; });
+  m.releaseAll();
+  const item = m.peekBytes("it_on", 3).some((x) => x);
+  const s1 = m.peekBytes("score", 6).join("");
+  return { ok: moved === 10 && hp0 === 3 && destroyed > 0 && item && s1 > s0, detail: `defilement suivi=${moved}px/10 img, detruit apres ${destroyed} images de tir, capsule=${item}, score ${s0}->${s1}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

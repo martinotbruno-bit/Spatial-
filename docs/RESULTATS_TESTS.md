@@ -3,7 +3,7 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **28/28** reussis.
+Resultat : **30/30** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
@@ -18,15 +18,15 @@ Resultat : **28/28** reussis.
 | T09 | Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie | OK | EGIDE en vol=1 |
 | T10 | Scrolling horizontal : contenu VRAM conforme a la carte sur tout le niveau | OK | 16224 tuiles verifiees, 0 erreurs, camera finale=1760 |
 | T11 | Scrolling vertical : contenu VRAM conforme a la carte sur tout le niveau | OK | 13312 tuiles verifiees, 0 erreurs, HUD intact=true, camera=1536 |
-| T12 | Ennemis et projectiles : apparition des 4 familles, tirs ennemis | OK | familles vues=[1,2,3,4], ennemis simultanes max=10, projectiles ennemis max=9 |
+| T12 | Ennemis et projectiles : 4 familles + conteneurs destructibles, tirs ennemis | OK | familles vues=[1,2,3,4,5], ennemis simultanes max=10, projectiles ennemis max=7 |
 | T13 | Mini-boss : apparition, 2 phases, destruction, niveau libere | OK | apparu=true, phase2=true, projectiles max=16, etat apres destruction=2, enchainement secteur 2=true |
 | T14 | Perte de vie, reapparition invulnerable, game over et retour au titre | OK | vies initiales=3, pertes=4, game over=true, retour titre=true |
 | T15 | Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> niveau -1 | OK | niveaux 1->2->3, apres perte=2, projectiles max (niv.3)=16 |
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=23 P2=90 TRI=40 BRUIT=39, declenchements DPCM=15, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 7 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1237/2273 cycles, cycles/image max=28129 moy=24766 (budget NTSC 29780 = 94 %), images perdues=0, sprites/ligne max=11, images avec >8 sprites/ligne=295/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19974 moy=14019, images perdues=0, vblank utilise max=1237/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=26756 moy=23226 (budget NTSC 29780 = 90 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19076 moy=13518, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -34,7 +34,9 @@ Resultat : **28/28** reussis.
 | T26 | Sequence narrative : texte affiche lettre par lettre, START pour passer | OK | etat=5, 1re ligne="AN 2291 - BRAS D'ORION", musique=1, apres START etat=1 |
 | T27 | Attaque synchronisee : appuis sur A a moins de 8 images -> salve puissante | OK | salve=6 projectiles, recharge=59, appuis trop espaces -> 0, ennemi 8 PV detruit=true |
 | T28 | Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vies | OK | etat bilan=true, vaisseaux sortis=true, texte="CIBLES 42", score 010000 -> 013000 (+3 vies x 1000) |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=9452b680698db242... |
+| T29 | Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1 | OK | 1190 octets d'attributs verifies, 0 erreurs, palettes de decor utilisees=[0,2,3], HUD intact=true |
+| T30 | Decor destructible : conteneur ancre au decor, detruit en 3 impacts, butin | OK | defilement suivi=10px/10 img, detruit apres 28 images de tir, capsule=true, score 000000->000200 |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=9e69095a843f7b9e... |
 
 ## Mesures
 
@@ -42,20 +44,20 @@ Resultat : **28/28** reussis.
 {
   "cam_h_end": 1760,
   "maxEnemies": 10,
-  "maxEnemyBullets": 9,
-  "stressMaxCycles": 28129,
-  "stressAvgCycles": 24766,
+  "maxEnemyBullets": 7,
+  "stressMaxCycles": 26756,
+  "stressAvgCycles": 23226,
   "stressLag": 0,
-  "spLineMax": 11,
-  "framesOver": 295,
+  "spLineMax": 10,
+  "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
-  "stressVblankMax": 1237,
-  "normalMaxCycles": 19974,
-  "normalAvgCycles": 14019,
+  "stressVblankMax": 1530,
+  "normalMaxCycles": 19076,
+  "normalAvgCycles": 13518,
   "normalLag": 0,
-  "normalVblankMax": 1237,
-  "sha256": "9452b680698db242afa346bb0b5df9be973258a374b4eb87d0fbbfdf1e73a7a4",
+  "normalVblankMax": 1530,
+  "sha256": "9e69095a843f7b9e89c2ed098601f9eca5af3ff8814842fb0bd74cecc15f0d94",
   "romSize": 98320
 }
 ```

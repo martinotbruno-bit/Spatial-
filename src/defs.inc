@@ -95,6 +95,7 @@ EN_DRONE    = 1
 EN_FIGHTER  = 2
 EN_TURRET   = 3
 EN_KAMIKAZE = 4
+EN_POD      = 5     ; conteneur de fret : decor destructible
 EN_BOSS     = 15    ; marqueur de script uniquement
 
 ; --- Regles --------------------------------------------------------------------

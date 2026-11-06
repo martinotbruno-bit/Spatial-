@@ -44,10 +44,10 @@ Légende :
 | 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | ✅ ÉMU | Faisceau, Transfert d'énergie, Salve synchronisée (T27), Nova solo |
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
 | 4 | Armement riche et évolutif | 🟡 | 2 × 3 niveaux (frontal, concentré, éventail, latéral, diagonal) ; bombes/armes défensives à produire |
-| 5.1 | Grande variété d'ennemis | 🟡 | 4 familles sur 8 demandées |
+| 5.1 | Grande variété d'ennemis | 🟡 | 4 familles + conteneurs (structures destructibles du décor) ; 8 familles visées |
 | 5.2 | Boss multi-phases | 🟡 | 1 mini-boss 2 phases ; parties destructibles à produire |
 | 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Séquences narratives (intro, transition, épilogue) avec musique dédiée (T26) ; 2 fins et encyclopédie à produire |
-| 7 | Direction artistique | 🟡 | Palettes par faction/secteur, sprites originaux ; décors de prototype |
+| 7 | Direction artistique | 🟡 | Secteur 1 en 3 palettes de décor par blocs 16×16 (T29), décor destructible (T30) ; secteur 2 encore en palette unique |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM |
 | 9.1 | Difficultés sélectionnables, mode expert | ⬜ | Bit réservé en sauvegarde |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 28/28 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 30/30 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

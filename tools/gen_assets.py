@@ -195,7 +195,7 @@ def build_chr():
     big = [("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
            ("fighter", 0x98, True), ("turret", 0xA0, True), ("kamikaze", 0xA8, True),
            ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False),
-           ("boss", 0xC0, True)]
+           ("boss", 0xC0, True), ("pod", 0xE0, False)]
     for name, base, orient in big:
         img = art[name]
         ts = split_tiles(img)
@@ -264,6 +264,39 @@ def gen_map_h(c):
                     col[y] = c["T_GIRDER"]
         cols.append(col)
     return cols
+
+
+def attrs_h(c, cols):
+    """Attributs du secteur 1 : une palette par bloc 16x16.
+    Palette 0 = coque grise, 2 = sections rouillees et conduites (orange),
+    3 = eclairages et pylones (bleu). Priorite 3 > 2 > 0 dans un bloc.
+    Sortie : 7 octets (rangees d'attributs 1-7) par groupe de 4 colonnes."""
+    blue = {c["T_LIGHT"], c["T_PYLON"], c["T_GIRDER"]}
+    hullish = {c["T_HULL"], c["T_HULL_EDGE_DOWN"], c["T_HULL_EDGE_UP"]}
+
+    def tile_pal(x, y):
+        t = cols[x][y]
+        if t in blue:
+            return 3
+        if t == c["T_PIPE"]:
+            return 2
+        if t in hullish and 48 <= x < 200 and ((x - 48) // 16) % 3 == 2:
+            return 2
+        return 0
+
+    def cell(x, q):
+        if q > 12:
+            return 0
+        return max(tile_pal(x + dx, 2 * q + dy) for dx in (0, 1) for dy in (0, 1))
+
+    out = []
+    for a in range(len(cols) // 4):
+        for r in range(1, 8):
+            q0, q1 = 2 * r - 2, 2 * r - 1
+            x0 = 4 * a
+            b = cell(x0, q0) | (cell(x0 + 2, q0) << 2) | (cell(x0, q1) << 4) | (cell(x0 + 2, q1) << 6)
+            out.append(b)
+    return out
 
 
 def gen_map_v(c):
@@ -536,6 +569,7 @@ def main():
     # Cartes
     cols = gen_map_h(consts)
     tpl_h, ids_h = dedupe(cols)
+    attr_h = attrs_h(consts, cols)
     rows = gen_map_v(consts)
     tpl_v, ids_v = dedupe(rows)
     out.append(f"MAP_H_LEN = {len(ids_h)}")
@@ -543,6 +577,7 @@ def main():
     out.append(f"; gabarits uniques: H={len(tpl_h)} (x26 octets)  V={len(tpl_v)} (x32 octets)")
     out.append('.segment "DATA0"')
     out.append(ca65_bytes("map_h_ids", ids_h))
+    out.append(ca65_bytes("map_h_attr", attr_h, 7))
     out.append("map_h_tpl_lo:\n    .lobytes " + ",".join(f"map_h_t{i}" for i in range(len(tpl_h))))
     out.append("map_h_tpl_hi:\n    .hibytes " + ",".join(f"map_h_t{i}" for i in range(len(tpl_h))))
     for i, t in enumerate(tpl_h):

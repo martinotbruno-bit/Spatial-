@@ -17,10 +17,10 @@ un émulateur de référence (Mesen) avant la Phase 3.
 
 | Poste | Budget | Mesuré (pire cas) | Marge |
 |---|---|---|---|
-| Écritures PPU dans le NMI (DMA + tampon VRAM) | ≤ 1 800 cycles | 1 237 | 31 % |
-| Tampon VRAM par image | ≤ 96 octets | 29 (colonne) + 39 (HUD) + 4 (palette) + 1 = 73 | 24 % |
-| CPU par image, partie normale | ≤ 70 % (20 800) | 19 800 (66 %), moyenne 13 731 | ✔ |
-| CPU par image, scène de stress | ≤ 100 % (29 780) | 28 012 (94 %), moyenne 24 456 | **6 % — à surveiller** |
+| Écritures PPU dans le NMI (DMA + tampon VRAM) | ≤ 1 800 cycles | 1 530 (colonne + 7 attributs) | 15 % |
+| Tampon VRAM par image | ≤ 96 octets | 29 (colonne) + 28 (attributs) + 4 (palette) + 1 = 62 ; le HUD (39) attend une image sans décor | 35 % |
+| CPU par image, partie normale | ≤ 70 % (20 800) | 19 076 (64 %), moyenne 13 518 | ✔ |
+| CPU par image, scène de stress | ≤ 100 % (29 780) | 26 756 (90 %), moyenne 23 226 | 10 % — à surveiller |
 | Ennemis actifs | 10 | 10 | — |
 | Projectiles ennemis | 16 | 16 | — |
 | Projectiles joueurs | 16 (2 × 8 en moyenne) | 16 | — |
@@ -44,7 +44,11 @@ sur 600) :
    alternées (sans traversée possible : 14 px entre deux tests < fenêtre de
    18 px) ;
 3. HUD rafraîchi au plus une image sur quatre ;
-4. faisceau : ennemis et projectiles testés une image sur deux.
+4. faisceau : ennemis et projectiles testés une image sur deux ;
+5. (Phase 2) chemin rapide déroulé pour les objets 16×16 entièrement
+   visibles : 97 % → 90 % en stress. Il n'est pris que si les 4 entrées
+   ne rebouclent pas en fin d'OAM (sinon débordement sur `$0300`, défaut
+   détecté par les tests T10/T11/T29 et corrigé).
 
 ## Points de vigilance
 

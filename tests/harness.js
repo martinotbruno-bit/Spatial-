@@ -86,11 +86,9 @@ class Machine {
   tap(pad, btn, hold = 2, after = 4) { this.press(pad, btn); this.frame(hold); this.release(pad, btn); this.frame(after); }
   // VRAM : lecture d'une case de table de noms en tenant compte du miroir
   nt(addr) {
+    // VRAM brute (octets tels qu'ecrits par le jeu), miroir de la carte applique
     const ppu = this.nes.ppu;
-    const q = ((addr - 0x2000) >> 10) & 3;
-    const t = ppu.nameTable[ppu.ntable1[q]];
-    const off = addr & 0x3ff;
-    return off < 0x3c0 ? t.tile[off] : t.attrib[off - 0x3c0];
+    return ppu.vramMem[ppu.vramMirrorTable[addr]];
   }
   romByte(cpuAddr) { return this.nes.mmap.load(cpuAddr); }
   oam() { return this.nes.ppu.spriteMem.slice(0, 256); }

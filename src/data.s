@@ -6,8 +6,8 @@
 pal_title:
     .byte $0F, $30, $21, $11,  $0F, $30, $21, $16,  $0F, $30, $21, $11,  $0F, $30, $21, $11
     .byte $0F, $02, $21, $30,  $0F, $06, $27, $38,  $0F, $04, $14, $2A,  $0F, $30, $27, $16
-pal_stage_h:   ; Secteur 1 : station orbitale (metal froid)
-    .byte $0F, $00, $10, $3C,  $0F, $30, $21, $16,  $0F, $00, $10, $3C,  $0F, $00, $10, $3C
+pal_stage_h:   ; Secteur 1 : station orbitale - 0 coque, 1 HUD, 2 rouille/conduites, 3 energie
+    .byte $0F, $00, $10, $3C,  $0F, $30, $21, $16,  $0F, $07, $17, $27,  $0F, $01, $11, $31
     .byte $0F, $02, $21, $30,  $0F, $06, $27, $38,  $0F, $04, $14, $2A,  $0F, $30, $27, $16
 pal_stage_v:   ; Secteur 2 : surface planetaire (ocre)
     .byte $0F, $08, $18, $38,  $0F, $30, $21, $16,  $0F, $08, $18, $38,  $0F, $08, $18, $38
@@ -21,6 +21,7 @@ D = EN_DRONE
 F = EN_FIGHTER
 T = EN_TURRET
 K = EN_KAMIKAZE
+P = EN_POD
 
 ; --- Secteur 1 : horizontal (v = y ecran 40-208), fin a 220 ---
 script_h:
@@ -38,6 +39,8 @@ script_h:
     SPAWN 44, F, 150, 170
     SPAWN 52, K,  60,  0
     SPAWN 54, K, 180,  0
+    SPAWN 56, P, 36,  0
+    SPAWN 58, P, 200,  0
     SPAWN 60, T,  48,  0
     SPAWN 62, T, 192,  0
     SPAWN 66, D, 110,  0
@@ -46,17 +49,21 @@ script_h:
     SPAWN 69, D, 110, 48
     SPAWN 76, F,  60, 200
     SPAWN 76, F, 170, 200
+    SPAWN 80, P, 36,  0
     SPAWN 84, T,  48,  0
     SPAWN 86, T, 192,  0
     SPAWN 90, K, 120,  0
     SPAWN 92, K,  80,  0
     SPAWN 94, K, 160,  0
+    SPAWN 96, P, 200,  0
     SPAWN 100, D, 60,  0
     SPAWN 100, D, 180, 32
     SPAWN 102, D, 60,  8
     SPAWN 102, D, 180, 40
     SPAWN 104, D, 60, 16
     SPAWN 104, D, 180, 48
+    SPAWN 108, P, 36,  0
+    SPAWN 110, P, 200,  0
     SPAWN 112, F, 120, 180
     SPAWN 116, T,  48,  0
     SPAWN 116, T, 192,  0
@@ -65,15 +72,19 @@ script_h:
     SPAWN 132, K,  60,  0
     SPAWN 133, K, 120,  0
     SPAWN 134, K, 180,  0
+    SPAWN 138, P, 36,  0
     SPAWN 144, D, 120,  0
     SPAWN 145, D, 120, 12
     SPAWN 146, D, 120, 24
     SPAWN 147, D, 120, 36
     SPAWN 148, D, 120, 48
+    SPAWN 150, P, 200,  0
     SPAWN 156, T,  48,  0
     SPAWN 158, T, 192,  0
     SPAWN 160, F,  90, 190
     SPAWN 162, F, 150, 190
+    SPAWN 166, P, 36,  0
+    SPAWN 168, P, 200,  0
     SPAWN 172, K,  50,  0
     SPAWN 172, K, 190,  0
     SPAWN 174, K, 120,  0

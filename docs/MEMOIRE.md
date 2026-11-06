@@ -13,7 +13,7 @@ RESULTATS_TESTS.md).
 | `$0300-$07FF` | Variables (`BSS`) : tampon VRAM, pools d'entités, audio, partie | 646 / 1280 octets |
 | `$5FF0-$5FF1` | Marqueurs de profilage (non décodés par le MMC3) | — |
 | `$6000-$7FFF` | PRG-RAM sur pile (sauvegarde) | 64 / 8192 octets |
-| `$8000-$9FFF` | Banc R6 = PRG 0 : cartes des secteurs | 6140 / 8192 octets |
+| `$8000-$9FFF` | Banc R6 = PRG 0 : cartes et attributs des secteurs | 6588 / 8192 octets |
 | `$A000-$BFFF` | Banc R7 = PRG 1 : musique, SFX, tables de périodes, directions, sinus | 2873 / 8192 octets |
 | `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 6064 / 8192 octets |
 | `$E000-$FFFF` | PRG 7 fixe : démarrage, NMI, IRQ, audio, sauvegarde, titre, HUD, palettes/scripts, vecteurs | 3558 / 8192 octets |
