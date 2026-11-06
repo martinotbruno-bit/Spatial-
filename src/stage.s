@@ -9,6 +9,7 @@
 game_start:
     ldx #5
     lda #0
+    sta ext_done
 @sc:
     sta score,x
     dex
@@ -268,7 +269,7 @@ set_full_lives:
 
 ; Tables de difficulte :        RECRUE PILOTE VETERAN EXPERT
 ; (revues a la baisse apres l'allongement des secteurs : voir EQUILIBRAGE.md)
-diff_lives_solo: .byte          7,     5,     3,      2
+diff_lives_solo: .byte          9,     7,     4,      2
 diff_lives_coop: .byte          9,     7,     5,      3
 diff_aim:        .byte          0,     0,     16,     16   ; vitesse des tirs vises
 diff_tmask:      .byte          127,   127,   63,     31   ; periode des tourelles
@@ -1200,6 +1201,7 @@ continue_game:
     dec continues
     ldx #5
     lda #0
+    sta ext_done
 @s:
     sta score,x             ; le score repart de zero (record deja enregistre)
     dex

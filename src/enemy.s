@@ -884,6 +884,27 @@ add_score:
     sta score,y
     lda #1
     sta hud_dirty
+    ; vie bonus tous les 20 000 points (max 9 vies)
+    lda score
+    asl
+    sta ext_t
+    asl
+    asl
+    clc
+    adc ext_t
+    adc score+1             ; dizaines de milliers (0-99)
+    lsr                     ; / 2 -> paliers de 20 000
+    cmp ext_done
+    beq @r
+    bcc @r
+    sta ext_done
+    lda lives
+    cmp #9
+    bcs @r
+    inc lives
+    lda #SFX_POWERUP
+    jmp sfx_play
+@r:
     rts
 @max:
     ldy #5

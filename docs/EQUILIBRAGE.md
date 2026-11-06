@@ -20,7 +20,8 @@ sans changer la réserve de vies, la difficulté a été revue à la baisse :
 
 | Paramètre | RECRUE | PILOTE | VÉTÉRAN | EXPERT* |
 |---|---|---|---|---|
-| Vies solo / coop | 7 / 9 (avant 5 / 7) | 5 / 7 (avant 3 / 5) | 3 / 5 (avant 2 / 4) | 2 / 3 |
+| Vies solo / coop | 9 / 9 (avant 5 / 7) | 7 / 7 (avant 3 / 5) | 4 / 5 (avant 2 / 4) | 2 / 3 |
+| Vie bonus tous les 20 000 points (max 9) | oui | oui | oui | oui |
 | Vie bonus au relais (max 9) | oui | oui | oui | non |
 | Tirs visés | lents | **lents** (avant rapides) | rapides | rapides |
 | Tourelles | 1 tir / 128 img | **1 / 128** (avant 64) | 1 / 64 | 1 / 32 |

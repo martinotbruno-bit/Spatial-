@@ -323,7 +323,7 @@ test("T14", "Perte de vie, reapparition invulnerable, game over et retour au tit
   m.frame(260);
   const cont = m.peek("state") === ST.CONT;
   m.frame(620);                                   // compte a rebours ecoule sans START
-  return { ok: lives0 === 5 && deaths === 6 && over && cont && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, ecran CONTINUER=${cont}, retour titre=${m.peek("state") === 0}` };
+  return { ok: lives0 === 7 && deaths === 8 && over && cont && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, ecran CONTINUER=${cont}, retour titre=${m.peek("state") === 0}` };
 });
 
 test("T15", "Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> niveau -1", () => {
@@ -653,7 +653,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
     m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(2);
     out.push([m.peek("diff"), m.peek("lives"), m.peek("aim_speed"), m.peek("turret_mask"), m.peek("boss_hp0")]);
   }
-  const ok1 = JSON.stringify(out) === JSON.stringify([[0, 7, 0, 127, 150], [1, 5, 0, 127, 200], [2, 3, 16, 63, 250]]);
+  const ok1 = JSON.stringify(out) === JSON.stringify([[0, 9, 0, 127, 150], [1, 7, 0, 127, 200], [2, 4, 16, 63, 250]]);
   // EXPERT indisponible sans deblocage : DROITE depuis VETERAN revient a RECRUE
   const m = new Machine();
   m.frame(40); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT"); m.tap(0, "RIGHT");
@@ -862,6 +862,33 @@ test("T39", "Bombes (SELECT) : munitions, projectiles effaces, degats, invulnera
   grab(m, 1, 192);
   return { ok: b0 === 2 && b1 === 1 && inv > 30 && en === 0 && eb === 0 && hud === "S1*2 S1*1" && none && m.peek("pl_bombs", 1) === 1,
     detail: `bombes ${b0}->${b1}, invulnerable=${inv} img, ennemis restants=${en}, projectiles=${eb}, HUD="${hud}", sans munition inactif=${none}, capsule B -> ${m.peek("pl_bombs", 1)}` };
+});
+
+test("T40", "Vie bonus tous les 20 000 points (max 9)", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("lives", 5);
+  [0, 1, 9, 9, 0, 0].forEach((v, i) => m.poke("score", v, i));   // 019 900
+  m.poke("ext_done", 0);
+  // +200 points via un drone detruit : passage a 020 000 -> +1 vie
+  m.poke("en_type", 1, 0); m.poke("en_hp", 1, 0); m.poke("en_u", 150, 0); m.poke("en_v", 100, 0);
+  m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0);
+  m.frame(1);
+  m.poke("en_hp", 0, 0);
+  // appel direct : 100 points
+  const before = m.peek("lives");
+  m.poke("eb_on", 0, 0);
+  m.poke("pb_on", 1, 0); m.poke("pb_kind", 0, 0); m.poke("pb_u", 150, 0); m.poke("pb_v", 104, 0); m.poke("pb_du", 0, 0); m.poke("pb_dv", 0, 0);
+  m.poke("en_hp", 1, 0);
+  m.frame(3, invul);
+  const s1 = m.peekBytes("score", 6).join(""), l1 = m.peek("lives");
+  // 9 vies maximum
+  m.poke("lives", 9); [0, 3, 9, 9, 0, 0].forEach((v, i) => m.poke("score", v, i));
+  m.poke("en_type", 1, 0); m.poke("en_hp", 1, 0); m.poke("en_u", 150, 0); m.poke("en_v", 100, 0);
+  m.poke("pb_on", 1, 0); m.poke("pb_u", 150, 0); m.poke("pb_v", 104, 0);
+  m.frame(3, invul);
+  return { ok: s1 === "020000" && l1 === before + 1 && m.peek("lives") === 9 && m.peek("ext_done") === 2,
+    detail: `score ${s1} : vies ${before} -> ${l1} ; plafond : ${m.peek("lives")} vies, palier=${m.peek("ext_done")}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
