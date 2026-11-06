@@ -158,6 +158,22 @@
   toits saturés nuisaient à la lisibilité. Test T36 (vblank V : 1341 cycles).
 - 36/36 tests en émulation.
 
+## 2026-11-06 — Arsenal enrichi
+
+- Inversion des boutons à la demande : B = tir, A = capacité / pouvoir
+  (affectation centralisée `BTN_FIRE` / `BTN_POWER` / `BTN_BOMB`).
+- Laser perçant, missiles guidés (cible choisie à la salve, recalage
+  latéral amorti), bombes sur SELECT, capsules changeantes P/L/M/B, HUD
+  par joueur (type, niveau, bombes). Tests T37-T39.
+- Défaut trouvé par T38 : les missiles dépassaient leur cible (correction
+  trop lente, sans amortissement) → recalage toutes les 2 images avec
+  retour à 0 près de la cible.
+- Le flash blanc plein écran de la bombe masquait le HUD et posait un
+  risque de photosensibilité → gris foncé pendant 6 images.
+- Banc `$C000` à 94 % : le boss a été déplacé en `$E000`. **L'extension de
+  la ROM devient nécessaire avant le secteur 5.**
+- 39/39 tests ; stress avec missiles : 96 % CPU, 0 image perdue.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

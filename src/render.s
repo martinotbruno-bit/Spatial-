@@ -415,7 +415,16 @@ draw_pbullets:
     bcc @own
     lda #3                  ; salve synchronisee : palette blanc/orange
     sta d_attr
+    bne @drw
 @own:
+    lda pb_kind,x           ; laser / missile : tuile propre au type
+    beq @drw
+    asl
+    ora orient
+    tay
+    lda kind_tiles-2,y
+    sta d_tile
+@drw:
     jsr draw_obj
 @n:
     dex
@@ -423,6 +432,7 @@ draw_pbullets:
     rts
 
 shot_tiles: .byte S_SHOT_A_H, S_SHOT_A_V, S_SHOT_B_H, S_SHOT_B_V, S_BEAM_H, S_BEAM_H
+kind_tiles: .byte S_LASER_H, S_LASER_V, S_MISSILE_H, S_MISSILE_V
 
 draw_enemies:
     lda #2
@@ -491,27 +501,36 @@ draw_fx:
 
 fx_tiles: .byte S_EXPLO1_H, S_EXPLO2_H, S_EXPLO3_H, S_EXPLO3_H
 
+; Capsules : le type change toutes les 64 images (P, L, M, B) ; clignote
+; pendant les 16 dernieres images de chaque type pour annoncer le changement.
 draw_items:
     lda #1
     sta d_size
-    lda #1
-    sta d_attr
-    lda #S_CAPSULE_H
-    sta d_tile
     ldx #MAX_IT-1
 @l:
     lda it_on,x
     beq @n
+    lda it_t,x
+    and #$30
+    cmp #$30
+    bne @vis
     lda frame
-    and #8
-    beq @c
-    lda #0
+    and #4
+    bne @n
+@vis:
+    lda it_t,x
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    and #3
+    tay
+    lda capsule_tiles,y
+    sta d_tile
+    lda capsule_pals,y
     sta d_attr
-    beq @d
-@c:
-    lda #1
-    sta d_attr
-@d:
     lda it_u,x
     sta d_u
     lda it_v,x
@@ -521,6 +540,9 @@ draw_items:
     dex
     bpl @l
     rts
+
+capsule_tiles: .byte S_CAPSULE_H, S_CAPSULE_L_H, S_CAPSULE_M_H, S_CAPSULE_B_H
+capsule_pals:  .byte 1, 0, 2, 3
 
 draw_beam:
     lda beam_t

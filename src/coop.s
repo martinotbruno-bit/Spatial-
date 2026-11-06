@@ -74,12 +74,16 @@ coop_update:
     beq @nsc
     dec sync_cd
 @nsc:
-    lda nova_t
+    lda nova_t              ; temps de recharge Nova / bombe
     beq @nonova
     dec nova_t
-    bne @nonova
-    jsr restore_bg_color
 @nonova:
+    lda flash_t
+    beq @noflash
+    dec flash_t
+    bne @noflash
+    jsr restore_bg_color
+@noflash:
     lda beam_t
     beq @r
     jsr both_alive
@@ -143,13 +147,23 @@ coop_trigger:
     lda #SFX_NOVA
     jsr sfx_play
     jsr flash_bg_color
-    ; degats a tous les ennemis, efface les projectiles
+    lda #8
+    ldy #30
+    jsr shockwave
+@r:
+    rts
+
+; Onde de choc (Nova, bombes) : A = degats aux ennemis, Y = degats au boss.
+; Efface tous les projectiles ennemis. Preserve X.
+shockwave:
+    sta tmp3
+    sty tmp2
     stx tmp4
     ldx #MAX_EN-1
 @e:
     lda en_type,x
     beq @en
-    lda #8
+    lda tmp3
     jsr enemy_damage
 @en:
     dex
@@ -160,10 +174,9 @@ coop_trigger:
     sta eb_on,x
     dex
     bpl @b
-    lda #30
+    lda tmp2
     jsr boss_damage
     ldx tmp4
-@r:
     rts
 
 ; Points du faisceau : interpolation lineaire entre les centres des vaisseaux.
@@ -256,8 +269,13 @@ beam_compute:
     ldx tmp4
     rts
 
+; Flash d'onde de choc : fond gris fonce pendant 6 images seulement (pas de
+; blanc plein ecran prolonge : lisibilite du HUD et photosensibilite).
+FLASH_TIME = 6
 flash_bg_color:
-    lda #$30
+    lda #FLASH_TIME
+    sta flash_t
+    lda #$00                ; gris fonce
     jmp set_bg_color
 restore_bg_color:
     lda #$0F
@@ -328,11 +346,8 @@ col_pb_enemies:
     bcs @ne
     ; touche
     jsr pb_damage
-    pha
-    lda #0
-    sta pb_on,y
+    jsr pb_consume
     sty tmp4
-    pla
     jsr enemy_damage
     ldy tmp4
     jmp @nb
@@ -349,10 +364,29 @@ col_pb_enemies:
 pb_damage:
     lda pb_on,y
     cmp #3
-    lda #1
-    bcc @r
+    bcc @k
     lda #SYNC_DMG
-@r:
+    rts
+@k:
+    lda pb_kind,y
+    cmp #WT_MISSILE
+    bne @one
+    lda #2
+    rts
+@one:
+    lda #1
+    rts
+
+; Efface le projectile Y sauf s'il s'agit d'un laser (percant). Preserve A.
+pb_consume:
+    pha
+    lda pb_kind,y
+    cmp #WT_LASER
+    beq @keep
+    lda #0
+    sta pb_on,y
+@keep:
+    pla
     rts
 
 col_pb_boss:
@@ -380,11 +414,8 @@ col_pb_boss:
     cmp #28
     bcs @nb
     jsr pb_damage
-    pha
-    lda #0
-    sta pb_on,y
+    jsr pb_consume
     sty tmp4
-    pla
     jsr boss_damage
     ldy tmp4
 @nb:
@@ -553,6 +584,29 @@ col_items:
     bcs @ni
     lda #0
     sta it_on,y
+    lda it_t,y              ; type = age / 64 mod 4 : P, L, M, B
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    and #3
+    beq @lvl
+    cmp #3
+    beq @bomb
+    ; L (1) ou M (2) : changement d'arme, ou niveau +1 si deja equipee
+    cmp pl_wtype,x
+    beq @lvl
+    sta pl_wtype,x
+    jmp @maxed
+@bomb:
+    lda pl_bombs,x
+    cmp #BOMBS_MAX
+    bcs @maxed
+    inc pl_bombs,x
+    jmp @maxed
+@lvl:
     lda pl_wlv,x
     cmp #3
     bcs @maxed

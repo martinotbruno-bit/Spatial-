@@ -20,6 +20,12 @@ game_start:
     lda #1
     sta pl_wlv
     sta pl_wlv+1
+    lda #WT_BASE
+    sta pl_wtype
+    sta pl_wtype+1
+    lda #BOMBS_START
+    sta pl_bombs
+    sta pl_bombs+1
     lda nplayers
     cmp #2
     bne @solo
@@ -1033,6 +1039,12 @@ continue_game:
     lda #1
     sta pl_wlv
     sta pl_wlv+1
+    lda #WT_BASE
+    sta pl_wtype
+    sta pl_wtype+1
+    lda #BOMBS_START
+    sta pl_bombs
+    sta pl_bombs+1
     jsr set_full_lives
     lda #SFX_MENU
     jsr sfx_play

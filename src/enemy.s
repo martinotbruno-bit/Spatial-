@@ -790,6 +790,7 @@ item_spawn:
     sta it_v,x
     lda #0
     sta it_ulo,x
+    sta it_t,x
     ldx tmp7
     rts
 
@@ -798,6 +799,7 @@ items_update:
 @l:
     lda it_on,x
     beq @n
+    inc it_t,x
     lda it_ulo,x            ; recule a 0.75 px/image
     sec
     sbc #$C0

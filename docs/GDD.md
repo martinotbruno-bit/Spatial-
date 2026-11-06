@@ -48,8 +48,25 @@ pleine (jauge pleine : A déclenche le pouvoir coopératif) :
 | Recharge | 90 images (1,5 s) | 240 images (4 s) |
 | Rôle | Traverser un barrage, ramasser une capsule | Couvrir le partenaire, tenir une position face au boss |
 
-**Armes évolutives** : capsule « P » lâchée par les chasseurs → niveau +1
-(max 3) ; perte d'une vie → niveau −1 (min 1).
+**Arsenal** *[prototype]* — trois types d'arme, chacun sur 3 niveaux :
+
+| Type (HUD) | Effet | Niv. 1 / 2 / 3 | Cadence | Dégâts |
+|---|---|---|---|---|
+| **S** — arme d'origine | LANCE : trait concentré ; ÉGIDE : éventail (voir ci-dessus) | voir tableau des vaisseaux | 6 / 9 img | 1 |
+| **L** — laser perçant | Traits rapides (8 px/img) qui **traversent** les ennemis | 1 / 2 / 3 traits | 8 img | 1 par contact |
+| **M** — missiles | Partent en éventail, puis se **recalent latéralement** sur la cible choisie au tir (ennemi le plus proche), avec amortissement | 2 / 3 / 4 missiles | 14 img | 2 |
+
+**Capsules changeantes** (lâchées par les chasseurs et le décor destructible) :
+le type change toutes les 64 images — **P** (niveau +1), **L**, **M**, **B**
+(bombe +1, max 5) — et clignote avant de changer : le joueur choisit son
+arme en choisissant le moment du ramassage. Prendre L ou M change d'arme
+(ou monte d'un niveau si déjà équipée). Perte d'une vie : niveau −1, type
+conservé.
+
+**Bombes** (SELECT) : 2 au départ et à chaque réapparition (minimum), max 5.
+Onde de choc : projectiles ennemis effacés, 6 dégâts à tous les ennemis,
+16 au boss, 40 images d'invulnérabilité, flash gris bref (6 images, pas de
+blanc plein écran).
 
 ## 3. Coopération *[prototype]*
 

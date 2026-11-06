@@ -75,6 +75,14 @@ BTN_RIGHT  = $01
 ; Affectation des boutons en jeu (modifiable ici uniquement)
 BTN_FIRE   = BTN_B      ; tir (maintenu) - attaque synchronisee (appui)
 BTN_POWER  = BTN_A      ; capacite du vaisseau / pouvoir cooperatif
+BTN_BOMB   = BTN_SELECT ; bombe (munitions limitees)
+
+; Types d'armes
+WT_BASE    = 0          ; arme d'origine du vaisseau (concentre / eventail)
+WT_LASER   = 1          ; laser percant
+WT_MISSILE = 2          ; missiles a tete chercheuse
+BOMBS_START = 2
+BOMBS_MAX   = 5
 
 ; --- Etats du jeu --------------------------------------------------------------
 ST_TITLE  = 0

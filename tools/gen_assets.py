@@ -131,6 +131,8 @@ FONT = {
     ",": ["00000", "00000", "00000", "00000", "01100", "00100", "01000"],
     "=": ["00000", "00000", "11111", "00000", "11111", "00000", "00000"],
     "+": ["00000", "00100", "00100", "11111", "00100", "00100", "00000"],
+    "*": ["00100", "10101", "01110", "11111", "01110", "10101", "00100"],   # icone bombe
+    "@": ["01110", "11111", "10101", "11111", "01110", "01010", "00000"],   # icone boss
 }
 
 
@@ -202,7 +204,9 @@ def build_common(consts):
     consts["T_BOSSBAR0"] = 0x69
     art = dict(load_art(os.path.join(ASSETS, "sprites.txt")))
     small = [("shot_a", True), ("shot_b", True), ("ebullet", False),
-             ("capsule", False), ("beam", False)]
+             ("capsule", False), ("beam", False),
+             ("laser", True), ("missile", True),
+             ("capsule_l", False), ("capsule_m", False), ("capsule_b", False)]
     idx = 0x01
     for name, orient in small:
         img = art[name]

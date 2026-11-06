@@ -38,7 +38,13 @@ player_update:
     beq @r
     dec pl_resp,x
     bne @r
-    ; reapparition
+    ; reapparition (bombes rechargees a BOMBS_START au minimum)
+    lda pl_bombs,x
+    cmp #BOMBS_START
+    bcs @bk
+    lda #BOMBS_START
+    sta pl_bombs,x
+@bk:
     lda #1
     sta pl_alive,x
     lda #INVUL_TIME
@@ -205,10 +211,20 @@ player_update:
     beq @nofire
     lda pl_cool,x
     bne @nofire
+    ldy pl_wtype,x
+    lda wtype_rate,y
+    bne @rt
     lda ship_fire_rate,x
+@rt:
     sta pl_cool,x
     jsr player_fire
 @nofire:
+    ; --- BOMBE (munitions limitees) ---
+    lda tmp6
+    and #BTN_BOMB
+    beq @nobomb
+    jsr player_bomb
+@nobomb:
     ; --- POUVOIR : pouvoir cooperatif si la jauge est pleine, sinon capacite propre
     lda tmp6
     and #BTN_POWER
@@ -220,6 +236,29 @@ player_update:
 @abil:
     jmp ability_trigger
 @nob:
+    rts
+
+; Bombe du joueur X : onde de choc (projectiles effaces, degats a l'ecran),
+; 40 images d'invulnerabilite
+player_bomb:
+    lda pl_bombs,x
+    beq @r
+    lda nova_t
+    bne @r
+    dec pl_bombs,x
+    lda #40
+    sta pl_invul,x
+    lda #1
+    sta hud_dirty
+    lda #NOVA_TIME
+    sta nova_t
+    lda #SFX_NOVA
+    jsr sfx_play
+    jsr flash_bg_color
+    lda #6
+    ldy #16
+    jmp shockwave
+@r:
     rts
 
 ; Verifie et declenche la SALVE SYNCHRONISEE (X = joueur qui vient d'appuyer)
@@ -253,6 +292,8 @@ sync_check:
     ldy tmp1
     lda #3                  ; 3 = projectile synchronise (degats SYNC_DMG)
     sta pb_on,y
+    lda #WT_BASE
+    sta pb_kind,y
     lda #6
     sta pb_du,y
     stx tmp3
@@ -306,13 +347,40 @@ ability_trigger:
     rts
 
 ; Tir selon le vaisseau X et son niveau d'arme
+; Index de motif : arme d'origine = vaisseau*3 + niveau (1-6) ;
+; laser = 6 + niveau (7-9) ; missiles = 9 + niveau (10-12).
 player_fire:
+    lda pl_wtype,x
+    beq @base
+    asl
+    sta tmp0
+    asl
+    adc tmp0                ; type * 6 (C=0)
+    adc pl_wlv,x            ; type*6 + niveau : laser 7-9, missiles 13-15
+    sec
+    sbc #0
+    cmp #10
+    bcc @idx
+    sbc #3                  ; missiles : 10-12
+    jmp @idx
+@base:
     txa
     asl
     clc
-    adc pl_wlv,x            ; ship*2 + niveau (1..3) -> index 1..5 (ship*3 serait
-    adc ship_wofs,x         ; plus simple : corrige par ship_wofs)
+    adc pl_wlv,x            ; vaisseau*2 + niveau, corrige par ship_wofs
+    adc ship_wofs,x
+@idx:
     tay
+    ; missiles : une cible par salve (ennemi le plus proche lateralement)
+    lda #$FF
+    sta tmp5
+    lda pl_wtype,x
+    cmp #WT_MISSILE
+    bne @nt
+    sty tmp6
+    jsr pick_target
+    ldy tmp6
+@nt:
     lda weapon_ptr_lo-1,y
     sta ptr0
     lda weapon_ptr_hi-1,y
@@ -356,12 +424,51 @@ player_fire:
     ldx tmp1
     pla
     sta pb_on,x
+    lda tmp5
+    sta pb_tgt,x
+    ldx tmp2
+    lda pl_wtype,x
+    ldx tmp1
+    sta pb_kind,x
     ldx tmp2
     dec tmp0
     bne @shot
 @done:
+    lda pl_wtype,x
+    bne @sfx2
     lda shot_sfx,x
     jmp sfx_play
+@sfx2:
+    lda #SFX_SHOT_A
+    jmp sfx_play
+
+; Missiles : tmp5 = ennemi le plus proche sur l'axe lateral, devant le
+; vaisseau X ($FF si aucun). Utilise tmp3, tmp4.
+pick_target:
+    lda #$FF
+    sta tmp3
+    ldy #MAX_EN-1
+@l:
+    lda en_type,y
+    beq @n
+    lda en_u,y
+    cmp pl_u,x
+    bcc @n
+    lda en_v,y
+    sec
+    sbc pl_v,x
+    bcs @p
+    eor #$FF
+    adc #1
+@p:
+    cmp tmp3
+    bcs @n
+    sta tmp3
+    sty tmp5
+@n:
+    dey
+    bpl @l
+    rts
 
 ship_wofs: .byte 0, 1        ; LANCE : 0+lv (1-3), EGIDE : 2+lv+1 (4-6)
 shot_sfx:  .byte SFX_SHOT_A, SFX_SHOT_B
@@ -384,8 +491,8 @@ pb_alloc:
     sec
     rts
 
-weapon_ptr_lo: .lobytes wpn_a1, wpn_a2, wpn_a3, wpn_b1, wpn_b2, wpn_b3
-weapon_ptr_hi: .hibytes wpn_a1, wpn_a2, wpn_a3, wpn_b1, wpn_b2, wpn_b3
+weapon_ptr_lo: .lobytes wpn_a1, wpn_a2, wpn_a3, wpn_b1, wpn_b2, wpn_b3, wpn_l1, wpn_l2, wpn_l3, wpn_m1, wpn_m2, wpn_m3
+weapon_ptr_hi: .hibytes wpn_a1, wpn_a2, wpn_a3, wpn_b1, wpn_b2, wpn_b3, wpn_l1, wpn_l2, wpn_l3, wpn_m1, wpn_m2, wpn_m3
 ; [nombre] puis (du, dv, decalage lateral) - vitesses en px/image (signees)
 wpn_a1: .byte 1,  7,0,0
 wpn_a2: .byte 2,  7,0,<-4,  7,0,4
@@ -393,6 +500,16 @@ wpn_a3: .byte 4,  7,0,<-4,  7,0,4,  6,<-2,0,  6,2,0
 wpn_b1: .byte 3,  5,0,0,  5,<-1,0,  5,1,0
 wpn_b2: .byte 5,  5,0,0,  5,<-1,0,  5,1,0,  4,<-2,0,  4,2,0
 wpn_b3: .byte 7,  5,0,0,  5,<-1,0,  5,1,0,  4,<-2,0,  4,2,0,  0,<-5,0,  0,5,0
+; Laser percant : traits rapides qui traversent les ennemis
+wpn_l1: .byte 1,  8,0,0
+wpn_l2: .byte 2,  8,0,<-5,  8,0,5
+wpn_l3: .byte 3,  8,0,0,  8,<-1,<-6,  8,1,6
+; Missiles : partent en eventail puis se recalent sur leur cible
+wpn_m1: .byte 2,  4,<-2,<-4,  4,2,4
+wpn_m2: .byte 3,  4,<-2,<-4,  4,0,0,  4,2,4
+wpn_m3: .byte 4,  4,<-3,<-6,  4,<-1,<-2,  4,1,2,  4,3,6
+; Cadence par type (images) : arme d'origine = cadence du vaisseau
+wtype_rate: .byte 0, 8, 14
 
 pbullets_update:
     ldy orient
@@ -400,6 +517,12 @@ pbullets_update:
 @l:
     lda pb_on,x
     beq @n
+    lda pb_kind,x
+    cmp #WT_MISSILE
+    bne @mv
+    jsr missile_steer
+    ldy orient
+@mv:
     lda pb_u,x
     clc
     adc pb_du,x
@@ -424,6 +547,56 @@ pbullets_update:
     lda #0
     sta pb_on,x
     beq @n
+
+; Guidage d'un missile (X), toutes les 2 images : ecart lateral e = cible - v.
+; |e| < 4 : la vitesse laterale revient vers 0 (amortissement, pas de
+; depassement) ; sinon elle tend vers le signe de e (bornes -3..+3).
+; Cible detruite : vol en ligne droite.
+missile_steer:
+    lda frame
+    and #1
+    bne @r
+    ldy pb_tgt,x
+    cpy #MAX_EN
+    bcs @r
+    lda en_type,y
+    beq @lost
+    lda en_v,y
+    clc
+    adc #4
+    sec
+    sbc pb_v,x              ; e (signe)
+    clc
+    adc #4
+    cmp #8
+    bcc @damp               ; |e| < 4
+    sbc #4                  ; C=1 : retablit e
+    bmi @up
+    lda pb_dv,x
+    cmp #3
+    beq @r
+    inc pb_dv,x
+    rts
+@up:
+    lda pb_dv,x
+    cmp #<-3
+    beq @r
+    dec pb_dv,x
+@r:
+    rts
+@damp:
+    lda pb_dv,x
+    beq @r
+    bmi @inc
+    dec pb_dv,x
+    rts
+@inc:
+    inc pb_dv,x
+    rts
+@lost:
+    lda #$FF
+    sta pb_tgt,x
+    rts
 
 ; Perte d'un vaisseau (X = joueur)
 player_kill:

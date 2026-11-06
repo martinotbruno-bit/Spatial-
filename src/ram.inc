@@ -88,6 +88,8 @@ pl_v:        .res 2
 pl_vlo:      .res 2
 pl_cool:     .res 2
 pl_wlv:      .res 2     ; niveau d'arme 1-3
+pl_wtype:    .res 2     ; type d'arme (WT_*)
+pl_bombs:    .res 2
 pl_invul:    .res 2
 pl_resp:     .res 2
 pl_abil_t:   .res 2     ; capacite propre active (images restantes)
@@ -154,6 +156,8 @@ pb_u:        .res MAX_PB
 pb_v:        .res MAX_PB
 pb_du:       .res MAX_PB
 pb_dv:       .res MAX_PB
+pb_kind:     .res MAX_PB    ; type d'arme du projectile (WT_*)
+pb_tgt:      .res MAX_PB    ; missile : ennemi vise ($FF = aucun)
 
 ; --- explosions ---
 fx_t:        .res MAX_FX    ; 0 = libre, sinon age+1
@@ -165,6 +169,7 @@ it_on:       .res MAX_IT
 it_u:        .res MAX_IT
 it_ulo:      .res MAX_IT
 it_v:        .res MAX_IT
+it_t:        .res MAX_IT    ; age de la capsule (type = age/64 mod 4)
 
 ; --- boss ---
 boss_on:     .res 1     ; 0 absent, 1 entree, 2 combat, 3 destruction
@@ -183,6 +188,7 @@ gauge:       .res 1     ; ressource LIEN 0-64
 gauge_tick:  .res 1
 beam_t:      .res 1
 nova_t:      .res 1
+flash_t:     .res 1
 beam_u:      .res BEAM_PTS
 beam_v:      .res BEAM_PTS
 

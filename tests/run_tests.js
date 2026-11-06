@@ -801,6 +801,78 @@ test("T36", "Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparen
     detail: `secteur charge=${ok0}, erreurs VRAM (tuiles+attributs)=${vbad}, vblank max=${vb}/2273, soutiens=${support}, reparation observee=${repaired}, directions de spirale distinctes=${dirs.size}, boss vaincu=${cleared}, epilogue=${epi}` };
 });
 
+// Place une capsule d'age donne sur le joueur p et la fait ramasser
+function grab(m, p, age) {
+  m.poke("it_on", 1, 0); m.poke("it_t", age, 0);
+  m.poke("it_u", m.peek("pl_u", p) + 4, 0); m.poke("it_v", m.peek("pl_v", p) + 4, 0);
+  m.frame(2, invul);
+}
+function clearField(mm) { for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i); for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); }
+
+test("T37", "Capsules changeantes P/L/M/B et laser percant", () => {
+  const m = startGame({ players: 1 });
+  m.frame(20, (mm) => { invul(mm); clearField(mm); });
+  // le type change toutes les 64 images
+  m.poke("it_on", 1, 1); m.poke("it_t", 0, 1); m.poke("it_u", 200, 1); m.poke("it_v", 60, 1);
+  const kinds = [];
+  for (let k = 0; k < 4; k++) { kinds.push((m.peek("it_t", 1) >> 6) & 3); m.frame(64, invul); }
+  m.poke("it_on", 0, 1);
+  grab(m, 0, 64);                                     // L
+  const wt = m.peek("pl_wtype"), lv = m.peek("pl_wlv");
+  grab(m, 0, 64);                                     // L de nouveau : niveau +1
+  const lv2 = m.peek("pl_wlv");
+  // laser percant : deux ennemis alignes touches par le meme trait
+  m.poke("pl_wlv", 1);
+  const pu = m.peek("pl_u"), pv = m.peek("pl_v");
+  for (const [i, du] of [[0, 40], [1, 80]]) {
+    m.poke("en_type", 3, i); m.poke("en_hp", 30, i); m.poke("en_u", pu + du, i); m.poke("en_v", pv - 4, i);
+    m.poke("en_duhi", 0, i); m.poke("en_dulo", 0, i); m.poke("en_dvhi", 0, i); m.poke("en_dvlo", 0, i); m.poke("en_t", 1, i);
+  }
+  m.press(0, "B"); m.frame(1); m.release(0, "B");
+  m.frame(20, (mm) => { invul(mm); for (const i of [0, 1]) { mm.poke("en_u", pu + (i ? 80 : 40), i); mm.poke("en_t", 1, i); } for (let e = 0; e < 16; e++) mm.poke("eb_on", 0, e); });
+  const hit0 = 30 - m.peek("en_hp", 0), hit1 = 30 - m.peek("en_hp", 1);
+  m.screenshot(path.join(SHOTS, "16_laser.png"));
+  return { ok: JSON.stringify(kinds) === "[0,1,2,3]" && wt === 1 && lv === 1 && lv2 === 2 && hit0 > 0 && hit1 > 0,
+    detail: `types successifs=${kinds.map((k) => "PLMB"[k]).join("")}, capsule L -> arme ${"SLM"[wt]}${lv}, 2e L -> niveau ${lv2}, trait unique : 1er ennemi -${hit0} PV, 2e ennemi -${hit1} PV (percant)` };
+});
+
+test("T38", "Missiles a tete chercheuse : recalage lateral sur la cible", () => {
+  const m = startGame({ players: 1 });
+  m.frame(20, (mm) => { invul(mm); clearField(mm); });
+  grab(m, 0, 128);                                    // M
+  const wt = m.peek("pl_wtype");
+  const pu = m.peek("pl_u"), pv = m.peek("pl_v");
+  // cible decalee de 50 px lateralement
+  m.poke("en_type", 3, 0); m.poke("en_hp", 40, 0); m.poke("en_u", pu + 120, 0); m.poke("en_v", pv + 50, 0);
+  m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0); m.poke("en_dvhi", 0, 0); m.poke("en_dvlo", 0, 0);
+  m.press(0, "B"); m.frame(1); m.release(0, "B");
+  m.frame(40, (mm) => { invul(mm); mm.poke("en_u", pu + 120, 0); mm.poke("en_v", pv + 50, 0); mm.poke("en_t", 1, 0); for (let e = 0; e < 16; e++) mm.poke("eb_on", 0, e); });
+  const dmg = 40 - m.peek("en_hp", 0);
+  return { ok: wt === 2 && dmg >= 4, detail: `arme ${"SLM"[wt]}, cible a +50 px lateralement : ${dmg} PV infliges (2 par missile)` };
+});
+
+test("T39", "Bombes (SELECT) : munitions, projectiles effaces, degats, invulnerabilite, HUD", () => {
+  const m = startGame({ players: 2 });
+  m.frame(20, (mm) => { invul(mm); clearField(mm); });
+  for (let i = 0; i < 4; i++) { m.poke("en_type", 1, i); m.poke("en_hp", 5, i); m.poke("en_u", 150, i); m.poke("en_v", 60 + 30 * i, i); }
+  for (let i = 0; i < 10; i++) { m.poke("eb_on", 1, i); m.poke("eb_u", 180, i); m.poke("eb_v", 50 + 10 * i, i); }
+  const b0 = m.peek("pl_bombs", 1);
+  m.poke("pl_invul", 0, 1);
+  m.tap(1, "SELECT", 1, 0);
+  const b1 = m.peek("pl_bombs", 1), inv = m.peek("pl_invul", 1);
+  const en = countOn(m, "en_type", 10), eb = countOn(m, "eb_on", 16);
+  m.frame(6);
+  let hud = ""; for (let i = 0; i < 9; i++) hud += String.fromCharCode(m.nt(0x204f + i));
+  // sans munitions : rien
+  m.poke("pl_bombs", 0, 1); m.poke("nova_t", 0);
+  m.tap(1, "SELECT", 1, 0);
+  const none = m.peek("nova_t") === 0;
+  // une capsule B recharge
+  grab(m, 1, 192);
+  return { ok: b0 === 2 && b1 === 1 && inv > 30 && en === 0 && eb === 0 && hud === "S1*2 S1*1" && none && m.peek("pl_bombs", 1) === 1,
+    detail: `bombes ${b0}->${b1}, invulnerable=${inv} img, ennemis restants=${en}, projectiles=${eb}, HUD="${hud}", sans munition inactif=${none}, capsule B -> ${m.peek("pl_bombs", 1)}` };
+});
+
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
   const { execSync } = require("child_process");
   const rom = path.join(ROOT, "build", "spatial.nes");

@@ -7,12 +7,12 @@ HUD_SCORE = $2027
 HUD_HI    = $2032
 HUD_LIVES = $203E
 HUD_GAUGE = $2046
-HUD_WPN_A = $2051
-HUD_WPN_B = $2055
+HUD_WPN_A = $204F         ; type, niveau, '*', bombes (4 cases par joueur)
+HUD_WPN_B = $2054
 HUD_BOSS  = $205C
 
 hud_row1: .byte " SCORE 000000  HI 000000 VIES 0 ", 0
-hud_row2: .byte " LIEN          A:1 B:1 BOSS     ", 0
+hud_row2: .byte " LIEN          S1*2 S1*2   @    ", 0
 
 ; Ecran coupe : textes fixes, attributs, puis valeurs
 hud_init:
@@ -126,33 +126,15 @@ hud_update_now:
     lda gauge
     sta tmp0
     jsr hud_bar
-    ; armes
+    ; armes : type (S/L/M), niveau, icone bombe, nombre de bombes
     lda #<HUD_WPN_A
     sta ptr1
-    lda #1
-    jsr vbuf_open
-    lda #'-'
-    ldy pl_on
-    beq @wa
-    lda pl_wlv
-    ora #'0'
-@wa:
-    sta vbuf,x
-    inx
-    jsr vbuf_close
+    ldy #0
+    jsr hud_weapon
     lda #<HUD_WPN_B
     sta ptr1
-    lda #1
-    jsr vbuf_open
-    lda #'-'
-    ldy pl_on+1
-    beq @wb
-    lda pl_wlv+1
-    ora #'0'
-@wb:
-    sta vbuf,x
-    inx
-    jsr vbuf_close
+    ldy #1
+    jsr hud_weapon
     ; barre du boss : 4 tuiles, PV/8
     lda #<HUD_BOSS
     sta ptr1
@@ -195,6 +177,42 @@ hud_update_now:
     dey
     bne @bb
     jmp vbuf_close
+
+; 4 cases d'arme du joueur Y a ptr1
+hud_weapon:
+    lda #4
+    jsr vbuf_open
+    lda pl_on,y
+    bne @on
+    lda #'-'
+    sta vbuf,x
+    sta vbuf+1,x
+    sta vbuf+2,x
+    sta vbuf+3,x
+    jmp @end
+@on:
+    lda pl_wtype,y
+    sty tmp1
+    tay
+    lda wtype_letter,y
+    ldy tmp1
+    sta vbuf,x
+    lda pl_wlv,y
+    ora #'0'
+    sta vbuf+1,x
+    lda #'*'
+    sta vbuf+2,x
+    lda pl_bombs,y
+    ora #'0'
+    sta vbuf+3,x
+@end:
+    inx
+    inx
+    inx
+    inx
+    jmp vbuf_close
+
+wtype_letter: .byte "SLM"
 
 ; Barre de 8 tuiles a ptr1 (hi = $20), valeur tmp0 (0-64)
 hud_bar:

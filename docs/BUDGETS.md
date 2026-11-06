@@ -50,6 +50,10 @@ sur 600) :
    ne rebouclent pas en fin d'OAM (sinon débordement sur `$0300`, défaut
    détecté par les tests T10/T11/T29 et corrigé).
 
+Variante de la scène de stress avec l'arsenal enrichi (deux joueurs au
+niveau 3) : laser 28 159 cycles (95 %), missiles 28 542 cycles (96 %),
+0 image perdue. **Marge réduite à 4-5 %** dans ce cas extrême.
+
 ## Points de vigilance
 
 - **PAL** : la mise à jour logique double (une image sur 5) dépasse le

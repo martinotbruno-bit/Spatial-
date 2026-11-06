@@ -517,6 +517,7 @@ state_drw_tbl:
 .include "story.s"
 .include "hud.s"
 .include "data.s"
+.include "boss.s"
 
 ; Banc fixe $C000 : code critique du jeu
 .segment "CODE"
@@ -524,7 +525,6 @@ state_drw_tbl:
 .include "stage.s"
 .include "player.s"
 .include "enemy.s"
-.include "boss.s"
 .include "coop.s"
 
 .segment "VECTORS"

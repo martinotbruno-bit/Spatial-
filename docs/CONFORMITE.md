@@ -43,7 +43,7 @@ Légende :
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |
 | 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | ✅ ÉMU | Faisceau, Transfert d'énergie, Salve synchronisée (T27), Nova solo |
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
-| 4 | Armement riche et évolutif | 🟡 | 2 × 3 niveaux (frontal, concentré, éventail, latéral, diagonal) ; bombes/armes défensives à produire |
+| 4 | Armement riche et évolutif | ✅ ÉMU | Arme d'origine ×2, laser perçant, missiles guidés (3 niveaux chacun), bombes à munitions, bouclier, capsules changeantes, salve synchronisée, pouvoirs coop (T15, T37-T39) ; options d'escorte à envisager |
 | 5.1 | Grande variété d'ennemis | 🟡 | 6 familles (drones, chasseurs, tourelles, kamikazes, unités lourdes, soutiens) + décor destructible ; 8 familles visées |
 | 5.2 | Boss multi-phases | 🟡 | 3 boss à 2 phases (KORVAX, Essaim-mère, Garde-ciel à spirales ; T13, T33, T36) ; parties destructibles à produire |
 | 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Séquences narratives (intro, transition, épilogue) avec musique dédiée (T26) ; 2 fins et encyclopédie à produire |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 36/36 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 39/39 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

@@ -15,7 +15,10 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - ROM NES MMC3 (TKROM) de 96 Kio : `dist/spatial.nes`
 - Coopération à 2 joueurs simultanés (2 manettes) **et** mode solo complet
 - Deux vaisseaux différents : **LANCE** (intercepteur rapide, tir concentré)
-  et **ÉGIDE** (vaisseau lourd, tir en éventail), 3 niveaux d'arme chacun
+  et **ÉGIDE** (vaisseau lourd, tir en éventail)
+- Arsenal : arme d'origine, **laser perçant**, **missiles à tête
+  chercheuse** (3 niveaux chacun), **bombes** (SELECT), capsules
+  changeantes P / L / M / B
 - Capacités propres : **Surcharge** (LANCE, esquive rapide) et **Bouclier
   frontal** (ÉGIDE, absorbe 4 projectiles)
 - Collisions physiques entre joueurs, sans dégâts ni blocage
@@ -64,6 +67,7 @@ octet pour octet).
 | Capacité du vaisseau / pouvoir coopératif (jauge LIEN pleine) | A |
 | Pause | START |
 | Menu : ligne / valeur / départ | Haut-Bas / Gauche-Droite / START |
+| Bombe | SELECT |
 | Menu : accès libre à tous les secteurs (prototype) | A |
 
 L'affectation des boutons est définie en un seul endroit (`BTN_FIRE`,

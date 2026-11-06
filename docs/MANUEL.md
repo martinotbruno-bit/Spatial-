@@ -29,13 +29,16 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 | Croix | Déplacement dans 8 directions |
 | B (maintenu) | Tir automatique |
 | A | Capacité du vaisseau (LANCE : Surcharge, ÉGIDE : Bouclier) ; pouvoir coopératif si la jauge LIEN est pleine |
+| SELECT | Bombe (munitions limitées, affichées dans le HUD) |
 | START | Pause |
 
 - **LANCE** (manette 1) : rapide, tir concentré.
 - **ÉGIDE** (manette 2) : plus lent, tir en éventail.
 - Les deux vaisseaux peuvent se toucher sans se blesser.
-- **Capsule P** (lâchée par les chasseurs) : arme +1 niveau (max 3).
-  Une vie perdue fait perdre un niveau.
+- **Capsules** : leur lettre change toutes les secondes environ —
+  **P** niveau d'arme +1, **L** laser perçant, **M** missiles à tête
+  chercheuse, **B** bombe supplémentaire. Ramassez-les au bon moment !
+  Une vie perdue fait perdre un niveau d'arme.
 - **Vies** : réserve commune (5 en coopération, 3 en solo).
 
 ## La jauge LIEN
@@ -70,7 +73,8 @@ relais (3 crédits par partie, score remis à zéro).
 
 ## HUD
 
-`SCORE` — `HI` (record du mode) — `VIES` / `LIEN` (jauge) — `A:` `B:`
-(niveau d'arme de LANCE et ÉGIDE) — `BOSS` (énergie du mini-boss).
+`SCORE` — `HI` (record du mode) — `VIES` / `LIEN` (jauge) — pour LANCE
+puis ÉGIDE : type d'arme (S, L ou M), niveau, `*` et nombre de bombes —
+icône de boss et sa barre d'énergie.
 
 Les records sont sauvegardés dans la cartouche.
