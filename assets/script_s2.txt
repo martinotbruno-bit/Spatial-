@@ -1,0 +1,54 @@
+# Script d'apparition - Secteur 2 : Surface de Kera
+# declencheur (camera / 8 px)  famille  v (x ecran 8-232)  parametre
+# DRONE : parametre = dephasage ; CHASSEUR : u d'arret ; DECOR : objet destructible
+# Trie par declencheur. La ligne BOSS termine le secteur.
+   8 DRONE       48    0
+  10 DRONE       48    8
+  12 DRONE       48   16
+  14 DRONE       48   24
+  20 DRONE      176    0
+  22 DRONE      176    8
+  24 DRONE      176   16
+  26 DRONE      176   24
+  34 CHASSEUR    64  170
+  34 CHASSEUR   160  170
+  44 KAMIKAZE    40    0
+  45 KAMIKAZE   112    0
+  46 KAMIKAZE   184    0
+  54 TOURELLE    32    0
+  54 TOURELLE   192    0
+  60 DRONE      112    0
+  61 DRONE      112   16
+  62 DRONE      112   32
+  63 DRONE      112   48
+  70 CHASSEUR    40  180
+  72 CHASSEUR   184  180
+  80 TOURELLE    64    0
+  80 TOURELLE   160    0
+  88 KAMIKAZE    60    0
+  89 KAMIKAZE   112    0
+  90 KAMIKAZE   164    0
+  96 DRONE       32    0
+  96 DRONE      192   32
+  98 DRONE       32    8
+  98 DRONE      192   40
+ 104 CHASSEUR   112  170
+ 110 TOURELLE    32    0
+ 110 TOURELLE   192    0
+ 118 CHASSEUR    56  180
+ 118 CHASSEUR   168  180
+ 128 KAMIKAZE    40    0
+ 128 KAMIKAZE   184    0
+ 130 KAMIKAZE   112    0
+ 140 DRONE       80    0
+ 141 DRONE       80   16
+ 142 DRONE      144    0
+ 143 DRONE      144   16
+ 152 TOURELLE    48    0
+ 152 TOURELLE   176    0
+ 160 CHASSEUR    40  190
+ 160 CHASSEUR   112  170
+ 160 CHASSEUR   184  190
+ 170 KAMIKAZE    60    0
+ 171 KAMIKAZE   164    0
+ 192 BOSS         0    0

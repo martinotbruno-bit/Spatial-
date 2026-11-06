@@ -1,0 +1,56 @@
+# Script d'apparition - Secteur 5 : Chantiers d'Hadar
+# declencheur (camera / 8 px)  famille  v (y ecran 40-208)  parametre
+# MINEUR : parametre = u d'arret ; largue des mines qui explosent en anneau.
+# Corps rejoue : declencheurs 32-215. La ligne BOSS termine le secteur.
+   8 DRONE       80    0
+  10 DRONE       80   12
+  12 DRONE       80   24
+  14 DRONE       80   36
+  16 DRONE      160    0
+  18 DRONE      160   12
+  20 DRONE      160   24
+  22 DRONE      160   36
+  26 KAMIKAZE    70    0
+  27 KAMIKAZE   170    0
+  36 MINEUR     100  190
+  40 CHASSEUR    60  180
+  42 CHASSEUR   160  180
+  50 DECOR       60    0
+  52 DECOR      176    0
+  58 TOURELLE    48    0
+  58 TOURELLE   196    0
+  66 DRONE      120    0
+  67 DRONE      120   16
+  68 DRONE      120   32
+  69 DRONE      120   48
+  76 LOURDE      90  170
+  78 MINEUR     150  185
+  88 KAMIKAZE    60    0
+  89 KAMIKAZE   120    0
+  90 KAMIKAZE   180    0
+  98 SOUTIEN    120  195
+ 100 CHASSEUR    70  180
+ 100 CHASSEUR   170  180
+ 110 DECOR      120    0
+ 114 MINEUR      70  185
+ 122 DRONE       60    0
+ 122 DRONE      180   32
+ 124 DRONE       60   16
+ 124 DRONE      180   48
+ 126 DRONE       60   32
+ 126 DRONE      180   64
+ 134 TOURELLE    48    0
+ 134 TOURELLE   196    0
+ 142 LOURDE     130  170
+ 146 MINEUR      60  190
+ 156 KAMIKAZE    90    0
+ 157 KAMIKAZE   150    0
+ 166 CHASSEUR    50  190
+ 166 CHASSEUR   120  180
+ 166 CHASSEUR   190  190
+ 178 DECOR       80    0
+ 180 DECOR      160    0
+ 188 MINEUR     120  190
+ 198 SOUTIEN     80  195
+ 200 LOURDE     160  175
+ 220 BOSS         0    0

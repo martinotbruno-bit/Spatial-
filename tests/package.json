@@ -1,0 +1,11 @@
+{
+  "name": "spatial-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Banc de test automatise (emulation jsnes) du Projet SPATIAL",
+  "scripts": { "test": "node run_tests.js" },
+  "dependencies": {
+    "jsnes": "1.2.1",
+    "pngjs": "7.0.0"
+  }
+}

@@ -1,0 +1,54 @@
+# Script d'apparition - Secteur 6 : Le Premier Ancrage
+# declencheur (camera / 8 px)  famille  v (x ecran 8-232)  parametre
+# CRISTAL : emetteur ancre au decor, invulnerable quand il est ferme.
+# Corps rejoue : declencheurs 24-199. La ligne BOSS termine le secteur.
+   8 DRONE       64    0
+  10 DRONE       64   12
+  12 DRONE       64   24
+  14 DRONE       64   36
+  16 DRONE      160    0
+  18 DRONE      160   12
+  20 DRONE      160   24
+  22 DRONE      160   36
+  28 CRISTAL     64    0
+  28 CRISTAL    160    0
+  36 KAMIKAZE    70    0
+  37 KAMIKAZE   112    0
+  38 KAMIKAZE   154    0
+  46 CHASSEUR    80  180
+  48 CHASSEUR   144  180
+  56 SOUTIEN    112  190
+  58 LOURDE      80  175
+  66 CRISTAL     96    0
+  66 CRISTAL    128    0
+  74 DRONE      112    0
+  75 DRONE      112   16
+  76 DRONE      112   32
+  77 DRONE      112   48
+  84 MINEUR     112  185
+  90 DECOR       72    0
+  92 DECOR      152    0
+ 100 KAMIKAZE    60    0
+ 101 KAMIKAZE   164    0
+ 108 CRISTAL     64    0
+ 108 CRISTAL    160    0
+ 110 CHASSEUR   112  175
+ 120 LOURDE     140  175
+ 122 SOUTIEN     80  190
+ 130 DRONE       72    0
+ 130 DRONE      152   32
+ 132 DRONE       72   16
+ 132 DRONE      152   48
+ 134 DRONE       72   32
+ 134 DRONE      152   64
+ 142 CRISTAL    112    0
+ 146 MINEUR      80  185
+ 154 CHASSEUR    64  185
+ 154 CHASSEUR   160  185
+ 164 KAMIKAZE    80    0
+ 165 KAMIKAZE   144    0
+ 172 CRISTAL     72    0
+ 172 CRISTAL    152    0
+ 180 LOURDE     112  170
+ 188 DECOR      112    0
+ 192 BOSS         0    0

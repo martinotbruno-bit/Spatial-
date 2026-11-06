@@ -1,0 +1,473 @@
+; =============================================================================
+; title.s - Ecran titre anime et menu principal
+;   HAUT/BAS : choix de la ligne ; GAUCHE/DROITE : valeur ; START : depart
+; =============================================================================
+
+title_enter:
+    jsr ppu_off
+    lda #0
+    sta split_on
+    sta orient
+    sta menu_sel
+    sta MMC3_MIRROR
+    sta beam_t
+    sta boss_on
+    lda #ST_TITLE
+    sta state
+    lda #<pal_title
+    sta ptr0
+    lda #>pal_title
+    sta ptr0+1
+    jsr load_palette
+    jsr clear_nametables
+    ldx #0
+@s:
+    lda title_strings,x
+    sta ptr1+1
+    lda title_strings+1,x
+    sta ptr1
+    lda title_strings+2,x
+    sta ptr0
+    lda title_strings+3,x
+    sta ptr0+1
+    beq @done
+    txa
+    pha
+    jsr put_string_direct
+    pla
+    clc
+    adc #4
+    tax
+    bne @s
+@done:
+    ; etoiles du fond anime (pool d'explosions reutilise)
+    ldx #MAX_FX-1
+@st:
+    jsr rand
+    sta fx_u,x
+    jsr rand
+    and #$7F
+    clc
+    adc #40
+    sta fx_v,x
+    dex
+    bpl @st
+    lda nplayers
+    bne @np
+    lda #1
+    sta nplayers
+    sta diff                ; premiere visite : PILOTE
+@np:
+    jsr menu_write
+    jsr flush_vbuf_direct
+    lda #SONG_TITLE
+    jsr play_song
+    jmp ppu_on
+
+title_strings:
+    ;      adresse VRAM, chaine
+    .dbyt $20A9
+    .word str_t_logo
+    .dbyt $20E5
+    .word str_t_sub
+    .dbyt $2186
+    .word str_t_m1
+    .dbyt $21C6
+    .word str_t_m2
+    .dbyt $2206
+    .word str_t_m3
+    .dbyt $2246
+    .word str_t_m4
+    .dbyt $2286
+    .word str_t_m5
+    .dbyt $22C6
+    .word str_t_m6
+    .dbyt $2366
+    .word str_t_copy
+    .dbyt $0000
+    .word 0
+
+str_t_logo: .byte "S P A T I A L", 0
+str_t_sub:  .byte "CAMPAGNE EN 8 SECTEURS", 0
+str_t_m1:   .byte "  JOUEURS  :", 0
+str_t_m2:   .byte "  VAISSEAU :", 0
+str_t_m3:   .byte "  SECTEUR  :", 0
+str_t_m4:   .byte "  NIVEAU   :", 0
+str_t_m5:   .byte "  ENCYCLOPEDIE", 0
+str_t_m6:   .byte "  CLASSEMENTS", 0
+str_t_copy: .byte "2026 - PROJET SPATIAL", 0
+str_start:  .byte "APPUYEZ SUR START", 0
+str_blank:  .byte "                 ", 0
+
+; Ecrit les valeurs du menu et le curseur dans le tampon VRAM
+menu_write:
+    ; curseur
+    ldy #0
+@cur:
+    lda menu_cursor_lo,y
+    sta ptr1
+    lda #$21
+    cpy #2
+    bcc @c1
+    lda #$22
+@c1:
+    sta ptr1+1
+    lda #1
+    jsr vbuf_open
+    lda #' '
+    cpy menu_sel
+    bne @c2
+    lda #'>'
+@c2:
+    sta vbuf,x
+    inx
+    jsr vbuf_close
+    iny
+    cpy #6
+    bne @cur
+    ; nombre de joueurs
+    lda #$93
+    sta ptr1
+    lda #$21
+    sta ptr1+1
+    lda #1
+    jsr vbuf_open
+    lda nplayers
+    ora #'0'
+    sta vbuf,x
+    inx
+    jsr vbuf_close
+    ; vaisseau
+    lda nplayers
+    cmp #2
+    beq @both
+    lda solo_ship
+    beq @la
+    lda #<str_v_egide
+    ldy #>str_v_egide
+    bne @wv
+@la:
+    lda #<str_v_lance
+    ldy #>str_v_lance
+    bne @wv
+@both:
+    lda #<str_v_both
+    ldy #>str_v_both
+@wv:
+    sta ptr0
+    sty ptr0+1
+    lda #$D3
+    sta ptr1
+    jsr vbuf_str11
+    ; secteur
+    ldx sector_sel
+    lda sector_str_lo,x
+    ldy sector_str_hi,x
+    sta ptr0
+    sty ptr0+1
+    lda #$13
+    sta ptr1
+    lda #$22
+    sta ptr1+1
+    jsr vbuf_str11
+    ; difficulte
+    ldx diff
+    lda diff_str_lo,x
+    sta ptr0
+    lda diff_str_hi,x
+    sta ptr0+1
+    lda #$53
+    sta ptr1
+    jsr vbuf_str11
+    ; ligne d'aide : acces libre
+    lda #<str_free_off
+    ldy #>str_free_off
+    ldx test_access
+    beq @fo
+    lda #<str_free_on
+    ldy #>str_free_on
+@fo:
+    sta ptr0
+    sty ptr0+1
+    lda #$27
+    sta ptr1
+    lda #$23
+    sta ptr1+1
+    lda #22
+    jsr vbuf_open
+    ldy #0
+@fl:
+    lda (ptr0),y
+    sta vbuf,x
+    inx
+    iny
+    cpy #22
+    bne @fl
+    jmp vbuf_close
+
+str_free_off: .byte "A : TOUS LES SECTEURS "
+str_free_on:  .byte "ACCES LIBRE : ACTIF   "
+
+diff_str_lo: .lobytes str_d0, str_d1, str_d2, str_d3
+diff_str_hi: .hibytes str_d0, str_d1, str_d2, str_d3
+str_d0: .byte "RECRUE     "
+str_d1: .byte "PILOTE     "
+str_d2: .byte "VETERAN    "
+str_d3: .byte "EXPERT !   "
+
+menu_cursor_lo: .byte $86, $C6, $06, $46, $86, $C6
+
+; Copie 11 caracteres de ptr0 vers ptr1 via le tampon VRAM
+vbuf_str11:
+    lda #11
+    jsr vbuf_open
+    ldy #0
+@l:
+    lda (ptr0),y
+    sta vbuf,x
+    inx
+    iny
+    cpy #11
+    bne @l
+    jmp vbuf_close
+
+str_v_lance: .byte "LANCE      "
+str_v_egide: .byte "EGIDE      "
+str_v_both:  .byte "LANCE+EGIDE"
+sector_str_lo: .lobytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6, str_s7, str_s8
+sector_str_hi: .hibytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6, str_s7, str_s8
+str_s1:      .byte "1 STATION H"
+str_s2:      .byte "2 PLANETE V"
+str_s3:      .byte "3 CEINTURE "
+str_s4:      .byte "4 LUMEN V  "
+str_s5:      .byte "5 HADAR H  "
+str_s6:      .byte "6 ANCRAGE V"
+str_s7:      .byte "7 FRONT H  "
+str_s8:      .byte "8 COEUR H  "
+
+title_update:
+    lda pad_new
+    ora pad_new+1
+    sta tmp0
+    bne @input
+    jmp @r
+@input:
+    and #BTN_POWER
+    beq @nob
+    ; A : acces libre a tous les secteurs pour la session (non sauvegarde)
+    lda test_access
+    eor #$FF
+    sta test_access
+    lda #SFX_MENU
+    jsr sfx_play
+    jsr menu_write
+    jmp @r
+@nob:
+    lda tmp0
+    and #BTN_START
+    beq @nostart
+    lda #SFX_MENU
+    jsr sfx_play
+    lda menu_sel
+    cmp #4
+    bne @nenc
+    jmp ency_enter
+@nenc:
+    cmp #5
+    bne @nrk
+    jmp rank_enter
+@nrk:
+    jmp game_start
+@nostart:
+    lda tmp0
+    and #BTN_DOWN | BTN_SELECT
+    beq @nd
+    inc menu_sel
+    lda menu_sel
+    cmp #6
+    bcc @chg0
+    lda #0
+    sta menu_sel
+    beq @chg0
+@nd:
+    lda tmp0
+    and #BTN_UP
+    beq @nu
+    dec menu_sel
+    bpl @chg0
+    lda #5
+    sta menu_sel
+@chg0:
+    jmp @chg
+@nu:
+    lda tmp0
+    and #BTN_LEFT | BTN_RIGHT
+    bne @lr
+    jmp @r
+@lr:
+    lda menu_sel            ; lignes ENCYCLOPEDIE / CLASSEMENTS : START seul
+    cmp #4
+    bcc @lrok
+    jmp @r
+@lrok:
+    lda menu_sel
+    bne @n1
+    lda nplayers            ; 1 <-> 2
+    eor #3
+    sta nplayers
+    jmp @chg
+@n1:
+    cmp #1
+    bne @n2
+    lda solo_ship
+    eor #1
+    sta solo_ship
+    jmp @chg
+@n2:
+    cmp #2
+    bne @n3
+    ; secteur : seuls les secteurs debloques (sauvegarde) sont proposes
+    ldy #NUM_SECTORS
+@sec:
+    lda tmp0
+    and #BTN_RIGHT
+    beq @secl
+    inc sector_sel
+    lda sector_sel
+    cmp #NUM_SECTORS
+    bcc @sect
+    lda #0
+    sta sector_sel
+    beq @sect
+@secl:
+    dec sector_sel
+    bpl @sect
+    lda #NUM_SECTORS-1
+    sta sector_sel
+@sect:
+    ldx sector_sel
+    lda sector_bit,x
+    and sectors_unl
+    ora test_access         ; acces libre (B) : tous les secteurs
+    bne @secok
+    dey
+    bne @sec
+@secok:
+    jmp @chg
+@n3:
+    ; difficulte : DROITE +1, GAUCHE -1 ; EXPERT seulement si debloque
+    lda unlocked
+    and #1
+    clc
+    adc #3
+    sta tmp1                ; nombre de niveaux disponibles (3 ou 4)
+    lda tmp0
+    and #BTN_RIGHT
+    beq @dl
+    inc diff
+    lda diff
+    cmp tmp1
+    bcc @chg
+    lda #0
+    sta diff
+    beq @chg
+@dl:
+    dec diff
+    bpl @chg
+    ldx tmp1
+    dex
+    stx diff
+@chg:
+    lda #SFX_MENU
+    jsr sfx_play
+    jsr menu_write
+@r:
+    ; clignotement du message
+    lda frame
+    and #31
+    bne @nb
+    lda #$07
+    sta ptr1
+    lda #$23
+    sta ptr1+1
+    lda frame
+    and #32
+    beq @on
+    lda #<str_blank
+    ldy #>str_blank
+    bne @w
+@on:
+    lda #<str_start
+    ldy #>str_start
+@w:
+    sta ptr0
+    sty ptr0+1
+    lda #17
+    jsr vbuf_open
+    ldy #0
+@cp:
+    lda (ptr0),y
+    sta vbuf,x
+    inx
+    iny
+    cpy #17
+    bne @cp
+    jsr vbuf_close
+@nb:
+    rts
+
+title_draw:
+    jsr oam_begin
+    ; vaisseaux de presentation
+    lda #2
+    sta d_size
+    lda #48
+    sta d_u
+    lda #84
+    sta d_v
+    lda #0
+    sta d_attr
+    lda #S_SHIP_A_H
+    sta d_tile
+    jsr draw_obj
+    lda #192
+    sta d_u
+    lda #1
+    sta d_attr
+    lda #S_SHIP_B_H
+    sta d_tile
+    jsr draw_obj
+    jsr draw_starfield
+    jmp oam_end
+
+; Etoiles defilantes (pool d'explosions reutilise hors du jeu)
+draw_starfield:
+    ldx #MAX_FX-1
+@st:
+    txa
+    and #3
+    clc
+    adc #1
+    sta tmp0
+    lda fx_u,x
+    sec
+    sbc tmp0
+    sta fx_u,x
+    ldy oam_idx
+    lda fx_v,x
+    sta $0200,y
+    lda #'.'
+    sta $0201,y
+    lda #3
+    sta $0202,y
+    lda fx_u,x
+    sta $0203,y
+    iny
+    iny
+    iny
+    iny
+    sty oam_idx
+    dec spr_left
+    dex
+    bpl @st
+    rts

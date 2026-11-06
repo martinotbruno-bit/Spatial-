@@ -1,0 +1,115 @@
+# Partitions originales - Projet SPATIAL (prototype Phase 1)
+# Compilees par tools/gen_assets.py vers le moteur audio du jeu.
+#
+# Syntaxe :
+#   @song <nom> tempo=<images par double-croche>
+#   P1: / P2: / TR: / NO:  (pulse 1, pulse 2, triangle, bruit+DPCM)
+#   Note : <Nom><Octave>/<duree en double-croches>   ex: A4/4, Cs5/2 (Cs = do diese)
+#   Silence : r/<duree>
+#   Batterie (canal NO) : K = grosse caisse (bruit + echantillon DPCM),
+#                         S = caisse claire, H = charleston
+#   Repetition : [ ... ]x<n>
+#   Instrument (P1/P2) : @lead @arp @pluck @brass @pad @bell
+#     (par defaut : P1 = lead, P2 = arp ; voir audio.s pour les enveloppes)
+#   Chaque canal boucle a la fin de sa sequence.
+
+# Theme de niveau "Ascension" - La mineur, ~150 bpm
+@song stage tempo=6
+P1: A4/4 C5/2 E5/2 D5/4 C5/2 B4/2  C5/6 A4/2 F4/4 A4/4  B4/4 D5/2 G5/2 F5/4 E5/2 D5/2  E5/12 r/4
+P1: A5/4 G5/2 E5/2 C5/4 E5/4  F5/6 E5/2 C5/4 A4/4  D5/4 E5/2 F5/2 G5/4 B5/4  Gs5/8 E5/4 B4/4
+P2: [A3/1 C4/1 E4/1 C4/1]x4 [F3/1 A3/1 C4/1 A3/1]x4 [G3/1 B3/1 D4/1 B3/1]x4 [E3/1 G3/1 B3/1 G3/1]x4
+P2: [A3/1 C4/1 E4/1 C4/1]x4 [F3/1 A3/1 C4/1 A3/1]x4 [G3/1 B3/1 D4/1 B3/1]x4 [E3/1 Gs3/1 B3/1 Gs3/1]x4
+TR: [A2/2 A3/2]x4 [F2/2 F3/2]x4 [G2/2 G3/2]x4 [E2/2 E3/2]x4
+TR: [A2/2 A3/2]x4 [F2/2 F3/2]x4 [G2/2 G3/2]x4 [E2/2 E3/2]x4
+NO: [K/2 H/2 S/2 H/2 K/2 K/2 S/2 H/2]x8
+
+# Theme de boss "Sentinelle" - Re mineur, plus rapide
+@song boss tempo=5
+P1: @brass D5/2 F5/2 A5/2 F5/2 Gs5/2 A5/2 F5/2 D5/2  As4/4 D5/2 F5/2 As5/4 A5/4
+P1: G5/2 E5/2 C5/2 E5/2 G5/2 C6/2 As5/2 G5/2  A5/6 G5/2 F5/2 E5/2 Cs5/4
+P2: [D4/1 A4/1]x8 [As3/1 F4/1]x8 [C4/1 G4/1]x8 [A3/1 E4/1]x4 [Cs4/1 E4/1]x4
+TR: [D2/1 D3/1]x8 [As1/1 As2/1]x8 [C2/1 C3/1]x8 [A1/1 A2/1]x4 [Cs2/1 Cs3/1]x4
+NO: [K/1 H/1 S/1 H/1]x16
+
+# Jingle de fin de niveau (ne boucle pas : se termine par un silence long)
+@song clear tempo=6
+P1: A4/2 C5/2 E5/2 A5/6 G5/2 A5/2 B5/2 C6/8 r/128
+P2: E4/2 A4/2 C5/2 E5/6 D5/2 E5/2 Gs5/2 A5/8 r/128
+TR: A2/2 A3/2 A2/2 A3/6 G2/2 G3/2 E3/2 A2/8 r/128
+NO: K/2 r/2 K/2 S/6 r/2 S/2 S/2 K/8 r/128
+
+# Theme des sequences narratives "Liens" - La mineur, lent
+@song story tempo=8
+P1: @bell E5/8 D5/8 C5/12 B4/4 A4/8 C5/8 E5/16 F5/8 E5/8 D5/12 C5/4 B4/16 Gs4/16
+P2: @pad [A3/2 C4/2 E4/2 A4/2]x4 [F3/2 A3/2 C4/2 F4/2]x4 [D3/2 F3/2 A3/2 D4/2]x4 [E3/2 Gs3/2 B3/2 E4/2]x4
+TR: A2/32 F2/32 D2/32 E2/32
+NO: r/128
+
+# Theme du menu "Escadre" - La mineur, heroique
+@song title tempo=7
+P1: @brass A4/4 E5/4 D5/2 C5/2 B4/2 C5/2  D5/6 C5/2 B4/4 G4/4  C5/4 G5/4 F5/2 E5/2 D5/2 E5/2  F5/8 E5/4 D5/4
+P1: E5/4 A5/4 G5/2 F5/2 E5/2 D5/2  C5/6 D5/2 E5/4 C5/4  D5/4 F5/4 E5/4 Gs4/4  A4/12 r/4
+P2: @pluck [A3/2 E4/2 A4/2 E4/2]x2 [G3/2 D4/2 G4/2 D4/2]x2 [C4/2 G4/2 C5/2 G4/2]x2 [F3/2 C4/2 F4/2 C4/2]x2
+P2: [A3/2 E4/2 A4/2 E4/2]x2 [F3/2 C4/2 F4/2 C4/2]x2 [D4/2 A4/2 E4/2 B4/2]x2 [A3/2 E4/2 A4/2 E4/2]x2
+TR: [A2/4]x4 [G2/4]x4 [C3/4]x4 [F2/4]x4 [A2/4]x4 [F2/4]x4 D2/8 E2/8 A2/16
+NO: [K/4 S/4 K/2 K/2 S/4]x8
+
+# Theme du secteur 3 "Ceinture" - Re mineur, pulse
+@song belt tempo=6
+P1: D5/4 F5/4 A5/2 G5/2 F5/2 E5/2  D5/6 C5/2 A4/8  As4/4 D5/4 F5/2 E5/2 D5/2 C5/2  A4/12 r/4
+P1: D5/4 F5/4 A5/2 C6/2 As5/2 A5/2  G5/6 F5/2 E5/8  F5/4 E5/4 D5/4 Cs5/4  D5/12 r/4
+P2: [D4/1 F4/1 A4/1 F4/1]x4 [C4/1 E4/1 G4/1 E4/1]x4 [As3/1 D4/1 F4/1 D4/1]x4 [A3/1 Cs4/1 E4/1 Cs4/1]x4
+P2: [D4/1 F4/1 A4/1 F4/1]x4 [C4/1 E4/1 G4/1 E4/1]x4 [As3/1 D4/1 F4/1 D4/1]x4 [A3/1 Cs4/1 E4/1 Cs4/1]x4
+TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
+TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
+NO: [K/2 H/2 S/2 H/2 K/2 H/2 S/2 K/2]x8
+
+# Theme du secteur 4 "Lumen" - Mi mineur, synthetique
+@song lumen tempo=6
+P1: @pluck E5/2 E5/2 G5/2 E5/2 B5/4 A5/2 G5/2  Fs5/2 Fs5/2 A5/2 Fs5/2 D6/4 C6/2 B5/2
+P1: C6/2 B5/2 A5/2 G5/2 A5/4 E5/4  Fs5/4 G5/4 Fs5/4 Ds5/4
+P1: @lead E5/6 G5/2 B5/8  D6/6 C6/2 B5/8  C6/4 B5/4 A5/4 G5/4  Fs5/8 B4/8
+P2: [E4/1 B4/1]x8 [D4/1 A4/1]x8 [C4/1 G4/1]x8 [B3/1 Fs4/1]x8
+P2: [E4/1 B4/1]x8 [D4/1 A4/1]x8 [C4/1 G4/1]x8 [B3/1 Ds4/1]x8
+TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
+TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
+NO: [K/2 H/1 H/1 S/2 H/2 K/1 K/1 H/2 S/2 H/2]x8
+
+# Theme du secteur 5 "Hadar" - Do mineur, industriel
+@song hadar tempo=6
+P1: @brass C5/4 r/2 C5/2 Ds5/4 F5/4  G5/6 F5/2 Ds5/4 D5/4  C5/4 r/2 C5/2 G4/4 As4/4  C5/12 r/4
+P1: @lead Ds5/4 G5/4 C6/4 As5/4  Gs5/6 G5/2 F5/8  G5/4 F5/4 Ds5/4 D5/4  C5/8 G4/8
+P2: @pluck [C4/2 G4/2 C4/2 Ds4/2]x2 [Gs3/2 Ds4/2 Gs3/2 C4/2]x2 [As3/2 F4/2 As3/2 D4/2]x2 [G3/2 D4/2 G3/2 B3/2]x2
+P2: [C4/2 G4/2 C4/2 Ds4/2]x2 [Gs3/2 Ds4/2 Gs3/2 C4/2]x2 [As3/2 F4/2 As3/2 D4/2]x2 [G3/2 D4/2 G3/2 B3/2]x2
+TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
+TR: [C2/1 C2/1 C3/2]x4 [Gs2/1 Gs2/1 Gs3/2]x4 [As1/1 As1/1 As2/2]x4 [G2/1 G2/1 G3/2]x4
+NO: [K/2 K/2 S/2 H/2 K/2 H/1 H/1 S/2 S/2]x8
+
+# Theme du secteur 6 "Ancrage" - Mi phrygien, mysterieux
+@song ancrage tempo=7
+P1: @bell E5/8 F5/4 E5/4  G5/8 F5/4 E5/4  D5/4 E5/4 F5/4 A5/4  E5/12 r/4
+P1: @pad B5/8 C6/4 B5/4  A5/8 G5/4 F5/4  E5/4 F5/4 G5/4 F5/4  E5/16
+P2: @arp [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4 [E4/1 B4/1 E5/1 B4/1]x4
+P2: [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4 [E4/1 B4/1 E5/1 B4/1]x4
+TR: E2/16 F2/16 D2/16 E2/16 E2/16 F2/16 D2/16 E2/16
+NO: [K/4 H/4 S/4 H/2 H/2]x8
+
+# Theme du secteur 7 "Front" - Sol mineur, marche guerriere
+@song front tempo=6
+P1: @brass G4/2 G4/2 G4/2 As4/2 D5/4 C5/4  As4/2 A4/2 G4/2 A4/2 As4/8  C5/2 C5/2 C5/2 D5/2 Ds5/4 D5/4  C5/4 As4/4 A4/8
+P1: G5/4 F5/2 Ds5/2 D5/4 C5/4  As4/4 C5/2 D5/2 G4/8  A4/4 As4/2 C5/2 D5/4 Fs5/4  G5/12 r/4
+P2: @pluck [G3/2 D4/2]x4 [Ds3/2 As3/2]x4 [C4/2 G4/2]x4 [D4/2 A4/2]x4
+P2: [G3/2 D4/2]x4 [Ds3/2 As3/2]x4 [C4/2 G4/2]x4 [D4/2 Fs4/2]x4
+TR: [G2/2 G2/2 G3/2 G2/2]x2 [Ds2/2 Ds2/2 Ds3/2 Ds2/2]x2 [C2/2 C2/2 C3/2 C2/2]x2 [D2/2 D2/2 D3/2 D2/2]x2
+TR: [G2/2 G2/2 G3/2 G2/2]x2 [Ds2/2 Ds2/2 Ds3/2 Ds2/2]x2 [C2/2 C2/2 C3/2 C2/2]x2 [D2/2 D2/2 D3/2 D2/2]x2
+NO: [K/2 S/1 S/1 K/2 S/2 K/1 K/1 S/2 K/2 S/2]x8
+
+# Theme du secteur 8 "Coeur" - La mineur, final
+@song coeur tempo=5
+P1: @lead A4/2 C5/2 E5/2 A5/2 G5/4 E5/4  F5/2 A5/2 C6/2 A5/2 G5/4 F5/4  E5/2 G5/2 B5/2 E6/2 D6/4 B5/4  C6/8 B5/8
+P1: @brass A5/4 E5/4 A5/4 C6/4  G5/4 D5/4 G5/4 B5/4  F5/4 C5/4 F5/4 A5/4  E5/8 Gs5/8
+P2: @arp [A3/1 E4/1 A4/1 E4/1]x4 [F3/1 C4/1 F4/1 C4/1]x4 [E3/1 B3/1 E4/1 B3/1]x4 [A3/1 E4/1 A4/1 E4/1]x4
+P2: [A3/1 E4/1 A4/1 E4/1]x4 [G3/1 D4/1 G4/1 D4/1]x4 [F3/1 C4/1 F4/1 C4/1]x4 [E3/1 Gs3/1 B3/1 Gs3/1]x4
+TR: [A2/1 A3/1]x8 [F2/1 F3/1]x8 [E2/1 E3/1]x8 [A2/1 A3/1]x8
+TR: [A2/1 A3/1]x8 [G2/1 G3/1]x8 [F2/1 F3/1]x8 [E2/1 E3/1]x8
+NO: [K/1 H/1 S/1 H/1 K/1 K/1 S/1 H/1]x16
