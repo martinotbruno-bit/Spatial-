@@ -13,12 +13,12 @@ RESULTATS_TESTS.md).
 | `$0300-$07FF` | Variables (`BSS`) : tampon VRAM, pools d'entités, audio, partie | 646 / 1280 octets |
 | `$5FF0-$5FF1` | Marqueurs de profilage (non décodés par le MMC3) | — |
 | `$6000-$7FFF` | PRG-RAM sur pile (sauvegarde) | 64 / 8192 octets |
-| `$8000-$9FFF` | Banc R6 : secteur courant (bancs 0, 2, 3, 4 : en-tête, carte, attributs, script, palettes — 2,3 à 4,1 Kio chacun) ou interface (banc 5 : titre, menus, séquences narratives — 2,1 Kio) | |
+| `$8000-$9FFF` | Banc R6 : secteur courant (bancs 0, 2, 3, 4, 6, 7, 8, 9 : en-tête, carte, attributs, script, palettes — 2,3 à 4,1 Kio chacun) ou interface (banc 5 : titre, menus, séquences narratives — 2,1 Kio) | |
 | `$A000-$BFFF` | Banc R7 = 1 : musique, SFX, tables de périodes, directions, sinus | 4,7 / 8 Kio |
 | `$C000-$DFFF` | Banc 30 fixe : échantillon DPCM (273 o) + code de jeu | 6,7 / 8 Kio (83 %) |
 | `$E000-$FFFF` | Banc 31 fixe : démarrage, NMI, IRQ, audio, sauvegarde, HUD, boss, coopération, vecteurs | 4,9 / 8 Kio (60 %) |
 
-Bancs PRG 6 à 29 libres (192 Kio) : un par secteur restant et pour les données à venir. La ROM finale (256-512 Kio) donnera un banc
+Bancs PRG 10 à 29 libres (160 Kio). La ROM finale (256-512 Kio) donnera un banc
 par secteur restant.
 
 > Phase 2 : titre, HUD et données de niveau déplacés vers `$E000` ; le banc

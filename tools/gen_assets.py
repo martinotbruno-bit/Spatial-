@@ -162,12 +162,13 @@ def bar_tile(fill, color):
 # ------------------------------------------------------------- tuiles -------
 # Disposition de la CHR-ROM (unites de 1 Kio, bancs MMC3) :
 #   0-1   decor commun $00-$7F (police, jauges)        -> R0 = 0
-#   2+2k  decor du secteur k, tuiles $80-$FF (2 Kio)   -> R1
-#   16-18 sprites communs $00-$BF                       -> R2-R4 = 16,17,18
-#   19+k  sprites du jeu de secteur k, $C0-$FF (1 Kio)  -> R5
+#   2+2k  decor du secteur k, tuiles $80-$FF (2 Kio)   -> R1 (k = 0..14)
+#   32-34 sprites communs $00-$BF                       -> R2-R4 = 32,33,34
+#   35+j  jeu de sprites de secteur j, $C0-$FF (1 Kio)  -> R5
 CHR_BG_COMMON = 0
-CHR_SPR_COMMON = 16
-CHR_SPR_SECTOR = 19
+CHR_SPR_COMMON = 32
+CHR_SPR_SECTOR = 35
+CHR_UNITS = 64                      # CHR-ROM 64 Kio
 
 
 def blank_tiles(n):
@@ -623,6 +624,109 @@ def pal_s6(c, rows, x, y):
     return 0
 
 
+def gen_map_front(c):
+    """Secteur 7 : Front de la Concordance. Vaisseaux-meres de la flotte
+    croises au-dessus et au-dessous du couloir de vol (coques a canons,
+    hublots, reacteurs), debris et eclats de DCA entre eux."""
+    rng = random.Random(8642)
+    ncols = 256
+    stars = []
+    for _ in range(4):
+        col = [0] * 26
+        for y in range(26):
+            r = rng.random()
+            if r < 0.04:
+                col[y] = c["T_STAR1"]
+            elif r < 0.07:
+                col[y] = c["T_STAR2"]
+        stars.append(col)
+    cols = []
+    for x in range(ncols):
+        col = list(stars[(x * 3) % 4])
+        if 32 <= x < 216:
+            seg = (x - 32) // 24          # un vaisseau-mere toutes les 24 colonnes
+            xx = (x - 32) % 24
+            top = [4, 6, 3, 5, 7, 4, 5, 3][seg % 8]
+            bot = [5, 3, 6, 4, 3, 6, 4, 5][seg % 8]
+            if xx < 20:                    # coque haute
+                for y in range(top):
+                    col[y] = c["T_CAP_HULL"]
+                col[top] = c["T_CAP_BOT"]
+                if xx % 5 == 2:
+                    col[top] = c["T_CAP_GUN_D"]
+                if xx % 4 == 1:
+                    col[top - 2] = c["T_WINDOW"]
+            if 4 <= xx < 24:               # coque basse, decalee
+                for y in range(26 - bot, 26):
+                    col[y] = c["T_CAP_HULL"]
+                col[25 - bot] = c["T_CAP_TOP"]
+                if xx % 5 == 0:
+                    col[25 - bot] = c["T_CAP_GUN"]
+                if xx % 4 == 3:
+                    col[27 - bot] = c["T_WINDOW"]
+            if xx in (19, 23):
+                col[1] = c["T_ENGINE"]
+                col[24] = c["T_ENGINE"]
+            if (x * 7) % 13 == 0:
+                col[rng.choice((9, 12, 15))] = c["T_DEBRIS"]
+            if (x * 5) % 17 == 0:
+                col[rng.choice((8, 13, 17))] = c["T_FLAK"]
+        cols.append(col)
+    return cols
+
+
+def pal_s7(c, cols, x, y):
+    t = cols[x][y]
+    if t in (c["T_ENGINE"], c["T_FLAK"]):
+        return 2
+    if t in (c["T_WINDOW"], c["T_CAP_GUN"], c["T_CAP_GUN_D"]):
+        return 3
+    return 0
+
+
+def gen_map_core(c):
+    """Secteur 8 : Coeur du Lien. Parois d'energie haute/basse, treillis,
+    flux lumineux horizontaux et verticaux reliant des noeuds."""
+    ncols = 256
+    cols = []
+    for x in range(ncols):
+        col = [0] * 26
+        if (x * 11) % 7 == 0:
+            col[(x * 5) % 26] = c["T_VEIL"]
+        if 24 <= x < 216:
+            seg = (x - 24) // 16
+            xx = (x - 24) % 16
+            top = [2, 3, 4, 3, 2, 4, 5, 3][seg % 8]
+            bot = [3, 2, 3, 4, 5, 2, 3, 4][seg % 8]
+            for y in range(top):
+                col[y] = c["T_WALL_E"]
+            col[top] = c["T_WALL_TOP"]
+            for y in range(26 - bot, 26):
+                col[y] = c["T_WALL_E"]
+            col[25 - bot] = c["T_WALL_BOT"]
+            for y in range(top + 1, 25 - bot):
+                if (x + y) % 6 == 0:
+                    col[y] = c["T_LATTICE"]
+            if seg % 2 == 0 and xx in range(2, 14):
+                col[12] = c["T_FLOW_H"]
+                col[13] = c["T_FLOW_H"]
+            if xx == 8:
+                for y in range(top + 1, 25 - bot):
+                    col[y] = c["T_FLOW_V"]
+                col[12] = c["T_NODE"]
+        cols.append(col)
+    return cols
+
+
+def pal_s8(c, cols, x, y):
+    t = cols[x][y]
+    if t in (c["T_FLOW_H"], c["T_FLOW_V"], c["T_NODE"]):
+        return 2
+    if t in (c["T_WALL_TOP"], c["T_WALL_BOT"]):
+        return 3
+    return 0
+
+
 # Definition des secteurs (ordre de la campagne)
 SECTORS = [
     dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
@@ -649,6 +753,14 @@ SECTORS = [
          sprites="sprites_s6.txt", spr_set=4, gen=gen_map_anchor, palfn=pal_s6,
          loop=(24, 176), reps=5, song="ancrage", boss=5,
          pal=[0x0F, 0x02, 0x13, 0x23, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x0A, 0x1A, 0x3A, 0x0F, 0x04, 0x24, 0x34]),
+    dict(name="s7", title="Front de la Concordance", orient=0, bank=8, tiles="tiles_s7.txt",
+         sprites="sprites_s7.txt", spr_set=5, gen=gen_map_front, palfn=pal_s7,
+         loop=(32, 192), reps=5, song="front", boss=6,
+         pal=[0x0F, 0x00, 0x2D, 0x10, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x06, 0x16, 0x27, 0x0F, 0x01, 0x21, 0x31]),
+    dict(name="s8", title="Coeur du Lien", orient=0, bank=9, tiles="tiles_s8.txt",
+         sprites="sprites_s8.txt", spr_set=6, gen=gen_map_core, palfn=pal_s8,
+         loop=(24, 192), reps=5, song="coeur", boss=7,
+         pal=[0x0F, 0x03, 0x13, 0x23, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x11, 0x21, 0x31, 0x0F, 0x04, 0x25, 0x35]),
 ]
 # Palettes de sprites communes
 SPR_PAL = [0x0F, 0x02, 0x21, 0x30, 0x0F, 0x06, 0x27, 0x38, 0x0F, 0x04, 0x14, 0x2A, 0x0F, 0x30, 0x27, 0x16]
@@ -894,11 +1006,11 @@ def main():
     os.makedirs(BUILD, exist_ok=True)
     consts = {}
     bg_common, spr_common = build_common(consts)
-    units = [bytes(1024)] * 32
+    units = [bytes(1024)] * CHR_UNITS
     def enc(tiles):
         return b"".join(encode_tile(t) for t in tiles)
     units[0:2] = [enc(bg_common[0:64]), enc(bg_common[64:128])]
-    units[16:19] = [enc(spr_common[0:64]), enc(spr_common[64:128]), enc(spr_common[128:192])]
+    units[CHR_SPR_COMMON:CHR_SPR_COMMON + 3] = [enc(spr_common[0:64]), enc(spr_common[64:128]), enc(spr_common[128:192])]
     spr_sets = []
     sector_data = []
     for k, sec in enumerate(SECTORS):
@@ -913,7 +1025,7 @@ def main():
         attr = attrfn(lines, lambda x, y, c=c, lines=lines, f=sec["palfn"]: f(c, lines, x, y)) if sec["palfn"] else None
         sector_data.append((sec, c, tpl, ids, attr, load_script(sec["name"])))
     chr_data = b"".join(units)
-    assert len(chr_data) == 32768
+    assert len(chr_data) == CHR_UNITS * 1024
     with open(os.path.join(BUILD, "chr.bin"), "wb") as f:
         f.write(chr_data)
     consts["S_BOSS_H"] = 0xC0
@@ -928,6 +1040,7 @@ def main():
     out.append(f"NUM_SECTORS = {len(SECTORS)}")
     out.append(f"CHR_BG_COMMON = {CHR_BG_COMMON}")
     out.append(f"CHR_SPR_COMMON = {CHR_SPR_COMMON}")
+    out.append(f"CHR_SPR_SECTOR = {CHR_SPR_SECTOR}")
     out.append("")
 
     # Secteurs : un banc PRG chacun, en-tete a $8000 (voir stage.s : SH_*)

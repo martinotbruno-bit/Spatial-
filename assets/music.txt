@@ -93,3 +93,23 @@ P2: @arp [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4
 P2: [E4/1 B4/1 E5/1 B4/1]x4 [F4/1 C5/1 F5/1 C5/1]x4 [D4/1 A4/1 D5/1 A4/1]x4 [E4/1 B4/1 E5/1 B4/1]x4
 TR: E2/16 F2/16 D2/16 E2/16 E2/16 F2/16 D2/16 E2/16
 NO: [K/4 H/4 S/4 H/2 H/2]x8
+
+# Theme du secteur 7 "Front" - Sol mineur, marche guerriere
+@song front tempo=6
+P1: @brass G4/2 G4/2 G4/2 As4/2 D5/4 C5/4  As4/2 A4/2 G4/2 A4/2 As4/8  C5/2 C5/2 C5/2 D5/2 Ds5/4 D5/4  C5/4 As4/4 A4/8
+P1: G5/4 F5/2 Ds5/2 D5/4 C5/4  As4/4 C5/2 D5/2 G4/8  A4/4 As4/2 C5/2 D5/4 Fs5/4  G5/12 r/4
+P2: @pluck [G3/2 D4/2]x4 [Ds3/2 As3/2]x4 [C4/2 G4/2]x4 [D4/2 A4/2]x4
+P2: [G3/2 D4/2]x4 [Ds3/2 As3/2]x4 [C4/2 G4/2]x4 [D4/2 Fs4/2]x4
+TR: [G2/2 G2/2 G3/2 G2/2]x2 [Ds2/2 Ds2/2 Ds3/2 Ds2/2]x2 [C2/2 C2/2 C3/2 C2/2]x2 [D2/2 D2/2 D3/2 D2/2]x2
+TR: [G2/2 G2/2 G3/2 G2/2]x2 [Ds2/2 Ds2/2 Ds3/2 Ds2/2]x2 [C2/2 C2/2 C3/2 C2/2]x2 [D2/2 D2/2 D3/2 D2/2]x2
+NO: [K/2 S/1 S/1 K/2 S/2 K/1 K/1 S/2 K/2 S/2]x8
+
+# Theme du secteur 8 "Coeur" - La mineur, final
+@song coeur tempo=5
+P1: @lead A4/2 C5/2 E5/2 A5/2 G5/4 E5/4  F5/2 A5/2 C6/2 A5/2 G5/4 F5/4  E5/2 G5/2 B5/2 E6/2 D6/4 B5/4  C6/8 B5/8
+P1: @brass A5/4 E5/4 A5/4 C6/4  G5/4 D5/4 G5/4 B5/4  F5/4 C5/4 F5/4 A5/4  E5/8 Gs5/8
+P2: @arp [A3/1 E4/1 A4/1 E4/1]x4 [F3/1 C4/1 F4/1 C4/1]x4 [E3/1 B3/1 E4/1 B3/1]x4 [A3/1 E4/1 A4/1 E4/1]x4
+P2: [A3/1 E4/1 A4/1 E4/1]x4 [G3/1 D4/1 G4/1 D4/1]x4 [F3/1 C4/1 F4/1 C4/1]x4 [E3/1 Gs3/1 B3/1 Gs3/1]x4
+TR: [A2/1 A3/1]x8 [F2/1 F3/1]x8 [E2/1 E3/1]x8 [A2/1 A3/1]x8
+TR: [A2/1 A3/1]x8 [G2/1 G3/1]x8 [F2/1 F3/1]x8 [E2/1 E3/1]x8
+NO: [K/1 H/1 S/1 H/1 K/1 K/1 S/1 H/1]x16

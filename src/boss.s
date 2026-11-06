@@ -9,6 +9,13 @@ boss_spawn:
     sta boss_on
     lda boss_hp0
     sta boss_hp
+    lda sec_hdr+SH_BOSS     ; boss final : PV et seuils de phase propres
+    cmp #7
+    bne @nf7
+    ldx diff
+    lda boss7_hp,x
+    sta boss_hp
+@nf7:
     lda #SPAWN_U
     sta boss_u
     ldy orient
@@ -130,6 +137,14 @@ boss_fight:
     bne @k4
     jmp boss5_fire
 @k4:
+    cmp #6
+    bne @k5
+    jmp boss6_fire
+@k5:
+    cmp #7
+    bne @k6
+    jmp boss7_fire
+@k6:
     lda boss_hp
     cmp boss_ph2
     bcc @phase2
@@ -510,6 +525,135 @@ boss_cross:
 boss5_m1: .byte 31,    15,    15,     7
 boss5_m2: .byte 15,    15,    7,      7
 
+; -----------------------------------------------------------------------------
+; Boss 6 : AMIRAL-MACHINE (secteur 7)
+;   Phase 1 : gerbe de 5 + tir vise, lache un kamikaze toutes les 128 img
+;   Phase 2 : cycle de 40 img : gerbe de 5, 3 tirs vises, kamikaze / 64 img
+; -----------------------------------------------------------------------------
+boss6_fire:
+    lda boss_hp
+    cmp boss_ph2
+    bcc @p2
+    lda boss_t
+    and #127
+    cmp #96
+    bne @n1
+    lda #EN_KAMIKAZE
+    jmp boss_minion
+@n1:
+    and #63
+    bne @n2
+    lda #6
+    ldy #5
+    jmp boss_fan
+@n2:
+    cmp #32
+    bne @r
+    jmp boss_aim
+@p2:
+    lda boss_t
+    and #63
+    cmp #50
+    bne @nk
+    lda #EN_KAMIKAZE
+    jmp boss_minion
+@nk:
+    lda boss_burst
+    cmp #40
+    bcc @t
+    lda #0
+    sta boss_burst
+@t:
+    inc boss_burst
+    lda boss_burst
+    cmp #1
+    bne @a
+    lda #6
+    ldy #5
+    jmp boss_fan
+@a:
+    cmp #12
+    beq @aim
+    cmp #18
+    beq @aim
+    cmp #24
+    bne @r
+@aim:
+    jmp boss_aim
+@r:
+    rts
+
+; -----------------------------------------------------------------------------
+; Boss 7 : LA CONCORDANCE (secteur 8, boss final) - 3 phases selon les PV
+;   Phase 1 : anneaux alternes
+;   Phase 2 : spirale rapide + tirs vises
+;   Phase 3 : croix tournantes + anneaux + tirs vises + drones
+; -----------------------------------------------------------------------------
+boss7_fire:
+    ldx diff
+    lda boss_hp
+    cmp boss7_th2,x
+    bcc @p3
+    cmp boss7_th1,x
+    bcc @p2
+    ; phase 1
+    lda boss_t
+    and boss7_m1,x
+    bne @r
+    lda boss_burst
+    inc boss_burst
+    and #1
+    jmp boss_ring
+@p2:
+    lda boss_t
+    and #63
+    cmp #40
+    bne @s
+    jmp boss_aim
+@s:
+    lda boss_t
+    and boss7_m2,x
+    bne @r
+    jsr boss3_origin
+    lda boss_burst
+    inc boss_burst
+    and #15
+    sta tmp2
+    jmp eb_spawn
+@p3:
+    lda boss_t
+    and #127
+    cmp #100
+    bne @nd
+    lda #EN_DRONE
+    jmp boss_minion
+@nd:
+    and #31
+    cmp #16
+    bne @nr
+    jmp boss_aim
+@nr:
+    lda boss_t
+    and #63
+    bne @nc
+    lda boss_burst
+    and #1
+    jmp boss_ring
+@nc:
+    lda boss_t
+    and boss5_m2,x
+    bne @r
+    jmp boss_cross
+@r:
+    rts
+
+;              RECRUE PILOTE VETERAN EXPERT
+boss7_hp:  .byte 200,   250,   250,    250
+boss7_th1: .byte 133,   166,   166,    180  ; passage en phase 2
+boss7_th2: .byte 66,    83,    83,     100  ; passage en phase 3
+boss7_m1:  .byte 63,    31,    31,     31
+boss7_m2:  .byte 7,     3,     3,      3
+
 ; Anneau de 8 projectiles, directions A, A+2, ..., A+14 (A+16 : rapides)
 boss_ring:
     sta tmp2
@@ -537,6 +681,8 @@ boss_ring:
 ; Lache un drone depuis le boss
 boss2_drone:
     lda #EN_DRONE
+; Lache un ennemi de type A depuis le boss
+boss_minion:
     sta tmp2
     lda boss_v
     clc

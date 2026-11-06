@@ -143,7 +143,7 @@ test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   m.tap(0, "DOWN");
   m.tap(0, "LEFT");
   const sec = m.peek("sector_sel");
-  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 5, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 7, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
 });
 
 test("T03", "Deux manettes : deplacements independants et simultanes", () => {
@@ -660,7 +660,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   const locked = m.peek("diff") === 0;
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
-  m.poke("story_page", 6); m.tap(0, "START"); m.frame(10);
+  m.poke("story_page", 8); m.tap(0, "START"); m.frame(10);
   const sram = m.sram(64);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
@@ -968,9 +968,83 @@ test("T42", "Secteur 6 Premier Ancrage (V) : decor, emetteurs cristallins, Gardi
   m.releaseAll();
   const cleared = m.peek("state") === ST.CLEAR;
   m.frame(252, invul);
-  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 6;
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 6;   // arrivee secteur 7
   return { ok: ok0 && vbad === 0 && seen && st1 === 1 && st2 === 0 && cross >= 4 && dirs.size >= 6 && cleared && epi,
     detail: `secteur charge=${ok0}, erreurs VRAM=${vbad}, emetteurs vus=${seen}, ferme=${st1 === 1} puis ouvert=${st2 === 0} avec ${cross} projectiles en croix, directions boss=${dirs.size}, boss vaincu=${cleared}, epilogue=${epi}` };
+});
+
+// Joue le boss du secteur courant jusqu'a sa destruction (vaisseaux places devant lui)
+function fightBoss(m, maxFrames, each) {
+  jumpToBoss(m);
+  m.press(0, "B"); m.press(1, "B");
+  for (let i = 0; i < maxFrames && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1, invul);
+    const bv = m.peek("boss_v");
+    m.poke("pl_u", 100); m.poke("pl_u", 100, 1);
+    m.poke("pl_v", Math.max(40, bv)); m.poke("pl_v", Math.min(208, bv + 16), 1);
+    if (each) each(m, i);
+  }
+  m.releaseAll();
+  return m.peek("state") === ST.CLEAR;
+}
+
+test("T43", "Secteur 7 Front de la Concordance : decor, Amiral-machine (kamikazes lances)", () => {
+  const m = startGame({ players: 2, sector: 6 });
+  const ok0 = m.peek("stage") === 6;
+  let vbad = 0, abad = 0;
+  for (let k = 0; k < 10; k++) { m.frame(97, invul); vbad += vramErrors(m); abad += attrErrors(m); if (k === 5) m.screenshot(path.join(SHOTS, "21_secteur7_front.png")); }
+  let kami = 0;
+  const cleared = fightBoss(m, 3000, (mm, i) => {
+    if (mm.peek("boss_on") === 2) kami = Math.max(kami, mm.peekBytes("en_type", 10).filter((x) => x === 4).length);
+    if (i === 300) mm.screenshot(path.join(SHOTS, "22_amiral.png"));
+  });
+  m.frame(252, invul);
+  const next = m.peek("state") === ST.STORY && m.peek("story_page") === 7;
+  return { ok: ok0 && vbad === 0 && abad === 0 && kami > 0 && cleared && next, detail: `secteur charge=${ok0}, VRAM ${vbad}/${abad} erreurs, kamikazes lances par le boss (max)=${kami}, boss vaincu=${cleared}, arrivee secteur 8=${next}` };
+});
+
+test("T44", "Secteur 8 Coeur du Lien : Concordance en 3 phases, deux fins (LIAISON / RUPTURE)", () => {
+  const res = [];
+  for (const cont of [3, 2]) {
+    const m = startGame({ players: 2, sector: 7 });
+    if (cont === 3) for (let k = 0; k < 8; k++) { m.frame(97, invul); }
+    const vbad = vramErrors(m) + attrErrors(m);
+    if (cont === 3) m.screenshot(path.join(SHOTS, "23_secteur8_coeur.png"));
+    m.poke("continues", cont);
+    const phases = new Set();
+    const cleared = fightBoss(m, 4000, (mm, i) => {
+      if (mm.peek("boss_on") !== 2) return;
+      const hp = mm.peek("boss_hp");
+      phases.add(hp >= 166 ? 1 : hp >= 83 ? 2 : 3);
+      if (cont === 3 && i === 500) mm.screenshot(path.join(SHOTS, "24_concordance.png"));
+    });
+    m.frame(252, invul);
+    const page = m.peek("story_page"), st = m.peek("state");
+    m.frame(900);                                   // texte puis retour automatique au titre
+    res.push({ cont, ok: vbad === 0 && cleared && phases.size === 3 && st === ST.STORY && page === (cont === 3 ? 8 : 9) && m.peek("state") === ST.TITLE && m.peek("unlocked") === 1,
+      txt: `credits=${cont} : phases vues=${[...phases].sort()}, page de fin=${page} (${page === 8 ? "LIAISON" : "RUPTURE"}), retour titre=${m.peek("state") === ST.TITLE}, EXPERT=${m.peek("unlocked")}` });
+  }
+  return { ok: res.every((r) => r.ok), detail: res.map((r) => r.txt).join(" ; ") };
+});
+
+test("T45", "Campagne complete enchainee : secteurs 1 a 8, histoire, deblocages, fin", () => {
+  const m = new Machine();
+  m.frame(40); m.tap(0, "RIGHT"); m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(4);
+  const seq = [];
+  for (let k = 0; k < 8; k++) {
+    seq.push(m.peek("stage"));
+    if (m.peek("state") !== ST.PLAY || m.peek("stage") !== k) break;
+    m.frame(30, invul);
+    jumpToBoss(m);
+    m.frame(60, invul);
+    m.poke("boss_on", 3); m.poke("boss_t", 99);
+    m.frame(254, invul);
+    if (k < 7) { if (m.peek("story_page") !== k + 1) break; m.tap(0, "START"); m.frame(4); }
+  }
+  const page = m.peek("story_page"), unl = m.peek("sectors_unl");
+  m.frame(900);
+  return { ok: seq.join("") === "01234567" && page === 8 && unl === 255 && m.peek("state") === ST.TITLE,
+    detail: `secteurs joues=${seq.join(",")}, page finale=${page} (LIAISON), secteurs debloques=${unl.toString(2)}, retour titre=${m.peek("state") === ST.TITLE}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

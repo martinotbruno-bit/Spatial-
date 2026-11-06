@@ -52,8 +52,10 @@ CHR-ROM (unités de 1 Kio) :
 |---|---|---|
 | 0-1 | décor commun `$00-$7F` (police, jauges) | R0 = 0 |
 | 2+2k | décor du secteur k, tuiles `$80-$FF` | R1 |
-| 16-18 | sprites communs `$00-$BF` (vaisseaux, ennemis, tirs, explosions) | R2-R4 |
-| 19+j | jeu de sprites j, `$C0-$FF` (boss H/V, objet de décor) | R5 |
+| 32-34 | sprites communs `$00-$BF` (vaisseaux, ennemis, tirs, explosions) | R2-R4 |
+| 35+j | jeu de sprites j, `$C0-$FF` (boss H/V, objet de décor, parties de boss) | R5 |
+
+CHR-ROM : 64 Kio (64 unités de 1 Kio) depuis l'ajout des secteurs 7 et 8.
 
 **Longueur des secteurs** : la carte est découpée en intro (jouée une fois),
 corps (joué `SH_REPS` fois) et fin (arène du boss). `map_pos` convertit la

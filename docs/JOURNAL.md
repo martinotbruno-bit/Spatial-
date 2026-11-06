@@ -224,6 +224,17 @@
   fermé) — les 8 familles du CDC sont couvertes.
 - Boss Gardien d'Ancrage (croix tournantes). Test T42 ; 42/42.
 
+## 2026-11-06 — Campagne complète : secteurs 7 et 8, deux fins
+
+- CHR-ROM 32 → 64 Kio (décors de 8 secteurs + 7 jeux de sprites).
+- Secteur 7 « Front de la Concordance » (flotte en bataille, Amiral-machine
+  lançant des kamikazes) ; secteur 8 « Cœur du Lien » (boss final la
+  Concordance en 3 phases). Musiques « Front » et « Cœur ».
+- Deux fins (Liaison / Rupture) selon l'usage des crédits.
+- Tests T43, T44, T45 (campagne enchaînée de 1 à 8) : 45/45.
+- Incident de génération : deux scripts écrits à la racine du dépôt au lieu
+  de `assets/`, détecté au contrôle et supprimé (contenu identique).
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

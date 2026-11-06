@@ -37,7 +37,7 @@ Légende :
 | 2.2 | Niveaux horizontaux et verticaux | ✅ ÉMU | 1 secteur de chaque |
 | 2.3 | Coop 2 joueurs, vaisseaux différents, vies communes | ✅ ÉMU | T03-T09 |
 | 2.3 | Solo complet, sans passage imposant 2 joueurs | 🟡 | Solo jouable avec les 2 vaisseaux, Nova de remplacement ; campagne non produite |
-| 2.4 | Campagne de 1 à 2 h | 🟡 | 6 secteurs jouables sur 8, ≈ 2-2,5 min de défilement + boss chacun ; ≈ 16-18 min au total |
+| 2.4 | Campagne de 1 à 2 h | 🟡 | **8 secteurs sur 8** enchaînés (T45) ; ≈ 22-25 min sans perte, davantage avec reprises : **en dessous de la cible de 1 à 2 h** (augmenter le nombre de passages du corps de chaque secteur est un réglage de données) |
 | 3.1 | 8 directions, contrôles précis | ✅ ÉMU | Déplacement sub-pixel 8.8, sans inertie |
 | 3.2 | Vaisseaux distincts et complémentaires | ✅ ÉMU | Vitesse, armes, cadence, capacités propres (Surcharge / Bouclier, T23-T24) |
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |
@@ -45,8 +45,8 @@ Légende :
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
 | 4 | Armement riche et évolutif | ✅ ÉMU | Arme d'origine ×2, laser perçant, missiles guidés (3 niveaux chacun), bombes à munitions, bouclier, capsules changeantes, salve synchronisée, pouvoirs coop (T15, T37-T39) ; options d'escorte à envisager |
 | 5.1 | Grande variété d'ennemis | ✅ ÉMU | Les 8 familles du CDC : drones, chasseurs, unités lourdes, tourelles, soutiens, kamikazes, spécialisés (poseurs de mines + mines), structures défensives (émetteurs cristallins) + décor destructible (T12, T33, T36, T41, T42) |
-| 5.2 | Boss multi-phases | ✅ ÉMU | 5 boss à 2 phases dont un à **parties destructibles** (Croiseur, T41) ; T13, T33, T36, T42 |
-| 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Séquences narratives (intro, transition, épilogue) avec musique dédiée (T26) ; 2 fins et encyclopédie à produire |
+| 5.2 | Boss multi-phases | ✅ ÉMU | 7 boss : 6 à 2 phases dont un à **parties destructibles** (Croiseur, T41), boss final à 3 phases (T44) |
+| 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Scénario sur 8 secteurs, séquences narratives avec musique (T26), **2 fins selon la performance** (T44) ; encyclopédie à produire |
 | 7 | Direction artistique | 🟡 | 4 environnements, 3 palettes de décor par secteur en H comme en V (T29, T11, T36), décor destructible (T30) |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM, 6 instruments ; 5 musiques (menu, histoire, niveau, boss, fin de secteur), WAV dans `docs/audio/` |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 42/42 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 45/45 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

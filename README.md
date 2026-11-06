@@ -3,9 +3,9 @@
 Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 [cahier des charges maître](Cdc%20spatial.md).
 
-> **État : Phase 1 (prototype technique) réalisée et testée en émulation.**
-> Les phases 2 à 5 (tranche verticale, campagne complète, finition, cartouche)
-> restent à faire. Aucun test sur matériel réel n'a été effectué : voir
+> **État : campagne complète jouable (8 secteurs, 2 fins), testée en émulation.**
+> Restent : encyclopédie, classements complets, finition, fabrication de la
+> cartouche et tests sur matériel réel. Aucun test sur matériel réel n'a été effectué : voir
 > [docs/CONFORMITE.md](docs/CONFORMITE.md) pour l'état exact de chaque exigence.
 
 ![Planche de captures (émulation)](docs/captures/planche.png)
@@ -27,12 +27,16 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - Ressource coopérative **LIEN** et trois pouvoirs : **Faisceau de Liaison**
   (attaque combinée dépendant du placement des deux vaisseaux),
   **Transfert d'énergie** (ramène un partenaire sans vie), **Nova** (solo)
-- 6 secteurs : **Station Vesta** (horizontal, 3 palettes, conteneurs
+- **Campagne complète de 8 secteurs** : **Station Vesta** (horizontal, 3 palettes, conteneurs
   destructibles), **Surface de Kéra** (vertical), **Ceinture brisée**
   (horizontal, astéroïdes, unités lourdes, boss Essaim-mère), **Cité de
   Lumen** (vertical, appareils de soutien, boss Garde-ciel), **Chantiers
   d'Hadar** (horizontal, poseurs de mines, croiseur à tourelles destructibles),
-  **Premier Ancrage** (vertical, émetteurs cristallins, Gardien d'Ancrage)
+  **Premier Ancrage** (vertical, émetteurs cristallins, Gardien d'Ancrage),
+  **Front de la Concordance** (horizontal, Amiral-machine), **Cœur du Lien**
+  (horizontal, boss final la Concordance en 3 phases)
+- **Deux fins** : *Fin de Liaison* (campagne terminée sans « Continuer ») ou
+  *Fin de Rupture*
 - Secteurs débloqués sauvegardés et rejouables, secteur 2 en **défilement vertical**,
   HUD fixe par séparation d'écran (IRQ de ligne MMC3)
 - 4 familles d'ennemis (drones, chasseurs, tourelles, kamikazes), tirs visés

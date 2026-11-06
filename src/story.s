@@ -7,6 +7,14 @@ STORY_ORIGIN = $20C3        ; rangee 6, colonne 3
 
 ; A = page (k = arrivee dans le secteur k, NUM_SECTORS = epilogue)
 story_enter:
+    ; epilogue : FIN DE LIAISON sans credit utilise, sinon FIN DE RUPTURE
+    cmp #NUM_SECTORS
+    bne @pg
+    ldx continues
+    cpx #CONTINUES
+    beq @pg
+    lda #NUM_SECTORS+1
+@pg:
     sta story_page
     jsr ppu_off
     lda #0
@@ -52,8 +60,9 @@ story_enter:
     jmp ppu_on
 
 ; page k = arrivee dans le secteur k ; page NUM_SECTORS = epilogue
-story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_end
-story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_end
+; NUM_SECTORS = FIN DE LIAISON, NUM_SECTORS+1 = FIN DE RUPTURE
+story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_p6, story_p7, story_end_a, story_end_b
+story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_p4, story_p5, story_p6, story_p7, story_end_a, story_end_b
 
 story_update:
     lda pad_new
@@ -115,7 +124,7 @@ story_update:
 story_done:
     lda story_page
     cmp #NUM_SECTORS
-    bne @play
+    bcc @play
     ; campagne terminee : mode EXPERT debloque
     lda unlocked
     ora #1
@@ -182,10 +191,37 @@ story_p5:
     .byte "SES CRISTAUX SE FERMENT", $0A
     .byte "SOUS LE FEU : VISEZ-LES", $0A
     .byte "QUAND ILS S'OUVRENT.", 0
-story_end:
+story_p6:
     .byte "LE GARDIEN EST TOMBE.", $0A, $0A
-    .byte "MAIS AU LOIN, LES ANCRAGES", $0A
-    .byte "S'EVEILLENT UN A UN...", $0A, $0A, $0A
-    .byte "  A SUIVRE : SECTEUR 7", $0A, $0A
-    .byte "   MERCI D'AVOIR JOUE !", 0
+    .byte "LE CHEMIN DU COEUR EST", $0A
+    .byte "OUVERT, MAIS LA FLOTTE DE", $0A
+    .byte "LA CONCORDANCE BARRE", $0A
+    .byte "LA ROUTE.", $0A, $0A
+    .byte "PERCEZ LE FRONT !", 0
+story_p7:
+    .byte "L'AMIRAL-MACHINE EST", $0A
+    .byte "DETRUIT.", $0A, $0A
+    .byte "AU-DELA S'OUVRE LE COEUR", $0A
+    .byte "DU LIEN, OU PULSE", $0A
+    .byte "LA CONCORDANCE.", $0A, $0A
+    .byte "C'EST LA DERNIERE ETAPE.", 0
+story_end_a:
+    .byte "LA CONCORDANCE S'ETEINT.", $0A, $0A
+    .byte "LANCE ET EGIDE", $0A
+    .byte "REBRANCHENT LES LIENS :", $0A
+    .byte "LES MONDES DU BRAS", $0A
+    .byte "D'ORION SE PARLENT", $0A
+    .byte "A NOUVEAU.", $0A, $0A
+    .byte "    FIN DE LIAISON", $0A, $0A
+    .byte "  MERCI D'AVOIR JOUE !", 0
+story_end_b:
+    .byte "LA CONCORDANCE S'ETEINT,", $0A
+    .byte "MAIS TROP DE LIENS ONT", $0A
+    .byte "ETE ROMPUS EN CHEMIN.", $0A, $0A
+    .byte "LES MONDES RESTENT", $0A
+    .byte "SEPARES... POUR L'INSTANT.", $0A, $0A
+    .byte "    FIN DE RUPTURE", $0A, $0A
+    .byte "TERMINEZ SANS CONTINUER", $0A
+    .byte "POUR DECOUVRIR LA VRAIE", $0A
+    .byte "FIN.", 0
 

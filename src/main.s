@@ -10,7 +10,7 @@
 .segment "HEADER"
     .byte "NES", $1A
     .byte 16            ; PRG-ROM : 16 x 16 Kio = 256 Kio
-    .byte 4             ; CHR-ROM : 4 x 8 Kio  = 32 Kio
+    .byte 8             ; CHR-ROM : 8 x 8 Kio  = 64 Kio
     .byte $42           ; mapper 4 (bits bas), PRG-RAM sauvegardee par pile
     .byte $00           ; mapper 4 (bits hauts)
     .byte $00, $00, $00, $00, $00, $00, $00, $00
@@ -105,7 +105,7 @@ reset:
 mmc3_init_banks:
     ; R0, R1 : CHR 2 Kio $0000/$0800 ; R2-R5 : CHR 1 Kio $1000-$1C00
     ; R6 : PRG $8000 = banc 0 ; R7 : PRG $A000 = banc 1
-    .byte CHR_BG_COMMON, 2, CHR_SPR_COMMON, CHR_SPR_COMMON+1, CHR_SPR_COMMON+2, 19, 0, 1
+    .byte CHR_BG_COMMON, 2, CHR_SPR_COMMON, CHR_SPR_COMMON+1, CHR_SPR_COMMON+2, CHR_SPR_SECTOR, 0, 1
 
 ; -----------------------------------------------------------------------------
 ; Detection NTSC / PAL : nombre d'iterations d'une boucle de 11 cycles entre

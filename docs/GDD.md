@@ -139,7 +139,18 @@ tirs visés.
 de 4 projectiles tournant d'un cran à chaque salve ; phase 2 : croix plus
 rapide, anneau de 8 toutes les 4 salves et tirs visés.
 
-## 6. Campagne proposée (durée cible 1 à 2 h)
+**Amiral-machine** *[secteur 7]* : vaisseau-amiral ; gerbes de 5, tirs visés
+en rafales, lance des kamikazes.
+
+**La Concordance** *[secteur 8, boss final]* — **3 phases** selon ses PV :
+anneaux alternés ; spirale rapide et tirs visés ; croix tournantes, anneaux,
+tirs visés et drones. 200 PV en RECRUE, 250 sinon.
+
+**Fins** *[prototype]* : *Fin de Liaison* si la campagne est terminée sans
+utiliser de crédit « Continuer », *Fin de Rupture* sinon (le texte invite à
+recommencer sans continuer). Les deux débloquent le mode EXPERT.
+
+## 6. Campagne (durée cible 1 à 2 h)
 
 Hypothèse de calibrage, issue du prototype : un secteur sans perte dure
 ~1 min (30 s de défilement + mini-boss) dans le prototype ; un secteur final durera 5 à 7 min

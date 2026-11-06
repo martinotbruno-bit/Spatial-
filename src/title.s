@@ -259,14 +259,16 @@ vbuf_str11:
 str_v_lance: .byte "LANCE      "
 str_v_egide: .byte "EGIDE      "
 str_v_both:  .byte "LANCE+EGIDE"
-sector_str_lo: .lobytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6
-sector_str_hi: .hibytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6
+sector_str_lo: .lobytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6, str_s7, str_s8
+sector_str_hi: .hibytes str_s1, str_s2, str_s3, str_s4, str_s5, str_s6, str_s7, str_s8
 str_s1:      .byte "1 STATION H"
 str_s2:      .byte "2 PLANETE V"
 str_s3:      .byte "3 CEINTURE "
 str_s4:      .byte "4 LUMEN V  "
 str_s5:      .byte "5 HADAR H  "
 str_s6:      .byte "6 ANCRAGE V"
+str_s7:      .byte "7 FRONT H  "
+str_s8:      .byte "8 COEUR H  "
 
 title_update:
     lda pad_new
