@@ -263,8 +263,7 @@ draw_players:
     sta d_size
     txa
     sta d_attr              ; palette 0 = LANCE, 1 = EGIDE
-    lda orient
-    asl
+    lda orient              ; index = vaisseau*4 + orientation (0/1)
     ora ship_tile_sel,x
     tay
     lda ship_tiles,y

@@ -458,6 +458,30 @@ test("T24", "Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles", 
   return { ok: on > 0 && absorbed === 4 && diedAfter, detail: `bouclier actif=${on > 0}, absorbes=${absorbed}/4, 5e projectile touche=${diedAfter}` };
 });
 
+test("T25", "Affichage : tuiles des vaisseaux conformes a l'orientation (H et V)", () => {
+  const res = [];
+  for (const sector of [0, 1]) {
+    const m = startGame({ players: 2, sector });
+    m.frame(100, (mm) => {
+      mm.poke("pl_invul", 0); mm.poke("pl_invul", 0, 1);
+      for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i);
+      for (let i = 0; i < 16; i++) { mm.poke("eb_on", 0, i); mm.poke("pb_on", 0, i); }
+    });
+    const tbl = m.s("ship_tiles");
+    const a = m.romByte(tbl + sector), b = m.romByte(tbl + 4 + sector);
+    const oam = m.nes.cpu.mem.slice(0x200, 0x300);
+    const rel = new Set();
+    for (let i = 0; i < 64; i++) {
+      if (oam[i * 4] >= 239 || oam[i * 4 + 2] > 1) continue;
+      rel.add((oam[i * 4 + 2] ? "B" : "A") + (oam[i * 4 + 1] - (oam[i * 4 + 2] ? b : a)));
+    }
+    const ok = a >= 0x80 && b >= 0x80 && ["A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3"].every((k) => rel.has(k)) && rel.size === 8;
+    res.push({ o: sector ? "V" : "H", a, b, ok });
+    if (sector) m.screenshot(path.join(SHOTS, "05_secteur2_vertical.png"));
+  }
+  return { ok: res.every((r) => r.ok), detail: res.map((r) => `${r.o}: LANCE $${r.a.toString(16)} EGIDE $${r.b.toString(16)} ${r.ok ? "ok" : "ERREUR"}`).join(", ") };
+});
+
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
   const { execSync } = require("child_process");
   const rom = path.join(ROOT, "build", "spatial.nes");

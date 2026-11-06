@@ -3,7 +3,7 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **24/24** reussis.
+Resultat : **25/25** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
@@ -25,12 +25,13 @@ Resultat : **24/24** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=22 P2=89 TRI=39 BRUIT=39, declenchements DPCM=15, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 6 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1237/2273 cycles, cycles/image max=28090 moy=24545 (budget NTSC 29780 = 94 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=296/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19901 moy=13815, images perdues=0, vblank utilise max=1237/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1237/2273 cycles, cycles/image max=28090 moy=24543 (budget NTSC 29780 = 94 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=296/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19900 moy=13813, images perdues=0, vblank utilise max=1237/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=42909a71839a2347... |
+| T25 | Affichage : tuiles des vaisseaux conformes a l'orientation (H et V) | OK | H: LANCE $80 EGIDE $88 ok, V: LANCE $84 EGIDE $8c ok |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=e8deb60494b40c1c... |
 
 ## Mesures
 
@@ -40,18 +41,18 @@ Resultat : **24/24** reussis.
   "maxEnemies": 10,
   "maxEnemyBullets": 9,
   "stressMaxCycles": 28090,
-  "stressAvgCycles": 24545,
+  "stressAvgCycles": 24543,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 296,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1237,
-  "normalMaxCycles": 19901,
-  "normalAvgCycles": 13815,
+  "normalMaxCycles": 19900,
+  "normalAvgCycles": 13813,
   "normalLag": 0,
   "normalVblankMax": 1237,
-  "sha256": "42909a71839a2347951df3d4c9d201a02504e6c81bf4af45f45ffe3f2f084707",
+  "sha256": "e8deb60494b40c1c5bfead164e2ecd35ea6dc6d5a00521c9aad929bdfee92517",
   "romSize": 98320
 }
 ```
