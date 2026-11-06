@@ -380,6 +380,27 @@ def attrs_h(cols, palfn):
     return out
 
 
+def attrs_v(rows, palfn):
+    """Attributs des secteurs verticaux : par paire de rangees (2m, 2m+1),
+    16 blocs de 16x16 px (2 bits chacun), 4 octets ; bloc q dans l'octet q//4,
+    bits 2*(q%4). Le jeu les recompose dans la copie RAM des attributs."""
+    out = []
+    for m in range(len(rows) // 2):
+        q = [max(palfn(2 * k + dx, 2 * m + dy) for dx in (0, 1) for dy in (0, 1)) for k in range(16)]
+        for j in range(4):
+            out.append(q[4 * j] | (q[4 * j + 1] << 2) | (q[4 * j + 2] << 4) | (q[4 * j + 3] << 6))
+    return out
+
+
+def pal_s2(c, rows, x, y):
+    t = rows[y][x]
+    if t == c["T_WALL"]:
+        return 3
+    if t == c["T_PAD"]:                 # les crateres restent dans la palette du sol
+        return 2
+    return 0
+
+
 def gen_map_v(c):
     """Secteur 2 : survol planetaire, lignes de 32 tuiles. Ligne 0 = bas (debut)."""
     rng = random.Random(4321)
@@ -431,9 +452,9 @@ SECTORS = [
          cam_stop=1760, cp=896, song="stage", boss=1,
          pal=[0x0F, 0x00, 0x10, 0x3C, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x07, 0x17, 0x27, 0x0F, 0x01, 0x11, 0x31]),
     dict(name="s2", title="Surface de Kera", orient=1, bank=2, tiles="tiles_s2.txt",
-         sprites="sprites_s1.txt", spr_set=0, gen=gen_map_v, palfn=None,
+         sprites="sprites_s1.txt", spr_set=0, gen=gen_map_v, palfn=pal_s2,
          cam_stop=1536, cp=768, song="stage", boss=1,
-         pal=[0x0F, 0x08, 0x18, 0x38, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x08, 0x18, 0x38, 0x0F, 0x08, 0x18, 0x38]),
+         pal=[0x0F, 0x08, 0x18, 0x38, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x06, 0x16, 0x27, 0x0F, 0x00, 0x10, 0x30]),
     dict(name="s3", title="Ceinture brisee", orient=0, bank=3, tiles="tiles_s3.txt",
          sprites="sprites_s3.txt", spr_set=1, gen=gen_map_belt, palfn=pal_s3,
          cam_stop=1760, cp=896, song="belt", boss=2,
@@ -697,7 +718,8 @@ def main():
             units[CHR_SPR_SECTOR + len(spr_sets) - 1] = enc(build_sector_sprites(sec["sprites"]))
         lines = sec["gen"](c)
         tpl, ids = dedupe(lines)
-        attr = attrs_h(lines, lambda x, y, c=c, lines=lines, f=sec["palfn"]: f(c, lines, x, y)) if sec["palfn"] else None
+        attrfn = attrs_h if sec["orient"] == 0 else attrs_v
+        attr = attrfn(lines, lambda x, y, c=c, lines=lines, f=sec["palfn"]: f(c, lines, x, y)) if sec["palfn"] else None
         sector_data.append((sec, c, tpl, ids, attr, load_script(sec["name"])))
     chr_data = b"".join(units)
     assert len(chr_data) == 32768
@@ -734,7 +756,7 @@ def main():
         out.append(ca65_bytes(f"{n}_pal", sec["pal"] + SPR_PAL))
         out.append(ca65_bytes(f"{n}_ids", ids))
         if attr:
-            out.append(ca65_bytes(f"{n}_attr", attr, 7))
+            out.append(ca65_bytes(f"{n}_attr", attr, 7 if sec["orient"] == 0 else 4))
         out.append(f"{n}_tlo:\n    .lobytes " + ",".join(f"{n}_t{i}" for i in range(len(tpl))))
         out.append(f"{n}_thi:\n    .hibytes " + ",".join(f"{n}_t{i}" for i in range(len(tpl))))
         for i, t in enumerate(tpl):

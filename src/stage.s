@@ -113,6 +113,12 @@ stage_start:
     sta ptr0+1
     jsr load_palette
     jsr clear_nametables
+    ldx #63
+    lda #0
+@va:
+    sta vattr_sh,x
+    dex
+    bpl @va
     jsr hud_init
     jsr place_players
     lda orient
@@ -501,6 +507,7 @@ build_row_v:
     bcc @in
     ldy sec_hdr+SH_MAXIDX
 @in:
+    sty av_row
     lda (m_ids),y
     tay
     lda (m_tlo),y
@@ -531,7 +538,112 @@ build_row_v:
     iny
     cpy #32
     bne @c
+    jsr vbuf_close
+    ; --- attributs (secteurs verticaux multi-palettes) ---
+    ; Une paire de rangees de carte (2m, 2m+1) forme une rangee de blocs 16x16.
+    ; Quand la 2e rangee (impaire) est ecrite, sa rangee de table n est paire :
+    ; on met a jour la moitie haute (n mod 4 = 0) ou basse (n mod 4 = 2) de la
+    ; rangee d'attributs n/4, dans une copie en RAM, puis on envoie ses 8 octets.
+    lda m_attr+1
+    beq @r0
+    lda av_row
+    and #1
+    bne @go
+@r0:
+    rts
+@go:
+    lda av_row
+    lsr
+    sta ptr0
+    lda #0
+    sta ptr0+1
+    asl ptr0
+    rol ptr0+1
+    asl ptr0
+    rol ptr0+1              ; paire * 4
+    clc
+    lda ptr0
+    adc m_attr
+    sta ptr0
+    lda ptr0+1
+    adc m_attr+1
+    sta ptr0+1
+    lda tmp1
+    and #$FC
+    asl
+    sta av_base             ; (n / 4) * 8
+    lda tmp1
+    and #2
+    sta av_half             ; 0 = moitie haute, 2 = moitie basse
+    ldx #0
+@b:
+    txa
+    lsr
+    tay
+    lda (ptr0),y            ; 4 blocs par octet (2 bits chacun)
+    sta av_tmp
+    txa
+    and #1
+    beq @lo
+    lda av_tmp
+    lsr
+    lsr
+    lsr
+    lsr
+    sta av_tmp
+@lo:
+    lda av_tmp
+    and #$0F                ; blocs 2c et 2c+1
+    ldy av_half
+    beq @top
+    asl
+    asl
+    asl
+    asl
+    sta av_tmp
+    txa
+    clc
+    adc av_base
+    tay
+    lda vattr_sh,y
+    and #$0F
+    ora av_tmp
+    sta vattr_sh,y
+    jmp @nx
+@top:
+    sta av_tmp
+    txa
+    clc
+    adc av_base
+    tay
+    lda vattr_sh,y
+    and #$F0
+    ora av_tmp
+    sta vattr_sh,y
+@nx:
+    inx
+    cpx #8
+    bne @b
+    lda av_base
+    clc
+    adc #$C0
+    sta ptr1
+    lda #$27
+    sta ptr1+1
+    lda #8
+    jsr vbuf_open
+    ldy av_base
+@w:
+    lda vattr_sh,y
+    sta vbuf,x
+    inx
+    iny
+    tya
+    and #7
+    bne @w
     jmp vbuf_close
+@r:
+    rts
 
 ; Avance la camera de scroll_du pixels et diffuse les colonnes/rangees.
 scroll_update:

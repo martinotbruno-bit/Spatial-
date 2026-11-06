@@ -49,6 +49,16 @@ function vramErrors(m) {
       while (r < Math.floor(cam / 8) - 2) r += 30;
       const id = m.romByte(ids + Math.min(r, 231)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
       for (let c = 0; c < 32; c++) if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++;
+      // attributs : bloc k (16 px) de la paire de rangees r>>1
+      const attr = m.sym[pre + "_attr"];
+      if (attr !== undefined) {
+        const rr = Math.min(r, 231), a = ntrow >> 2, half = (ntrow >> 1) & 1;
+        for (let k = 0; k < 16; k++) {
+          const want = (m.romByte(attr + (rr >> 1) * 4 + (k >> 2)) >> (2 * (k & 3))) & 3;
+          const got = (m.nt(0x27c0 + a * 8 + (k >> 1)) >> ((k & 1) * 2 + half * 4)) & 3;
+          if (want !== got) bad++;
+        }
+      }
     }
   }
   return bad;
@@ -224,7 +234,7 @@ test("T10", "Scrolling horizontal : contenu VRAM conforme a la carte sur tout le
 
 test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le niveau", () => {
   const m = startGame({ players: 2, sector: 1 });
-  let bad = 0, checks = 0;
+  let bad = 0, checks = 0, vattr = 0;
   const ids = m.s("s2_ids"), tlo = m.s("s2_tlo"), thi = m.s("s2_thi");
   for (let k = 0; k < 16; k++) {
     m.frame(101, invul);
@@ -237,12 +247,13 @@ test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le n
       for (let c = 0; c < 32; c++) { checks++; if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++; }
     }
     if (k === 6) m.screenshot(path.join(SHOTS, "05_secteur2_vertical.png"));
+    vattr += vramErrors(m);
   }
   // le HUD ne doit jamais etre ecrase
   let hudOk = true;
   const row1 = " SCORE ";
   for (let i = 0; i < row1.length; i++) if (m.nt(0x2020 + i) !== row1.charCodeAt(i)) hudOk = false;
-  return { ok: bad === 0 && hudOk && camOf(m) === 1536, detail: `${checks} tuiles verifiees, ${bad} erreurs, HUD intact=${hudOk}, camera=${camOf(m)}` };
+  return { ok: bad === 0 && vattr === 0 && hudOk && camOf(m) === 1536, detail: `${checks} tuiles verifiees, ${bad} erreurs, erreurs tuiles+attributs (verif. 2)=${vattr}, HUD intact=${hudOk}, camera=${camOf(m)}` };
 });
 
 test("T12", "Ennemis et projectiles : 4 familles + conteneurs destructibles, tirs ennemis", () => {

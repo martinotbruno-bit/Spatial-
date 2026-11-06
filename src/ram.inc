@@ -98,6 +98,11 @@ cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
 continues:   .res 1
 sec_hdr:     .res SH_SIZE
 sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
+vattr_sh:    .res 64    ; copie des attributs de la table $2400 (secteurs V)
+av_row:      .res 1
+av_base:     .res 1
+av_half:     .res 1
+av_tmp:      .res 1
 test_access: .res 1     ; $FF = acces libre a tous les secteurs (session)
 diff:        .res 1     ; 0 RECRUE, 1 PILOTE, 2 VETERAN, 3 EXPERT
 unlocked:    .res 1     ; bit 0 : mode EXPERT debloque (sauvegarde)
