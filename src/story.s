@@ -5,7 +5,7 @@
 ; =============================================================================
 STORY_ORIGIN = $20C3        ; rangee 6, colonne 3
 
-; A = page (0 = introduction, 1 = transition secteur 2, 2 = epilogue)
+; A = page (k = arrivee dans le secteur k, NUM_SECTORS = epilogue)
 story_enter:
     sta story_page
     jsr ppu_off
@@ -51,8 +51,9 @@ story_enter:
     jsr play_song
     jmp ppu_on
 
-story_lo: .lobytes story_p0, story_p1, story_p2
-story_hi: .hibytes story_p0, story_p1, story_p2
+; page k = arrivee dans le secteur k ; page NUM_SECTORS = epilogue
+story_lo: .lobytes story_p0, story_p1, story_p2, story_end
+story_hi: .hibytes story_p0, story_p1, story_p2, story_end
 
 story_update:
     lda pad_new
@@ -113,7 +114,7 @@ story_update:
 
 story_done:
     lda story_page
-    cmp #2
+    cmp #NUM_SECTORS
     bne @play
     ; campagne terminee : mode EXPERT debloque
     lda unlocked
@@ -151,9 +152,17 @@ story_p1:
     .byte "DESCENTE EN ORBITE BASSE...", 0
 story_p2:
     .byte "KERA EST LIBEREE.", $0A, $0A
+    .byte "LA CONCORDANCE SE REPLIE", $0A
+    .byte "DERRIERE LA CEINTURE", $0A
+    .byte "BRISEE, OU GRANDIT", $0A
+    .byte "L'ESSAIM-MERE.", $0A, $0A
+    .byte "TRAVERSEE DU CHAMP", $0A
+    .byte "D'ASTEROIDES...", 0
+story_end:
+    .byte "LA CEINTURE EST FRANCHIE.", $0A, $0A
     .byte "MAIS AU LOIN, LES ANCRAGES", $0A
     .byte "S'EVEILLENT UN A UN...", $0A, $0A, $0A
-    .byte "   FIN DU PROTOTYPE", $0A, $0A
+    .byte "  A SUIVRE : SECTEUR 4", $0A, $0A
     .byte "   MERCI D'AVOIR JOUE !", 0
 
 ; -----------------------------------------------------------------------------

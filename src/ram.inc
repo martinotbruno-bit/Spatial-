@@ -50,6 +50,10 @@ spr_left:    .res 1
 rng:         .res 2
 vbuf_len:    .res 1
 script_ptr:  .res 2
+m_ids:       .res 2     ; pointeurs de carte du secteur courant
+m_tlo:       .res 2
+m_thi:       .res 2
+m_attr:      .res 2
 story_ptr:   .res 2
 ; parametres du dessin de metasprite
 d_xlo:       .res 1
@@ -92,6 +96,8 @@ pl_lasta:    .res 2     ; images depuis le dernier appui sur A (sature a 255)
 sync_cd:     .res 1
 cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
 continues:   .res 1
+sec_hdr:     .res SH_SIZE
+sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
 diff:        .res 1     ; 0 RECRUE, 1 PILOTE, 2 VETERAN, 3 EXPERT
 unlocked:    .res 1     ; bit 0 : mode EXPERT debloque (sauvegarde)
 aim_speed:   .res 1     ; 0 = tirs vises lents, 16 = rapides

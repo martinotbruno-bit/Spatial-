@@ -76,8 +76,8 @@ stage_start:
     lda #1
     sta scroll_du
     sta scroll_on
-    ldx stage
-    lda stage_orient,x
+    jsr sector_map          ; banc PRG + en-tete + bancs CHR du secteur
+    lda sec_hdr+SH_ORIENT
     sta orient
     ; Miroir vertical pour les deux orientations : HUD en $2000 (table A),
     ; zone de jeu en $2000/$2400 (H) ou en $2400 seule (V). En V, le passage
@@ -85,9 +85,9 @@ stage_start:
     ; 30 rangees reste dans la table B sans jamais toucher au HUD.
     lda #0
     sta MMC3_MIRROR
-    lda stage_script_lo,x
+    lda sec_hdr+SH_SCRIPT
     sta script_ptr
-    lda stage_script_hi,x
+    lda sec_hdr+SH_SCRIPT+1
     sta script_ptr+1
     jsr cam_div8
     sta tmp6                ; c0 = premiere colonne/rangee de carte
@@ -107,9 +107,9 @@ stage_start:
     inc script_ptr+1
     bne @skip
 @sk_done:
-    lda stage_pal_lo,x
+    lda sec_hdr+SH_PAL
     sta ptr0
-    lda stage_pal_hi,x
+    lda sec_hdr+SH_PAL+1
     sta ptr0+1
     jsr load_palette
     jsr clear_nametables
@@ -191,11 +191,13 @@ stage_start:
     sta msg_id
     lda #90
     sta msg_t
-    lda #SONG_STAGE
+    lda sec_hdr+SH_SONG
     jsr play_song
     lda #ST_PLAY
     sta state
     jmp ppu_on
+
+sector_bit: .byte 1, 2, 4, 8, 16, 32, 64, 128
 
 ; Reserve de vies pleine selon le mode et la difficulte
 set_full_lives:
@@ -240,11 +242,38 @@ mod30:
 @r:
     rts
 
-stage_orient:    .byte 0, 1
-stage_script_lo: .byte <script_h, <script_v
-stage_script_hi: .byte >script_h, >script_v
-stage_pal_lo:    .byte <pal_stage_h, <pal_stage_v
-stage_pal_hi:    .byte >pal_stage_h, >pal_stage_v
+; -----------------------------------------------------------------------------
+; Selection du secteur `stage` : banc PRG en $8000 (R6), copie de l'en-tete,
+; pointeurs de carte en page zero, bancs CHR du decor (R1) et des sprites (R5).
+; En-tete genere par tools/gen_assets.py (offsets SH_* dans defs.inc).
+; -----------------------------------------------------------------------------
+sector_map:
+    ldx stage
+    lda #6
+    sta MMC3_BANKSEL
+    lda sector_banks,x
+    sta MMC3_BANKDATA
+    ldy #SH_SIZE-1
+@c:
+    lda $8000,y
+    sta sec_hdr,y
+    dey
+    bpl @c
+    ldx #7
+@p:
+    lda sec_hdr+SH_IDS,x    ; ids, tlo, thi, attr -> m_ids..m_attr
+    sta m_ids,x
+    dex
+    bpl @p
+    lda #1
+    sta MMC3_BANKSEL
+    lda sec_hdr+SH_CHRBG
+    sta MMC3_BANKDATA
+    lda #5
+    sta MMC3_BANKSEL
+    lda sec_hdr+SH_CHRSPR
+    sta MMC3_BANKDATA
+    rts
 
 ; Position de depart des vaisseaux
 place_players:
@@ -361,17 +390,15 @@ build_column_h:
     sta tmp0                ; colonne de carte
     ; gabarit
     tay
-.if MAP_H_LEN < 256
-    cpy #MAP_H_LEN
+    cpy sec_hdr+SH_MAXIDX
     bcc @in
-    ldy #MAP_H_LEN-1
+    ldy sec_hdr+SH_MAXIDX
 @in:
-.endif
-    lda map_h_ids,y
+    lda (m_ids),y
     tay
-    lda map_h_tpl_lo,y
+    lda (m_tlo),y
     sta ptr0
-    lda map_h_tpl_hi,y
+    lda (m_thi),y
     sta ptr0+1
     ; adresse : $2000 + (col & 32 ? $400 : 0) + 4*32 + (col & 31)
     lda tmp0
@@ -403,6 +430,8 @@ build_column_h:
     lda tmp0
     and #3
     bne @r
+    lda m_attr+1            ; secteur sans attributs : palette unique
+    beq @r
     lda tmp0
     lsr
     lsr
@@ -424,10 +453,10 @@ build_column_h:
     sta ptr0+1              ; groupe * 7
     clc
     lda ptr0
-    adc #<map_h_attr
+    adc m_attr
     sta ptr0
     lda ptr0+1
-    adc #>map_h_attr
+    adc m_attr+1
     sta ptr0+1
     lda tmp0
     and #32
@@ -468,15 +497,15 @@ build_column_h:
 build_row_v:
     sta tmp1
     ldy tmp4
-    cpy #MAP_V_LEN
+    cpy sec_hdr+SH_MAXIDX
     bcc @in
-    ldy #MAP_V_LEN-1
+    ldy sec_hdr+SH_MAXIDX
 @in:
-    lda map_v_ids,y
+    lda (m_ids),y
     tay
-    lda map_v_tpl_lo,y
+    lda (m_tlo),y
     sta ptr0
-    lda map_v_tpl_hi,y
+    lda (m_thi),y
     sta ptr0+1
     ; adresse $2400 + rangee*32
     lda tmp1
@@ -511,12 +540,11 @@ scroll_update:
     lda scroll_du
     beq @r
     ; fin de niveau atteinte ?
-    ldx orient
     lda cam_hi
-    cmp cam_stop_hi,x
+    cmp sec_hdr+SH_STOP+1
     bcc @adv
     lda cam_lo
-    cmp cam_stop_lo,x
+    cmp sec_hdr+SH_STOP
     bcc @adv
     lda #0
     sta scroll_on
@@ -531,12 +559,11 @@ scroll_update:
     lda cp_cam
     ora cp_cam+1
     bne @nocp
-    ldx orient
     lda cam_lo
-    cmp cp_lo,x
+    cmp sec_hdr+SH_CP
     bne @nocp
     lda cam_hi
-    cmp cp_hi,x
+    cmp sec_hdr+SH_CP+1
     bne @nocp
     sta cp_cam+1
     lda cam_lo
@@ -616,10 +643,7 @@ update_split:
     lda #1
     jmp compute_split
 
-cp_lo: .byte <CP_H, <CP_V
-cp_hi: .byte >CP_H, >CP_V
-cam_stop_lo: .byte <CAM_STOP_H, <CAM_STOP_V
-cam_stop_hi: .byte >CAM_STOP_H, >CAM_STOP_V
+
 
 ; -----------------------------------------------------------------------------
 ; Script d'apparition : entrees [declencheur (cam/8), type, v, parametre]
@@ -809,13 +833,23 @@ clear_update:
     bne @r
     jsr save_update_hi
     lda stage
-    cmp #1
+    clc
+    adc #1
+    cmp #NUM_SECTORS
     bcs @end
-    inc stage
-    lda #1
+    sta stage
+    tax                     ; secteur suivant debloque (sauvegarde)
+    lda sector_bit,x
+    ora sectors_unl
+    cmp sectors_unl
+    beq @known
+    sta sectors_unl
+    jsr save_write
+@known:
+    lda stage
     jmp story_enter
 @end:
-    lda #2                  ; epilogue du prototype
+    lda #NUM_SECTORS        ; epilogue
     jmp story_enter
 @r:
     rts

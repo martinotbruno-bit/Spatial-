@@ -3,10 +3,10 @@
 ; Positions en virgule fixe 8.8, vitesses signees 8.8.
 ; =============================================================================
 
-;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE CONTENEUR
-en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3
-en_score_tbl: .byte 0,   1,      3,       5,       2,       2  ; centaines de points
-en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1
+;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE
+en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12
+en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8  ; centaines de points
+en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5
 
 ; Apparition : tmp2 = type, tmp3 = v, tmp4 = parametre
 enemy_spawn:
@@ -44,9 +44,9 @@ enemy_spawn:
     sta en_duhi,x
     rts
 
-;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE CONTENEUR
-en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00
-en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF ; -1.25 -3 -1 -2 -1
+;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE
+en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40
+en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF ; -1.25 -3 -1 -2 -1 -0.75
 
 enemies_update:
     ldx #MAX_EN-1
@@ -72,7 +72,7 @@ enemies_update:
     rts
 
 en_ai_tbl:
-    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1
+    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1
 
 ; Integration de la position, puis retour a la boucle. Detruit l'ennemi s'il
 ; sort du champ (debordement 8 bits).
@@ -191,6 +191,86 @@ ai_turret:
     lda en_u,x
     cmp #232
     bcs @mv
+    jsr fire_aimed
+@mv:
+    jmp en_move
+
+; --- UNITE LOURDE : s'avance jusqu'a u = parametre, se maintient en
+; derivant lateralement, gerbe de 3 + tir vise toutes les 96 images, repart
+; apres 10 s ---
+ai_heavy:
+    lda en_st,x
+    bne @hold
+    lda en_u,x
+    cmp en_p0,x
+    bcc @stop
+    jmp en_move
+@stop:
+    lda #1
+    sta en_st,x
+    lda #0
+    sta en_t,x
+    sta en_p0,x             ; desormais : compteur de cycles de tir
+    sta en_dulo,x
+    sta en_duhi,x
+@hold:
+    cmp #2
+    beq @mv
+    ; derive laterale lente (sinus / 4)
+    lda en_t,x
+    and #63
+    tay
+    lda sine_hi,y
+    cmp #$80
+    ror
+    sta en_dvhi,x
+    lda sine_lo,y
+    ror
+    sta en_dvlo,x
+    lda en_dvhi,x
+    cmp #$80
+    ror en_dvhi,x
+    ror en_dvlo,x
+    ; tirs
+    lda en_t,x
+    cmp #96
+    bcc @t
+    lda #0
+    sta en_t,x
+    inc en_p0,x
+    lda en_p0,x
+    cmp #7                  ; ~11 s de maintien
+    bcc @t
+    lda #2                  ; depart : recule a -1.5 px/image
+    sta en_st,x
+    lda #$80
+    sta en_dulo,x
+    lda #$FE
+    sta en_duhi,x
+    jmp en_move
+@t:
+    lda en_t,x
+    cmp #20
+    bne @n1
+    lda en_u,x
+    clc
+    adc #4
+    sta tmp3
+    lda en_v,x
+    clc
+    adc #4
+    sta tmp4
+    lda #7
+    sta tmp2
+    jsr eb_spawn
+    inc tmp2
+    jsr eb_spawn
+    inc tmp2
+    jsr eb_spawn
+    jmp @mv
+@n1:
+    cmp #60
+    bne @mv
     jsr fire_aimed
 @mv:
     jmp en_move

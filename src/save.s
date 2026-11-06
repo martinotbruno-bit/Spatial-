@@ -4,10 +4,11 @@
 ; d'alimentation pendant l'ecriture ne peut corrompre qu'une seule copie.
 ; Disposition d'une copie (32 octets) :
 ;   0-3  signature "SPTL"   4  version   5-10 record solo   11-16 record coop
-;   17   deblocages (bit 0 = mode expert)   18 somme de controle
+;   17   deblocages (bit 0 = mode expert)   18 secteurs debloques (bit k)
+;   19   somme de controle
 ; =============================================================================
-SAVE_VERSION = 1
-SAVE_LEN     = 18           ; octets couverts par la somme (0-17)
+SAVE_VERSION = 2
+SAVE_LEN     = 19           ; octets couverts par la somme (0-18)
 
 save_magic: .byte "SPTL", SAVE_VERSION
 
@@ -65,6 +66,8 @@ save_load:
     sta hi_coop,x
     dex
     bpl @def
+    lda #1
+    sta sectors_unl
     jmp save_write
 @load:
     ldy #5
@@ -78,6 +81,10 @@ save_load:
     bne @l
     lda (ptr0),y            ; y = 17
     sta unlocked
+    iny
+    lda (ptr0),y
+    ora #1                  ; le secteur 1 est toujours disponible
+    sta sectors_unl
     rts
 
 default_hi: .byte 0, 0, 5, 0, 0, 0
@@ -117,6 +124,9 @@ save_write_one:
     cpx #12
     bne @d
     lda unlocked            ; octet 17 : deblocages (bit 0 = EXPERT)
+    sta (ptr0),y
+    iny
+    lda sectors_unl         ; octet 18 : secteurs debloques
     sta (ptr0),y
     jsr save_sum
     ldy #SAVE_LEN

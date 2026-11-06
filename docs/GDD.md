@@ -86,8 +86,10 @@ Piste restante : *bouclier partagé* (deuxième usage du LIEN à demi-jauge).
 | Chasseur | Entre vite, freine, 2 tirs visés, repart ; lâche une capsule | 4 | 300 |
 | Tourelle | Liée au décor, tir visé toutes les 64 images | 6 | 500 |
 | Kamikaze | Fonce et se recale latéralement sur le joueur le plus proche | 2 | 200 |
+| Unité lourde | S'avance, se maintient en dérivant, gerbe de 3 + tir visé, repart après ~11 s | 12 | 800 |
+| Décor destructible | Conteneur (secteur 1) / rocher minéralier (secteur 3) ancré au décor | 3 | 200 |
 
-*[à produire]* : unités lourdes, appareils de soutien (réparation, bouclier
+*[à produire]* : appareils de soutien (réparation, bouclier
 de groupe), ennemis spécialisés (mines, poseurs de barrage), structures
 défensives destructibles du décor.
 
@@ -97,6 +99,10 @@ défensives destructibles du décor.
 entrée scriptée (invulnérable), phase 1 oscillation lente + gerbe de 3 +
 tir visé ; phase 2 sous 50 % : oscillation rapide, gerbe de 5 et rafales de
 3 tirs visés. Flash à l'impact, destruction en chaîne de 100 images.
+
+**Essaim-mère** *[secteur 3]* : organisme-ruche ; phase 1 : anneaux de 8
+projectiles et lâcher de drones ; phase 2 : anneaux alternés (rapides au-delà
+de RECRUE) et tirs visés.
 
 ## 6. Campagne proposée (durée cible 1 à 2 h)
 

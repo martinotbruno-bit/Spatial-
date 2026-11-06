@@ -53,3 +53,13 @@ P2: @pluck [A3/2 E4/2 A4/2 E4/2]x2 [G3/2 D4/2 G4/2 D4/2]x2 [C4/2 G4/2 C5/2 G4/2]
 P2: [A3/2 E4/2 A4/2 E4/2]x2 [F3/2 C4/2 F4/2 C4/2]x2 [D4/2 A4/2 E4/2 B4/2]x2 [A3/2 E4/2 A4/2 E4/2]x2
 TR: [A2/4]x4 [G2/4]x4 [C3/4]x4 [F2/4]x4 [A2/4]x4 [F2/4]x4 D2/8 E2/8 A2/16
 NO: [K/4 S/4 K/2 K/2 S/4]x8
+
+# Theme du secteur 3 "Ceinture" - Re mineur, pulse
+@song belt tempo=6
+P1: D5/4 F5/4 A5/2 G5/2 F5/2 E5/2  D5/6 C5/2 A4/8  As4/4 D5/4 F5/2 E5/2 D5/2 C5/2  A4/12 r/4
+P1: D5/4 F5/4 A5/2 C6/2 As5/2 A5/2  G5/6 F5/2 E5/8  F5/4 E5/4 D5/4 Cs5/4  D5/12 r/4
+P2: [D4/1 F4/1 A4/1 F4/1]x4 [C4/1 E4/1 G4/1 E4/1]x4 [As3/1 D4/1 F4/1 D4/1]x4 [A3/1 Cs4/1 E4/1 Cs4/1]x4
+P2: [D4/1 F4/1 A4/1 F4/1]x4 [C4/1 E4/1 G4/1 E4/1]x4 [As3/1 D4/1 F4/1 D4/1]x4 [A3/1 Cs4/1 E4/1 Cs4/1]x4
+TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
+TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
+NO: [K/2 H/2 S/2 H/2 K/2 H/2 S/2 K/2]x8

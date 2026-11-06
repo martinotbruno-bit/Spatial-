@@ -33,15 +33,16 @@ const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5, CONT: 6 };
 function vramErrors(m) {
   let bad = 0;
   const cam = camOf(m);
+  const pre = "s" + (m.peek("stage") + 1);
   if (m.peek("orient") === 0) {
-    const ids = m.s("map_h_ids"), tlo = m.s("map_h_tpl_lo"), thi = m.s("map_h_tpl_hi");
+    const ids = m.s(pre + "_ids"), tlo = m.s(pre + "_tlo"), thi = m.s(pre + "_thi");
     for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8) && c < 256; c++) {
       const id = m.romByte(ids + c), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
       const nc = c & 63, base = (nc & 32 ? 0x2400 : 0x2000) + (nc & 31);
       for (let r = 0; r < 26; r++) if (m.romByte(tp + r) !== m.nt(base + (r + 4) * 32)) bad++;
     }
   } else {
-    const ids = m.s("map_v_ids"), tlo = m.s("map_v_tpl_lo"), thi = m.s("map_v_tpl_hi"), vsy = m.peek("vsy");
+    const ids = m.s(pre + "_ids"), tlo = m.s(pre + "_tlo"), thi = m.s(pre + "_thi"), vsy = m.peek("vsy");
     for (let s = 0; s < 26; s++) {
       const ntrow = ((vsy >> 3) + s) % 30;
       let r = ((29 - ntrow) % 30 + 30) % 30;
@@ -59,11 +60,12 @@ const invul = (m) => { m.poke("pl_invul", 10); m.poke("pl_invul", 10, 1); };
 function startGame({ players = 2, ship = 0, sector = 0, sound = false } = {}) {
   const m = new Machine({ sound });
   m.frame(40);
+  m.poke("sectors_unl", 7);                        // tous les secteurs accessibles
   if (players === 2) m.tap(0, "RIGHT");
   m.tap(0, "DOWN");
   if (ship === 1 && players === 1) m.tap(0, "RIGHT");
   m.tap(0, "DOWN");
-  if (sector === 1) m.tap(0, "RIGHT");
+  for (let i = 0; i < sector; i++) m.tap(0, "RIGHT");
   m.tap(0, "START");
   m.frame(2);
   if (m.peek("state") === ST.STORY) { m.tap(0, "START"); m.frame(2); }   // passe la sequence narrative
@@ -87,6 +89,7 @@ test("T01", "Demarrage : ecran titre stable, NMI actif, region NTSC detectee", (
 test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   const m = new Machine();
   m.frame(40);
+  m.poke("sectors_unl", 7);
   m.tap(0, "RIGHT");
   const np = m.peek("nplayers");
   m.tap(0, "RIGHT");
@@ -97,7 +100,7 @@ test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   m.tap(0, "DOWN");
   m.tap(0, "LEFT");
   const sec = m.peek("sector_sel");
-  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 1, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur=${sec}` };
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 2, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
 });
 
 test("T03", "Deux manettes : deplacements independants et simultanes", () => {
@@ -203,7 +206,7 @@ test("T09", "Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie", () => {
 test("T10", "Scrolling horizontal : contenu VRAM conforme a la carte sur tout le niveau", () => {
   const m = startGame({ players: 2 });
   let bad = 0, checks = 0;
-  const ids = m.s("map_h_ids"), tlo = m.s("map_h_tpl_lo"), thi = m.s("map_h_tpl_hi");
+  const ids = m.s("s1_ids"), tlo = m.s("s1_tlo"), thi = m.s("s1_thi");
   for (let k = 0; k < 19; k++) {
     m.frame(97, invul);
     const cam = camOf(m);
@@ -222,7 +225,7 @@ test("T10", "Scrolling horizontal : contenu VRAM conforme a la carte sur tout le
 test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le niveau", () => {
   const m = startGame({ players: 2, sector: 1 });
   let bad = 0, checks = 0;
-  const ids = m.s("map_v_ids"), tlo = m.s("map_v_tpl_lo"), thi = m.s("map_v_tpl_hi");
+  const ids = m.s("s2_ids"), tlo = m.s("s2_tlo"), thi = m.s("s2_thi");
   for (let k = 0; k < 16; k++) {
     m.frame(101, invul);
     const cam = camOf(m), vsy = m.peek("vsy");
@@ -262,7 +265,7 @@ test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () =
   m.poke("cam_lo", 1744 & 255); m.poke("cam_hi", 1744 >> 8);
   m.poke("script_ptr", 0); // le script se recale ci-dessous
   // recale le script sur l'entree du boss
-  const sp = m.s("script_h");
+  const sp = m.s("s1_script");
   let p = sp; while (m.romByte(p) !== 220) p += 4;
   m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
   m.press(0, "A"); m.press(1, "A");
@@ -572,7 +575,7 @@ test("T28", "Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vi
 
 test("T29", "Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1", () => {
   const m = startGame({ players: 2 });
-  const attr = m.s("map_h_attr");
+  const attr = m.s("s1_attr");
   let bad = 0, checks = 0;
   const pals = new Set();
   for (let k = 0; k < 19; k++) {
@@ -658,12 +661,76 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   const locked = m.peek("diff") === 0;
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
-  m.poke("story_page", 2); m.tap(0, "START"); m.frame(10);
+  m.poke("story_page", 3); m.tap(0, "START"); m.frame(10);
   const sram = m.sram(64);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
   const expert = m2.peek("diff") === 3 && m2.peek("unlocked") === 1;
   return { ok: ok1 && locked && expert, detail: `[diff, vies solo, vitesse visee, masque tourelles, PV boss] = ${JSON.stringify(out)} ; EXPERT verrouille=${locked}, debloque apres l'epilogue et relu=${expert}` };
+});
+
+// Verifie les attributs visibles d'un secteur horizontal -> nb d'erreurs
+function attrErrors(m) {
+  const attr = m.s("s" + (m.peek("stage") + 1) + "_attr");
+  const cam = camOf(m);
+  let bad = 0;
+  for (let g = Math.floor(cam / 32); g <= Math.floor((cam + 255) / 32) && g < 64; g++) {
+    const nc = (g * 4) & 63, base = (nc & 32 ? 0x27c0 : 0x23c0) + ((nc & 31) >> 2);
+    for (let r = 1; r < 8; r++) if (m.romByte(attr + g * 7 + r - 1) !== m.nt(base + 8 * r)) bad++;
+  }
+  return bad;
+}
+
+test("T33", "Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim-mere, epilogue", () => {
+  const m = startGame({ players: 2, sector: 2 });
+  const okSector = m.peek("stage") === 2 && m.peek("orient") === 0;
+  const chr = [m.nes.mmap.chrRomBank1 || 0];
+  let vbad = 0, abad = 0, heavy = false, heavyShot = false;
+  for (let k = 0; k < 18; k++) {
+    m.frame(97, (mm) => {
+      invul(mm);
+      for (let i = 0; i < 10; i++) if (mm.peek("en_type", i) === 6) { heavy = true; if (mm.peek("en_st", i) === 1 && mm.peek("en_t", i) === 21) heavyShot = true; }
+    });
+    vbad += vramErrors(m); abad += attrErrors(m);
+    if (k === 8) m.screenshot(path.join(SHOTS, "12_secteur3_ceinture.png"));
+  }
+  // boss : drones laches et anneaux de 8 projectiles
+  let drones = 0, ring = 0;
+  m.press(0, "A"); m.press(1, "A");
+  for (let i = 0; i < 1200 && m.peek("state") === ST.PLAY; i++) {
+    const before = m.peekBytes("en_type", 10).filter((x) => x === 1).length;
+    m.frame(1, invul);
+    const bv = m.peek("boss_v");
+    m.poke("pl_v", Math.max(40, bv)); m.poke("pl_v", Math.min(208, bv + 16), 1); m.poke("pl_u", 110); m.poke("pl_u", 110, 1);
+    if (m.peek("boss_on") === 2 && m.peekBytes("en_type", 10).filter((x) => x === 1).length > before) drones++;
+    ring = Math.max(ring, countOn(m, "eb_on", 16));
+    if (i === 300) m.screenshot(path.join(SHOTS, "13_essaim_mere.png"));
+  }
+  m.releaseAll();
+  const cleared = m.peek("state") === ST.CLEAR;
+  m.frame(252, invul);
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 3;
+  return { ok: okSector && vbad === 0 && abad === 0 && heavy && heavyShot && drones > 0 && ring >= 8 && cleared && epi,
+    detail: `secteur charge=${okSector}, erreurs VRAM decor=${vbad} attributs=${abad}, unites lourdes=${heavy} (tirent=${heavyShot}), drones laches par le boss=${drones}, projectiles max=${ring}, boss vaincu=${cleared}, epilogue=${epi}` };
+});
+
+test("T34", "Secteurs debloques : sauvegardes, seuls les debloques sont proposes au menu", () => {
+  const m = new Machine();
+  m.frame(40);
+  m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT");
+  const lockedOnly1 = m.peek("sector_sel") === 0;
+  // termine le secteur 1
+  m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(4);
+  m.poke("boss_on", 3); m.poke("boss_t", 99);
+  m.frame(252);
+  const unl = m.peek("sectors_unl");
+  const sram = m.sram(64);
+  const m2 = new Machine({ sram });
+  m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT");
+  const s2 = m2.peek("sector_sel");
+  m2.tap(0, "RIGHT");
+  const back = m2.peek("sector_sel");
+  return { ok: lockedOnly1 && unl === 3 && s2 === 1 && back === 0, detail: `sauvegarde vierge : secteur 2 inaccessible=${lockedOnly1} ; apres secteur 1 : masque=${unl}, menu -> secteur ${s2 + 1} puis ${back + 1}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

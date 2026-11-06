@@ -12,7 +12,8 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 - **GAUCHE / DROITE** : changer la valeur.
   - JOUEURS : 1 ou 2.
   - VAISSEAU (solo) : LANCE ou ÉGIDE.
-  - SECTEUR : 1 STATION (horizontal) ou 2 PLANÈTE (vertical).
+  - SECTEUR : les secteurs déjà atteints (sauvegardés) peuvent être rejoués :
+    1 STATION (horizontal), 2 PLANÈTE (vertical), 3 CEINTURE (horizontal).
   - NIVEAU : RECRUE, PILOTE (par défaut) ou VÉTÉRAN ; EXPERT apparaît
     après avoir terminé la campagne. Débutant ? Essayez ÉGIDE en RECRUE.
 - **START** : lancer la partie.

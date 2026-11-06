@@ -101,6 +101,11 @@ boss_fight:
     sta boss_v
 @ok2:
     ; --- tirs ---
+    lda sec_hdr+SH_BOSS
+    cmp #2
+    bne @k1
+    jmp boss2_fire
+@k1:
     lda boss_hp
     cmp boss_ph2
     bcc @phase2
@@ -154,6 +159,101 @@ boss_p2_len:  .byte 72,  56, 40, 34
 boss_p2_fan:  .byte 3,   5,  5,  5
 boss_p2_dir:  .byte 7,   6,  6,  6      ; premiere direction (gerbe centree sur 8)
 boss_p2_aims: .byte 1,   2,  3,  3
+
+; -----------------------------------------------------------------------------
+; Boss 2 : ESSAIM-MERE (secteur 3)
+;   Phase 1 : anneau de 8 projectiles lents + un drone lache toutes les 128 img
+;   Phase 2 : anneaux alternes (decales d'une direction) + tirs vises
+; -----------------------------------------------------------------------------
+boss2_fire:
+    ldx diff
+    lda boss_hp
+    cmp boss_ph2
+    bcc @p2
+    lda boss_t
+    and #127
+    cmp #64
+    bne @nodrone
+    jsr boss2_drone
+@nodrone:
+    ldx diff
+    lda boss_t
+    and boss2_p1_mask,x
+    bne @r
+    lda #0
+    jmp boss_ring
+@p2:
+    lda boss_t
+    cmp boss2_p2_len,x
+    bcc @t
+    lda #0
+    sta boss_t
+    inc boss_burst          ; alterne le decalage des anneaux
+@t:
+    lda boss_t
+    bne @na
+    lda boss_burst
+    and #1
+    ora aim_speed           ; phase 2 : anneaux rapides sauf en RECRUE
+    jmp boss_ring
+@na:
+    cmp #20
+    beq @aim
+    ldy boss_p2_aims,x
+    cpy #2
+    bcc @r
+    cmp #28
+    bne @r
+@aim:
+    jmp boss_aim
+@r:
+    rts
+
+;                RECRUE PILOTE VETERAN EXPERT
+boss2_p1_mask: .byte 63,  31,  31,  31
+boss2_p2_len:  .byte 64,  44,  36,  30
+
+; Anneau de 8 projectiles, directions A, A+2, ..., A+14 (A+16 : rapides)
+boss_ring:
+    sta tmp2
+    lda #8
+    sta tmp0
+    lda boss_u
+    clc
+    adc #12
+    sta tmp3
+    lda boss_v
+    clc
+    adc #12
+    sta tmp4
+@l:
+    jsr eb_spawn
+    lda tmp2
+    clc
+    adc #2
+    and #31                 ; conserve le bit de vitesse (+16)
+    sta tmp2
+    dec tmp0
+    bne @l
+    rts
+
+; Lache un drone depuis le boss
+boss2_drone:
+    lda #EN_DRONE
+    sta tmp2
+    lda boss_v
+    clc
+    adc #8
+    sta tmp3
+    lda boss_t
+    sta tmp4
+    jsr enemy_spawn
+    cpx #MAX_EN
+    bcs @r                  ; pool plein (X = $FF)
+    lda boss_u
+    sta en_u,x
+@r:
+    rts
 
 ; Gerbe : A = premiere direction, Y = nombre (vitesse lente)
 boss_fan:

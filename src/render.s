@@ -460,6 +460,7 @@ enemy_tiles:
     .byte S_TURRET_H, S_TURRET_V
     .byte S_KAMIKAZE_H, S_KAMIKAZE_V
     .byte S_POD_H, S_POD_V
+    .byte S_HEAVY_H, S_HEAVY_V
 
 draw_fx:
     lda #2

@@ -105,7 +105,7 @@ reset:
 mmc3_init_banks:
     ; R0, R1 : CHR 2 Kio $0000/$0800 ; R2-R5 : CHR 1 Kio $1000-$1C00
     ; R6 : PRG $8000 = banc 0 ; R7 : PRG $A000 = banc 1
-    .byte 0, 2, 4, 5, 6, 7, 0, 1
+    .byte CHR_BG_COMMON, 2, CHR_SPR_COMMON, CHR_SPR_COMMON+1, CHR_SPR_COMMON+2, 19, 0, 1
 
 ; -----------------------------------------------------------------------------
 ; Detection NTSC / PAL : nombre d'iterations d'une boucle de 11 cycles entre

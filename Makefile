@@ -10,7 +10,7 @@ GEN   = build/assets.inc build/chr.bin build/kick.dmc
 
 all: $(ROM)
 
-$(GEN): tools/gen_assets.py assets/sprites.txt assets/tiles.txt assets/music.txt
+$(GEN): tools/gen_assets.py $(wildcard assets/*.txt)
 	$(PY) tools/gen_assets.py
 
 build/main.o: $(SRCS) $(GEN)

@@ -7,13 +7,17 @@ const { Bot } = require("./bot");
 
 const ST = { PLAY: 1, CLEAR: 2, OVER: 3, CONT: 6 };
 
+const SECTOR = Number(process.argv[3] || 0);
 function run({ players, ship = 0, diff, seed, profile }) {
   const m = new Machine();
   m.frame(40);
+  m.poke("sectors_unl", 7);
   if (players === 2) m.tap(0, "RIGHT");
   m.tap(0, "DOWN");
   if (players === 1 && ship) m.tap(0, "RIGHT");
-  m.tap(0, "DOWN"); m.tap(0, "DOWN");
+  m.tap(0, "DOWN");
+  for (let i = 0; i < SECTOR; i++) m.tap(0, "RIGHT");
+  m.tap(0, "DOWN");
   // difficulte : PILOTE par defaut
   if (diff === 0) m.tap(0, "LEFT");
   for (let i = 1; i < diff; i++) m.tap(0, "RIGHT");
@@ -66,5 +70,5 @@ for (const mode of MODES) for (let d = 0; d < 3; d++) {
 }
 const md = ["| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |", "|---|---|---|---|---|---|---|---|"];
 for (const r of rows) md.push(`| ${r.mode} | ${r.diff} | ${r.lives0} | ${r.deaths} | ${r.cleared} | ${r.boss} | ${r.kills} | ${r.ebAvg} / ${r.ebMax} |`);
-fs.writeFileSync(path.join(ROOT, "build", `balance_${PROF}.md`), md.join("\n") + "\n");
+fs.writeFileSync(path.join(ROOT, "build", `balance_${PROF}_s${SECTOR + 1}.md`), md.join("\n") + "\n");
 console.log("\n" + md.join("\n"));

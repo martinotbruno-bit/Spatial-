@@ -158,16 +158,40 @@ def bar_tile(fill, color):
 
 
 # ------------------------------------------------------------- tuiles -------
-def build_chr():
-    bg = [[[0] * 8 for _ in range(8)] for _ in range(256)]
-    spr = [[[0] * 8 for _ in range(8)] for _ in range(256)]
-    consts = {}
+# Disposition de la CHR-ROM (unites de 1 Kio, bancs MMC3) :
+#   0-1   decor commun $00-$7F (police, jauges)        -> R0 = 0
+#   2+2k  decor du secteur k, tuiles $80-$FF (2 Kio)   -> R1
+#   16-18 sprites communs $00-$BF                       -> R2-R4 = 16,17,18
+#   19+k  sprites du jeu de secteur k, $C0-$FF (1 Kio)  -> R5
+CHR_BG_COMMON = 0
+CHR_SPR_COMMON = 16
+CHR_SPR_SECTOR = 19
 
-    # Table BG
-    tiles = load_art(os.path.join(ASSETS, "tiles.txt"))
-    for i, (name, img) in enumerate(tiles, start=1):
-        bg[i] = img
-        consts["T_" + name.upper()] = i
+
+def blank_tiles(n):
+    return [[[0] * 8 for _ in range(8)] for _ in range(n)]
+
+
+def put_big(spr, consts, art, name, base, orient, prefix="S_"):
+    img = art[name]
+    ts = split_tiles(img)
+    for k, t in enumerate(ts):
+        spr[base + k] = t
+    consts[prefix + name.upper() + "_H"] = base
+    if orient:
+        # vue de dessus dediee si elle existe, sinon rotation de 90 degres
+        ts2 = split_tiles(art[name + "_top"] if name + "_top" in art else rot_ccw(img))
+        vbase = base + len(ts)
+        for k, t in enumerate(ts2):
+            spr[vbase + k] = t
+        consts[prefix + name.upper() + "_V"] = vbase
+    else:
+        consts[prefix + name.upper() + "_V"] = base
+
+
+def build_common(consts):
+    bg = blank_tiles(128)
+    spr = blank_tiles(192)
     for code in range(0x20, 0x60):
         bg[code] = font_tile(chr(code))
         spr[code] = font_tile(chr(code))
@@ -176,8 +200,6 @@ def build_chr():
         bg[0x69 + k] = bar_tile(k, 3)   # barre du boss
     consts["T_GAUGE0"] = 0x60
     consts["T_BOSSBAR0"] = 0x69
-
-    # Table sprites
     art = dict(load_art(os.path.join(ASSETS, "sprites.txt")))
     small = [("shot_a", True), ("shot_b", True), ("ebullet", False),
              ("capsule", False), ("beam", False)]
@@ -192,29 +214,34 @@ def build_chr():
             idx += 2
         else:
             idx += 1
-    big = [("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
+    big = [("heavy", 0x60, True),
+           ("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
            ("fighter", 0x98, True), ("turret", 0xA0, True), ("kamikaze", 0xA8, True),
-           ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False),
-           ("boss", 0xC0, True), ("pod", 0xE0, False)]
+           ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False)]
     for name, base, orient in big:
-        img = art[name]
-        ts = split_tiles(img)
-        for k, t in enumerate(ts):
-            spr[base + k] = t
-        consts["S_" + name.upper() + "_H"] = base
-        if orient:
-            # vue de dessus dediee si elle existe, sinon rotation de 90 degres
-            ts2 = split_tiles(art[name + "_top"] if name + "_top" in art else rot_ccw(img))
-            vbase = base + len(ts)
-            for k, t in enumerate(ts2):
-                spr[vbase + k] = t
-            consts["S_" + name.upper() + "_V"] = vbase
-        else:
-            consts["S_" + name.upper() + "_V"] = base
+        put_big(spr, consts, art, name, base, orient)
+    return bg, spr
 
-    data = b"".join(encode_tile(t) for t in bg) + b"".join(encode_tile(t) for t in spr)
-    assert len(data) == 8192
-    return data * 4, consts   # 32 Kio (4 copies : bancs CHR inutilises en Phase 1)
+
+def build_sector_sprites(fname):
+    """Jeu de sprites de secteur (64 tuiles, $C0-$FF) : boss H/V, objet de decor."""
+    spr = blank_tiles(64)
+    art = dict(load_art(os.path.join(ASSETS, fname)))
+    c = {}
+    tmp = blank_tiles(256)
+    put_big(tmp, c, art, "boss", 0xC0, True)
+    put_big(tmp, c, art, "pod", 0xE0, False)
+    return tmp[0xC0:0x100]
+
+
+def build_sector_bg(fname):
+    """Decor de secteur : tuiles $80-$FF ; renvoie (tuiles, constantes T_*)."""
+    bg = blank_tiles(128)
+    c = {}
+    for i, (name, img) in enumerate(load_art(os.path.join(ASSETS, fname))):
+        bg[i] = img
+        c["T_" + name.upper()] = 0x80 + i
+    return bg, c
 
 
 # ------------------------------------------------------------- cartes -------
@@ -223,7 +250,6 @@ def gen_map_h(c):
     rng = random.Random(1234)
     cols = []
     ncols = 256
-    # 8 variantes de colonnes d'etoiles (limite le nombre de gabarits uniques)
     star_cols = []
     for _ in range(8):
         col = [0] * 26
@@ -239,7 +265,6 @@ def gen_map_h(c):
     for x in range(ncols):
         col = list(star_cols[rng.randrange(len(star_cols))])
         if 48 <= x < 200:
-            # Coque haute/basse dont l'epaisseur varie par segments
             seg = (x - 48) // 16
             top = [2, 3, 4, 3, 2, 3, 5, 4, 3, 2][seg % 10]
             bot = [3, 2, 3, 4, 5, 3, 2, 3, 4, 3][seg % 10]
@@ -254,12 +279,10 @@ def gen_map_h(c):
                 col[25] = c["T_LIGHT"]
             if x % 16 in (6, 7, 8):
                 col[1] = c["T_PIPE"]
-            # Pylones traversant a certains endroits (decor, non bloquant)
             if x % 32 == 20:
                 for y in range(top + 1, 25 - bot):
                     col[y] = c["T_GIRDER"] if (y % 2) else c["T_PYLON"]
         elif 200 <= x < 216:
-            # Debris de station
             if x % 3 == 0:
                 for y in (rng.randrange(2, 24), rng.randrange(2, 24)):
                     col[y] = c["T_GIRDER"]
@@ -267,28 +290,85 @@ def gen_map_h(c):
     return cols
 
 
-def attrs_h(c, cols):
-    """Attributs du secteur 1 : une palette par bloc 16x16.
-    Palette 0 = coque grise, 2 = sections rouillees et conduites (orange),
-    3 = eclairages et pylones (bleu). Priorite 3 > 2 > 0 dans un bloc.
+def pal_s1(c, cols, x, y):
+    t = cols[x][y]
+    if t in (c["T_LIGHT"], c["T_PYLON"], c["T_GIRDER"]):
+        return 3
+    if t == c["T_PIPE"]:
+        return 2
+    if t in (c["T_HULL"], c["T_HULL_EDGE_DOWN"], c["T_HULL_EDGE_UP"]) and 48 <= x < 200 and ((x - 48) // 16) % 3 == 2:
+        return 2
+    return 0
+
+
+def gen_map_belt(c):
+    """Secteur 3 : Ceinture brisee. Bandes d'asteroides haute/basse d'epaisseur
+    variable, champ central de rochers 16x16 et de cristaux. Les motifs sont
+    tires dans un petit catalogue pour limiter le nombre de gabarits."""
+    rng = random.Random(777)
+    ncols = 256
+    # motifs centraux sur 2 colonnes : liste de (rangee, type) ; 'B' = gros rocher
+    field = []
+    for _ in range(10):
+        items = []
+        for _ in range(rng.randrange(0, 3)):
+            items.append((rng.randrange(6, 18), rng.choice("BBsc")))
+        field.append(items)
+    star = []
+    for _ in range(4):
+        col = [0] * 26
+        for y in range(26):
+            r = rng.random()
+            if r < 0.05:
+                col[y] = c["T_STAR1"]
+            elif r < 0.08:
+                col[y] = c["T_STAR2"]
+        star.append(col)
+    cols = []
+    pat = None
+    for x in range(ncols):
+        col = list(star[(x * 7) % 4])
+        if 24 <= x < 216:
+            seg = (x - 24) // 8
+            top = [1, 2, 3, 4, 3, 2, 3, 5, 4, 2, 1, 2][seg % 12]
+            bot = [2, 3, 2, 1, 2, 4, 5, 3, 2, 3, 4, 2][seg % 12]
+            for y in range(top):
+                col[y] = c["T_ROCK_FILL"]
+            col[top] = c["T_BAND_DOWN"]
+            for y in range(26 - bot, 26):
+                col[y] = c["T_ROCK_FILL"]
+            col[25 - bot] = c["T_BAND_UP"]
+            if x % 2 == 0:
+                pat = field[rng.randrange(len(field))] if (x // 2) % 3 else []
+            half = x % 2
+            for (ry, kind) in pat:
+                if kind == "B":
+                    col[ry] = c["T_ROCK_TR" if half else "T_ROCK_TL"]
+                    col[ry + 1] = c["T_ROCK_BR" if half else "T_ROCK_BL"]
+                elif kind == "s" and not half:
+                    col[ry] = c["T_ROCK_S"]
+                elif kind == "c" and not half:
+                    col[ry] = c["T_CRYSTAL"]
+        cols.append(col)
+    return cols
+
+
+def pal_s3(c, cols, x, y):
+    t = cols[x][y]
+    if t == c["T_CRYSTAL"]:
+        return 3
+    if t in (c["T_ROCK_TL"], c["T_ROCK_TR"], c["T_ROCK_BL"], c["T_ROCK_BR"], c["T_ROCK_S"]):
+        return 2
+    return 0
+
+
+def attrs_h(cols, palfn):
+    """Attributs : une palette par bloc 16x16, priorite 3 > 2 > 0 dans un bloc.
     Sortie : 7 octets (rangees d'attributs 1-7) par groupe de 4 colonnes."""
-    blue = {c["T_LIGHT"], c["T_PYLON"], c["T_GIRDER"]}
-    hullish = {c["T_HULL"], c["T_HULL_EDGE_DOWN"], c["T_HULL_EDGE_UP"]}
-
-    def tile_pal(x, y):
-        t = cols[x][y]
-        if t in blue:
-            return 3
-        if t == c["T_PIPE"]:
-            return 2
-        if t in hullish and 48 <= x < 200 and ((x - 48) // 16) % 3 == 2:
-            return 2
-        return 0
-
     def cell(x, q):
         if q > 12:
             return 0
-        return max(tile_pal(x + dx, 2 * q + dy) for dx in (0, 1) for dy in (0, 1))
+        return max(palfn(x + dx, 2 * q + dy) for dx in (0, 1) for dy in (0, 1))
 
     out = []
     for a in range(len(cols) // 4):
@@ -318,10 +398,8 @@ def gen_map_v(c):
     for y in range(nrows):
         row = [0] * 32
         if y < 30:
-            # Espace au-dessus de l'atmosphere (4 variantes de lignes)
             row = list(star_rows[rng.randrange(len(star_rows))])
         elif y < 34:
-            # Bordure de la surface
             for x in range(32):
                 row[x] = c["T_RIDGE"] if y == 30 else c["T_GROUND2"]
         else:
@@ -331,7 +409,6 @@ def gen_map_v(c):
                 row[(5, 13, 19, 26)[rng.randrange(4)]] = c["T_CRATER"]
             if y % 24 == 10:
                 row[:] = [c["T_RIDGE"]] * 32
-            # Base militaire : murs et plateformes
             if 90 <= y < 150:
                 base_l = 3 + ((y // 8) % 3)
                 base_r = 28 - ((y // 8) % 3)
@@ -345,6 +422,44 @@ def gen_map_v(c):
                     row[23] = c["T_PAD"]
         rows.append(row)
     return rows
+
+
+# Definition des secteurs (ordre de la campagne)
+SECTORS = [
+    dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
+         sprites="sprites_s1.txt", spr_set=0, gen=gen_map_h, palfn=pal_s1,
+         cam_stop=1760, cp=896, song="stage", boss=1,
+         pal=[0x0F, 0x00, 0x10, 0x3C, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x07, 0x17, 0x27, 0x0F, 0x01, 0x11, 0x31]),
+    dict(name="s2", title="Surface de Kera", orient=1, bank=2, tiles="tiles_s2.txt",
+         sprites="sprites_s1.txt", spr_set=0, gen=gen_map_v, palfn=None,
+         cam_stop=1536, cp=768, song="stage", boss=1,
+         pal=[0x0F, 0x08, 0x18, 0x38, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x08, 0x18, 0x38, 0x0F, 0x08, 0x18, 0x38]),
+    dict(name="s3", title="Ceinture brisee", orient=0, bank=3, tiles="tiles_s3.txt",
+         sprites="sprites_s3.txt", spr_set=1, gen=gen_map_belt, palfn=pal_s3,
+         cam_stop=1760, cp=896, song="belt", boss=2,
+         pal=[0x0F, 0x07, 0x17, 0x27, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x00, 0x2D, 0x10, 0x0F, 0x0C, 0x1C, 0x3C]),
+]
+# Palettes de sprites communes
+SPR_PAL = [0x0F, 0x02, 0x21, 0x30, 0x0F, 0x06, 0x27, 0x38, 0x0F, 0x04, 0x14, 0x2A, 0x0F, 0x30, 0x27, 0x16]
+
+ENEMY_NAMES = {"DRONE": 1, "CHASSEUR": 2, "TOURELLE": 3, "KAMIKAZE": 4, "DECOR": 5, "LOURDE": 6, "BOSS": 15}
+
+
+def load_script(name):
+    out = []
+    last = -1
+    with open(os.path.join(ASSETS, f"script_{name}.txt"), encoding="utf-8") as f:
+        for lineno, raw in enumerate(f, 1):
+            line = raw.split("#")[0].split()
+            if not line:
+                continue
+            t, fam, v, p = int(line[0]), ENEMY_NAMES[line[1]], int(line[2]), int(line[3])
+            if t < last:
+                raise SystemExit(f"script_{name}.txt:{lineno}: declencheurs non tries")
+            last = t
+            out += [t, fam, v, p]
+    out.append(0xFF)
+    return out
 
 
 def dedupe(lines):
@@ -565,36 +680,67 @@ def ca65_bytes(label, data, per_line=16):
 
 def main():
     os.makedirs(BUILD, exist_ok=True)
-    chr_data, consts = build_chr()
+    consts = {}
+    bg_common, spr_common = build_common(consts)
+    units = [bytes(1024)] * 32
+    def enc(tiles):
+        return b"".join(encode_tile(t) for t in tiles)
+    units[0:2] = [enc(bg_common[0:64]), enc(bg_common[64:128])]
+    units[16:19] = [enc(spr_common[0:64]), enc(spr_common[64:128]), enc(spr_common[128:192])]
+    spr_sets = []
+    sector_data = []
+    for k, sec in enumerate(SECTORS):
+        bg, c = build_sector_bg(sec["tiles"])
+        units[2 + 2 * k:4 + 2 * k] = [enc(bg[0:64]), enc(bg[64:128])]
+        if sec["sprites"] not in spr_sets:
+            spr_sets.append(sec["sprites"])
+            units[CHR_SPR_SECTOR + len(spr_sets) - 1] = enc(build_sector_sprites(sec["sprites"]))
+        lines = sec["gen"](c)
+        tpl, ids = dedupe(lines)
+        attr = attrs_h(lines, lambda x, y, c=c, lines=lines, f=sec["palfn"]: f(c, lines, x, y)) if sec["palfn"] else None
+        sector_data.append((sec, c, tpl, ids, attr, load_script(sec["name"])))
+    chr_data = b"".join(units)
+    assert len(chr_data) == 32768
     with open(os.path.join(BUILD, "chr.bin"), "wb") as f:
         f.write(chr_data)
+    consts["S_BOSS_H"] = 0xC0
+    consts["S_BOSS_V"] = 0xD0
+    consts["S_POD_H"] = 0xE0
+    consts["S_POD_V"] = 0xE0
 
     out = ["; Fichier genere par tools/gen_assets.py - ne pas modifier a la main", ""]
     for k in sorted(consts):
         out.append(f"{k} = ${consts[k]:02X}")
+    out.append(f"NUM_SECTORS = {len(SECTORS)}")
+    out.append(f"CHR_BG_COMMON = {CHR_BG_COMMON}")
+    out.append(f"CHR_SPR_COMMON = {CHR_SPR_COMMON}")
     out.append("")
 
-    # Cartes
-    cols = gen_map_h(consts)
-    tpl_h, ids_h = dedupe(cols)
-    attr_h = attrs_h(consts, cols)
-    rows = gen_map_v(consts)
-    tpl_v, ids_v = dedupe(rows)
-    out.append(f"MAP_H_LEN = {len(ids_h)}")
-    out.append(f"MAP_V_LEN = {len(ids_v)}")
-    out.append(f"; gabarits uniques: H={len(tpl_h)} (x26 octets)  V={len(tpl_v)} (x32 octets)")
-    out.append('.segment "DATA0"')
-    out.append(ca65_bytes("map_h_ids", ids_h))
-    out.append(ca65_bytes("map_h_attr", attr_h, 7))
-    out.append("map_h_tpl_lo:\n    .lobytes " + ",".join(f"map_h_t{i}" for i in range(len(tpl_h))))
-    out.append("map_h_tpl_hi:\n    .hibytes " + ",".join(f"map_h_t{i}" for i in range(len(tpl_h))))
-    for i, t in enumerate(tpl_h):
-        out.append(ca65_bytes(f"map_h_t{i}", t, 26))
-    out.append(ca65_bytes("map_v_ids", ids_v))
-    out.append("map_v_tpl_lo:\n    .lobytes " + ",".join(f"map_v_t{i}" for i in range(len(tpl_v))))
-    out.append("map_v_tpl_hi:\n    .hibytes " + ",".join(f"map_v_t{i}" for i in range(len(tpl_v))))
-    for i, t in enumerate(tpl_v):
-        out.append(ca65_bytes(f"map_v_t{i}", t, 32))
+    # Secteurs : un banc PRG chacun, en-tete a $8000 (voir stage.s : SH_*)
+    songs_names = [s_[0] for s_ in load_music()]
+    out.append("sector_banks: .byte " + ",".join(str(sd[0]["bank"]) for sd in sector_data))
+    for sec, c, tpl, ids, attr, script in sector_data:
+        n = sec["name"]
+        seg = "DATA0" if sec["bank"] == 0 else f"SEC{sec['bank']}"
+        width = 26 if sec["orient"] == 0 else 32
+        out.append(f'.segment "{seg}"')
+        out.append(f"; ---- Secteur {n} : {sec['title']} - {len(ids)} lignes, {len(tpl)} gabarits uniques")
+        out.append(f"{n}_hdr:")
+        out.append(f"    .byte {sec['orient']}, {len(ids) - 1}")
+        out.append(f"    .word {sec['cam_stop']}, {sec['cp']}")
+        out.append(f"    .word {n}_ids, {n}_tlo, {n}_thi, {n + '_attr' if attr else 0}, {n}_script, {n}_pal")
+        k = SECTORS.index(sec)
+        out.append(f"    .byte {2 + 2 * k}, {CHR_SPR_SECTOR + spr_sets.index(sec['sprites'])}, {songs_names.index(sec['song'])}, {sec['boss']}")
+        out.append(ca65_bytes(f"{n}_pal", sec["pal"] + SPR_PAL))
+        out.append(ca65_bytes(f"{n}_ids", ids))
+        if attr:
+            out.append(ca65_bytes(f"{n}_attr", attr, 7))
+        out.append(f"{n}_tlo:\n    .lobytes " + ",".join(f"{n}_t{i}" for i in range(len(tpl))))
+        out.append(f"{n}_thi:\n    .hibytes " + ",".join(f"{n}_t{i}" for i in range(len(tpl))))
+        for i, t in enumerate(tpl):
+            out.append(ca65_bytes(f"{n}_t{i}", t, width))
+        out.append(ca65_bytes(f"{n}_script", script, 4))
+        print(f"  secteur {n}: {len(ids)} lignes, {len(tpl)} gabarits, script {len(script) // 4} entrees")
     out.append("")
 
     # Musique
@@ -646,8 +792,7 @@ def main():
 
     with open(os.path.join(BUILD, "assets.inc"), "w", encoding="utf-8") as f:
         f.write("\n".join(out) + "\n")
-    print(f"chr.bin {len(chr_data)} o | carte H {len(ids_h)} col/{len(tpl_h)} gab | "
-          f"carte V {len(ids_v)} lig/{len(tpl_v)} gab | {len(songs)} musiques | {len(sfx)} SFX | "
+    print(f"chr.bin {len(chr_data)} o | {len(SECTORS)} secteurs | {len(songs)} musiques | {len(sfx)} SFX | "
           f"DPCM {len(kick)} o")
 
 

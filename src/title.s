@@ -185,15 +185,9 @@ menu_write:
     sta ptr1
     jsr vbuf_str11
     ; secteur
-    lda sector_sel
-    bne @s2
-    lda #<str_s1
-    ldy #>str_s1
-    bne @ws
-@s2:
-    lda #<str_s2
-    ldy #>str_s2
-@ws:
+    ldx sector_sel
+    lda sector_str_lo,x
+    ldy sector_str_hi,x
     sta ptr0
     sty ptr0+1
     lda #$13
@@ -237,8 +231,11 @@ vbuf_str11:
 str_v_lance: .byte "LANCE      "
 str_v_egide: .byte "EGIDE      "
 str_v_both:  .byte "LANCE+EGIDE"
+sector_str_lo: .lobytes str_s1, str_s2, str_s3
+sector_str_hi: .hibytes str_s1, str_s2, str_s3
 str_s1:      .byte "1 STATION H"
 str_s2:      .byte "2 PLANETE V"
+str_s3:      .byte "3 CEINTURE "
 
 title_update:
     lda pad_new
@@ -259,19 +256,20 @@ title_update:
     inc menu_sel
     lda menu_sel
     cmp #4
-    bcc @chg
+    bcc @chg0
     lda #0
     sta menu_sel
-    beq @chg
+    beq @chg0
 @nd:
     lda tmp0
     and #BTN_UP
     beq @nu
     dec menu_sel
-    bpl @chg
+    bpl @chg0
     lda #3
     sta menu_sel
-    bne @chg
+@chg0:
+    jmp @chg
 @nu:
     lda tmp0
     and #BTN_LEFT | BTN_RIGHT
@@ -294,9 +292,32 @@ title_update:
 @n2:
     cmp #2
     bne @n3
+    ; secteur : seuls les secteurs debloques (sauvegarde) sont proposes
+    ldy #NUM_SECTORS
+@sec:
+    lda tmp0
+    and #BTN_RIGHT
+    beq @secl
+    inc sector_sel
     lda sector_sel
-    eor #1
+    cmp #NUM_SECTORS
+    bcc @sect
+    lda #0
     sta sector_sel
+    beq @sect
+@secl:
+    dec sector_sel
+    bpl @sect
+    lda #NUM_SECTORS-1
+    sta sector_sel
+@sect:
+    ldx sector_sel
+    lda sector_bit,x
+    and sectors_unl
+    bne @secok
+    dey
+    bne @sec
+@secok:
     jmp @chg
 @n3:
     ; difficulte : DROITE +1, GAUCHE -1 ; EXPERT seulement si debloque

@@ -33,6 +33,27 @@ CHR 128–256 Kio, même carte.
   banc (`$E000`), seul banc garanti à la mise sous tension.
 - PRG-RAM protégée en écriture (`$A001 = $C0`) hors des sauvegardes.
 
+### Secteurs et bancs (Phase 3)
+
+Chaque secteur occupe un **banc PRG de 8 Kio** mappé en `$8000` (R6) pendant
+son niveau, et commence par un **en-tête** de 22 octets (offsets `SH_*` dans
+`defs.inc`) : orientation, longueur de carte, fin de défilement, relais,
+pointeurs (ids, gabarits, attributs, script, palette), bancs CHR, musique,
+type de boss. `sector_map` copie l'en-tête et place les pointeurs de carte en
+page zéro ; tout le code de niveau est indépendant du secteur.
+
+CHR-ROM (unités de 1 Kio) :
+
+| Unités | Contenu | Registre |
+|---|---|---|
+| 0-1 | décor commun `$00-$7F` (police, jauges) | R0 = 0 |
+| 2+2k | décor du secteur k, tuiles `$80-$FF` | R1 |
+| 16-18 | sprites communs `$00-$BF` (vaisseaux, ennemis, tirs, explosions) | R2-R4 |
+| 19+j | jeu de sprites j, `$C0-$FF` (boss H/V, objet de décor) | R5 |
+
+Ajouter un secteur = un fichier de tuiles, un script, une entrée `SECTORS`
+dans `tools/gen_assets.py` (et un jeu de sprites si le boss est nouveau).
+
 ## 2. Boucle principale et interruptions
 
 ```

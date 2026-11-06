@@ -55,6 +55,30 @@
 | Coop | PILOTE | 5 | 6.0 | 0/3 | - | 63 | 3.2 / 11 |
 | Coop | VETERAN | 4 | 5.0 | 0/3 | - | 59 | 2.8 / 11 |
 
+## Mesures — secteur 3 « Ceinture brisée », joueur moyen
+
+| Mode | Difficulté | Vies | Pertes moy. | Secteur réussi | Durée boss | Ennemis abattus | Tirs ennemis (moy./max) |
+|---|---|---|---|---|---|---|---|
+| Solo LANCE | RECRUE | 5 | 2.7 | 3/3 | 36 s | 58 | 7.4 / 16 |
+| Solo LANCE | PILOTE | 3 | 2.0 | 3/3 | 40 s | 57 | 8.6 / 16 |
+| Solo LANCE | VETERAN | 2 | 2.0 | 1/3 | 41 s | 59 | 8.9 / 16 |
+| Solo EGIDE | RECRUE | 5 | 1.7 | 3/3 | 40 s | 70 | 7.3 / 16 |
+| Solo EGIDE | PILOTE | 3 | 1.7 | 3/3 | 53 s | 74 | 8.8 / 16 |
+| Solo EGIDE | VETERAN | 2 | 2.0 | 2/3 | 54 s | 72 | 8.6 / 16 |
+| Coop | RECRUE | 7 | 2.7 | 3/3 | 25 s | 66 | 6.4 / 16 |
+| Coop | PILOTE | 5 | 3.3 | 3/3 | 35 s | 70 | 7.6 / 16 |
+| Coop | VETERAN | 4 | 3.0 | 3/3 | 34 s | 70 | 7.8 / 16 |
+
+Le secteur 3 présente **plus de projectiles** (≈ 8-9 à l'écran en moyenne
+contre ≈ 6) et introduit les unités lourdes et l'Essaim-mère. Pour ce bot,
+il reste **à peine plus difficile** que le secteur 1 malgré deux durcissements
+du boss (anneaux plus fréquents, anneaux rapides en phase 2) : les anneaux
+lents s'esquivent bien, et la réserve de 16 projectiles ennemis est souvent
+saturée, ce qui plafonne la pression. **Point ouvert** : la progression de
+difficulté d'un secteur à l'autre doit être confirmée par des parties
+humaines ; pistes si besoin : réserve de projectiles portée à 20 (coût CPU à
+mesurer), densité des scripts, vitesse des anneaux dès la phase 1.
+
 ## Constats et décisions
 
 1. **Avant réglage**, 49 pertes sur 57 avaient lieu pendant le combat contre
@@ -83,5 +107,5 @@
 
 - Parties humaines sur la ROM (en émulateur puis sur console) pour confirmer
   ces tendances, en particulier la lisibilité des gerbes du boss.
-- Rejouer `node tests/balance.js moyen` après chaque modification de
-  script ou de motif (≈ 5 min).
+- Rejouer `node tests/balance.js moyen <secteur 0-2>` après chaque
+  modification de script ou de motif (≈ 5 min par secteur).

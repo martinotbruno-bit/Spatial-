@@ -121,6 +121,22 @@
   motifs du boss paramétrés par difficulté (EQUILIBRAGE.md).
 - 32/32 tests en émulation ; stress 91 % CPU, normal 64 %.
 
+## 2026-11-06 — Phase 3 (début) : architecture de campagne, secteur 3
+
+- Données de secteur en bancs PRG commutables avec en-tête ; bancs CHR par
+  secteur (128 tuiles de décor + 64 tuiles de sprites) ; ressources
+  découpées par secteur (`tiles_sN`, `sprites_sN`, `script_sN`).
+  Vérification : les 32 tests existants restent verts après la refonte.
+- Secteur 3 « Ceinture brisée » : carte d'astéroïdes, 3 palettes, rochers
+  minéraliers destructibles, unité lourde (nouvelle famille), boss
+  Essaim-mère, musique « Ceinture », page narrative. Test T33.
+- Secteurs débloqués sauvegardés (sauvegarde v2), menu limité aux secteurs
+  débloqués. Test T34.
+- Défaut corrigé avant test : compteur de cycles de l'unité lourde partagé
+  avec son état.
+- Équilibrage secteur 3 mesuré : point ouvert documenté (EQUILIBRAGE.md).
+- 34/34 tests en émulation ; stress 90 % CPU.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

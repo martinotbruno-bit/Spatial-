@@ -96,7 +96,8 @@ EN_DRONE    = 1
 EN_FIGHTER  = 2
 EN_TURRET   = 3
 EN_KAMIKAZE = 4
-EN_POD      = 5     ; conteneur de fret : decor destructible
+EN_POD      = 5     ; objet de decor destructible (conteneur, rocher...)
+EN_HEAVY    = 6     ; unite lourde
 EN_BOSS     = 15    ; marqueur de script uniquement
 
 ; --- Regles --------------------------------------------------------------------
@@ -119,10 +120,21 @@ BOSS_HP       = 250
 BOSS_PHASE2   = 125
 SPAWN_U       = 250  ; position "avant" d'apparition (hors champ partiel)
 
-; Fins de defilement (camera en pixels) avant l'apparition du boss
-CAM_STOP_H = 1760
-CAM_STOP_V = 1536
-; Points de reprise (multiples de 32 : alignes sur les groupes d'attributs)
-CP_H = 896
-CP_V = 768
+; En-tete de secteur (debut du banc PRG du secteur, copie dans sec_hdr).
+; Fin de defilement et point de reprise (multiple de 32) y sont definis.
+SH_ORIENT = 0
+SH_MAXIDX = 1   ; derniere colonne/rangee de carte
+SH_STOP   = 2   ; camera de fin de defilement (16 bits)
+SH_CP     = 4   ; point de reprise (16 bits)
+SH_IDS    = 6   ; pointeurs : ids, gabarits lo/hi, attributs (0 = aucun)
+SH_TLO    = 8
+SH_THI    = 10
+SH_ATTR   = 12
+SH_SCRIPT = 14
+SH_PAL    = 16
+SH_CHRBG  = 18  ; banc CHR R1 (decor $80-$FF)
+SH_CHRSPR = 19  ; banc CHR R5 (sprites $C0-$FF)
+SH_SONG   = 20
+SH_BOSS   = 21  ; type de boss
+SH_SIZE   = 22
 CONTINUES = 3
