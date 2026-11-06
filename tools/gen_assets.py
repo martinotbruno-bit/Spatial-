@@ -471,6 +471,8 @@ def sfx_tables():
     sfx["DEATH"] = pulse([pf(2, max(1, 12 - i // 3), 0x80 + i * 0x14) for i in range(32)])
     sfx["MENU"] = pulse([pf(2, 8, 0xD5), pf(2, 8, 0xD5), pf(2, 6, 0xA0), pf(2, 4, 0xA0)])
     sfx["ALERT"] = pulse([pf(2, 10, 0xA0 if (i // 8) % 2 == 0 else 0xD5) for i in range(64)])
+    sfx["DASH"] = pulse([pf(1, 10 - i // 2, 0x200 - i * 0x18) for i in range(14)])
+    sfx["SHIELD"] = pulse([pf(3, 9, 0x120 if i % 4 < 2 else 0x100) for i in range(16)])
     sfx["COOPREADY"] = pulse([pf(1, 9, p) for p in (0xD5, 0xD5, 0xA9, 0xA9, 0x8E, 0x8E, 0x6A, 0x6A, 0x6A, 0x6A)])
     return sfx
 

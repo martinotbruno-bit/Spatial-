@@ -511,17 +511,18 @@ state_drw_tbl:
 
 .include "audio.s"
 .include "save.s"
+.include "title.s"
+.include "hud.s"
+.include "data.s"
 
+; Banc fixe $C000 : code critique du jeu
 .segment "CODE"
 .include "render.s"
-.include "title.s"
 .include "stage.s"
 .include "player.s"
 .include "enemy.s"
 .include "boss.s"
 .include "coop.s"
-.include "hud.s"
-.include "data.s"
 
 .segment "VECTORS"
     .word nmi, reset, irq

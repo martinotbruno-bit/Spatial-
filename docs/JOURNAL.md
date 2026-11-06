@@ -51,13 +51,26 @@
   sur une console via cartouche flash (type EverDrive / PowerPak, mapper 4)
   et dans Mesen (précision de cycle) avant de lancer la Phase 3.
 
+## 2026-11-06 — Phase 2 (début)
+
+- Réorganisation des bancs : titre, HUD, palettes et scripts en `$E000` ;
+  banc `$C000` de 95 % à 74 %.
+- Capacités propres des vaisseaux sur B (jauge non pleine) : Surcharge de
+  LANCE, Bouclier frontal d'ÉGIDE ; 2 SFX ajoutés ; tests T23-T24.
+  Arbitrage : pas de troisième bouton sur la manette NES, donc B est
+  contextuel (capacité / pouvoir coopératif selon la jauge), règle lisible
+  grâce à la jauge affichée en permanence.
+- Coût CPU : +0,3 % en scène de stress (28 090 cycles, 0 image perdue).
+- Push vers GitHub toujours refusé (403, accès de l'application Claude au
+  dépôt) : commits conservés en local.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
    DPCM/manettes, sauvegarde après coupure).
 2. Secteur 1 complet : décor définitif (attributs par paire de colonnes,
    2-3 palettes), décor interactif/destructible, checkpoint.
-3. Capacités propres à chaque vaisseau, deuxième pouvoir coopératif.
+3. ~~Capacités propres à chaque vaisseau~~ (fait) ; deuxième pouvoir coopératif.
 4. Séquence narrative d'introduction, écran de fin de secteur avec bilan.
 5. Moteur audio : enveloppes par instrument, musique de menu dédiée.
-6. Réorganisation des bancs (banc `$C000` rempli à 95 %).
+6. ~~Réorganisation des bancs~~ (fait).

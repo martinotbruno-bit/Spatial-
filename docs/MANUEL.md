@@ -21,7 +21,7 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 |---|---|
 | Croix | Déplacement dans 8 directions |
 | A (maintenu) | Tir automatique |
-| B | Pouvoir coopératif (jauge LIEN pleine) |
+| B | Capacité du vaisseau (LANCE : Surcharge, ÉGIDE : Bouclier) ; pouvoir coopératif si la jauge LIEN est pleine |
 | START | Pause |
 
 - **LANCE** (manette 1) : rapide, tir concentré.

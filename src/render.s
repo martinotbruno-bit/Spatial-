@@ -270,6 +270,34 @@ draw_players:
     lda ship_tiles,y
     sta d_tile
     jsr draw_obj
+    cpx #1
+    bne @n
+    lda pl_abil_t+1
+    beq @n
+    ; bouclier frontal : 3 particules devant EGIDE
+    lda #1
+    sta d_size
+    lda #S_BEAM_H
+    sta d_tile
+    lda pl_u+1
+    clc
+    adc #16
+    sta d_u
+    lda pl_v+1
+    sec
+    sbc #4
+    sta d_v
+    jsr draw_obj
+    lda d_v
+    clc
+    adc #8
+    sta d_v
+    jsr draw_obj
+    lda d_v
+    clc
+    adc #8
+    sta d_v
+    jsr draw_obj
 @n:
     inx
     cpx #2

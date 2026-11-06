@@ -143,6 +143,8 @@ place_players:
 @l:
     lda #0
     sta pl_alive,x
+    sta pl_abil_t,x
+    sta pl_abil_cd,x
     sta pl_invul,x
     sta pl_cool,x
     sta pl_ulo,x

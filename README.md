@@ -16,6 +16,8 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - Coopération à 2 joueurs simultanés (2 manettes) **et** mode solo complet
 - Deux vaisseaux différents : **LANCE** (intercepteur rapide, tir concentré)
   et **ÉGIDE** (vaisseau lourd, tir en éventail), 3 niveaux d'arme chacun
+- Capacités propres : **Surcharge** (LANCE, esquive rapide) et **Bouclier
+  frontal** (ÉGIDE, absorbe 4 projectiles)
 - Collisions physiques entre joueurs, sans dégâts ni blocage
 - Ressource coopérative **LIEN** et trois pouvoirs : **Faisceau de Liaison**
   (attaque combinée dépendant du placement des deux vaisseaux),
@@ -25,7 +27,7 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - 4 familles d'ennemis (drones, chasseurs, tourelles, kamikazes), tirs visés
   sur 16 directions, mini-boss à 2 phases
 - Moteur audio sur les 5 canaux (2 pulse, triangle, bruit, DPCM),
-  3 musiques originales, 12 effets sonores
+  3 musiques originales, 14 effets sonores
 - Sauvegarde des records sur PRG-RAM à pile (double copie + somme de contrôle)
 - Détection NTSC/PAL et compensation de cadence 6/5 en 50 Hz
 
@@ -48,7 +50,7 @@ octet pour octet).
 |---|---|
 | Déplacement 8 directions | Croix |
 | Tir (maintenu) | A |
-| Pouvoir coopératif (jauge LIEN pleine) | B |
+| Capacité du vaisseau / pouvoir coopératif (jauge LIEN pleine) | B |
 | Pause | START |
 | Menu : ligne / valeur / départ | Haut-Bas / Gauche-Droite / START |
 

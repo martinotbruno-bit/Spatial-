@@ -64,6 +64,29 @@ player_update:
     beq @nc
     dec pl_cool,x
 @nc:
+    lda pl_abil_cd,x
+    beq @ncd
+    dec pl_abil_cd,x
+@ncd:
+    ; vitesse : normale, ou surcharge de LANCE (4.5 px/image + esquive)
+    lda ship_spd_lo,x
+    sta ptr0
+    lda ship_spd_hi,x
+    sta ptr0+1
+    lda pl_abil_t,x
+    beq @nab
+    dec pl_abil_t,x
+    cpx #0
+    bne @nab
+    lda #$80
+    sta ptr0
+    lda #$04
+    sta ptr0+1
+    lda pl_invul,x
+    bne @nab
+    lda #2                  ; invulnerable pendant la surcharge
+    sta pl_invul,x
+@nab:
     ; manette associee
     ldy pl_pad,x
     lda pad,y
@@ -87,10 +110,10 @@ player_update:
     beq @nf
     lda pl_ulo,x
     clc
-    adc ship_spd_lo,x
+    adc ptr0
     sta pl_ulo,x
     lda pl_u,x
-    adc ship_spd_hi,x
+    adc ptr0+1
     sta pl_u,x
     sty tmp5
     ldy orient
@@ -107,10 +130,10 @@ player_update:
     beq @nb
     lda pl_ulo,x
     sec
-    sbc ship_spd_lo,x
+    sbc ptr0
     sta pl_ulo,x
     lda pl_u,x
-    sbc ship_spd_hi,x
+    sbc ptr0+1
     sta pl_u,x
     sty tmp5
     ldy orient
@@ -129,10 +152,10 @@ player_update:
     beq @np
     lda pl_vlo,x
     clc
-    adc ship_spd_lo,x
+    adc ptr0
     sta pl_vlo,x
     lda pl_v,x
-    adc ship_spd_hi,x
+    adc ptr0+1
     sta pl_v,x
     sty tmp5
     ldy orient
@@ -149,10 +172,10 @@ player_update:
     beq @nm
     lda pl_vlo,x
     sec
-    sbc ship_spd_lo,x
+    sbc ptr0
     sta pl_vlo,x
     lda pl_v,x
-    sbc ship_spd_hi,x
+    sbc ptr0+1
     sta pl_v,x
     ldy orient
     bcc @mclamp
@@ -172,12 +195,41 @@ player_update:
     sta pl_cool,x
     jsr player_fire
 @nofire:
-    ; --- pouvoir cooperatif (B) ---
+    ; --- B : pouvoir cooperatif si la jauge est pleine, sinon capacite propre
     lda tmp6
     and #BTN_B
     beq @nob
-    jsr coop_trigger
+    lda gauge
+    cmp #GAUGE_MAX
+    bcc @abil
+    jmp coop_trigger
+@abil:
+    jmp ability_trigger
 @nob:
+    rts
+
+; Capacite propre du vaisseau X
+ability_trigger:
+    lda pl_abil_cd,x
+    bne @r
+    cpx #0
+    bne @egide
+    lda #DASH_TIME
+    sta pl_abil_t,x
+    lda #DASH_CD
+    sta pl_abil_cd,x
+    lda #SFX_DASH
+    jmp sfx_play
+@egide:
+    lda #SHIELD_TIME
+    sta pl_abil_t,x
+    lda #SHIELD_CD
+    sta pl_abil_cd,x
+    lda #SHIELD_HP
+    sta shield_hp
+    lda #SFX_SHIELD
+    jmp sfx_play
+@r:
     rts
 
 ; Tir selon le vaisseau X et son niveau d'arme
@@ -308,6 +360,7 @@ player_kill:
     beq @r
     lda #0
     sta pl_alive,x
+    sta pl_abil_t,x
     sta beam_t
     lda pl_u,x
     sta tmp0

@@ -85,6 +85,9 @@ pl_cool:     .res 2
 pl_wlv:      .res 2     ; niveau d'arme 1-3
 pl_invul:    .res 2
 pl_resp:     .res 2
+pl_abil_t:   .res 2     ; capacite propre active (images restantes)
+pl_abil_cd:  .res 2     ; temps de recharge de la capacite
+shield_hp:   .res 1     ; projectiles encore absorbables par le bouclier d'EGIDE
 
 ; --- ennemis ---
 en_type:     .res MAX_EN

@@ -39,7 +39,7 @@ Légende :
 | 2.3 | Solo complet, sans passage imposant 2 joueurs | 🟡 | Solo jouable avec les 2 vaisseaux, Nova de remplacement ; campagne non produite |
 | 2.4 | Campagne de 1 à 2 h | ⬜ | 8 secteurs proposés (GDD §6) ; 2 secteurs prototypes (~1 min chacun) |
 | 3.1 | 8 directions, contrôles précis | ✅ ÉMU | Déplacement sub-pixel 8.8, sans inertie |
-| 3.2 | Vaisseaux distincts et complémentaires | 🟡 | Vitesse, armes, cadence différentes ; capacités propres à produire |
+| 3.2 | Vaisseaux distincts et complémentaires | ✅ ÉMU | Vitesse, armes, cadence, capacités propres (Surcharge / Bouclier, T23-T24) |
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |
 | 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | 🟡 | Faisceau, Transfert d'énergie (+ Nova solo) ; attaque synchronisée à produire |
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 22/22 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 24/24 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

@@ -37,9 +37,16 @@ palette ocre/or), la flotte humaine en déroute (alliée, séquences narratives)
 | Palette | Bleu / cyan / blanc | Rouge / orange / jaune |
 
 Aucun des deux n'est supérieur : LANCE inflige plus de dégâts par seconde sur
-une cible unique, ÉGIDE couvre plus d'espace. *[à produire]* : une capacité
-propre à chaque vaisseau (proposition : LANCE = accélération éclair de courte
-durée ; ÉGIDE = bouclier frontal absorbant 3 projectiles).
+une cible unique, ÉGIDE couvre plus d'espace.
+
+**Capacités propres** *[prototype]* — bouton B quand la jauge LIEN n'est pas
+pleine (jauge pleine : B déclenche le pouvoir coopératif) :
+
+| | LANCE — Surcharge | ÉGIDE — Bouclier frontal |
+|---|---|---|
+| Effet | 16 images à 4,5 px/image, invulnérable (esquive) | Écran 8×24 px devant le vaisseau, absorbe 4 projectiles, 2 s |
+| Recharge | 90 images (1,5 s) | 240 images (4 s) |
+| Rôle | Traverser un barrage, ramasser une capsule | Couvrir le partenaire, tenir une position face au boss |
 
 **Armes évolutives** : capsule « P » lâchée par les chasseurs → niveau +1
 (max 3) ; perte d'une vie → niveau −1 (min 1).

@@ -320,7 +320,7 @@ test("T17", "Effets sonores : plusieurs SFX distincts declenches en jeu", () => 
   m.press(0, "A"); m.press(1, "A");
   m.frame(1200, (mm, i) => { if (i < 1100) invul(mm); if (i === 500) mm.poke("gauge", 64); if (i === 502) mm.press(0, "B"); if (i === 506) mm.release(0, "B"); });
   cpu.emulate = emu;
-  const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "COOPREADY"];
+  const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "DASH", "SHIELD", "COOPREADY"];
   const seen = [...sfx.keys()].sort((a, b) => a - b).map((k) => names[k] || k);
   return { ok: sfx.size >= 6, detail: `${sfx.size} effets distincts : ${seen.join(", ")}` };
 });
@@ -413,6 +413,49 @@ test("T21", "PAL : compensation 6/5 de la logique (cadence de jeu identique a 60
   m.frame(500, invul);
   const d = camOf(m) - c0;
   return { ok: d === 600, detail: `camera +${d} px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC.` };
+});
+
+test("T23", "Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge", () => {
+  const m = startGame({ players: 2 });
+  m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
+  m.poke("pl_u", 40); m.poke("pl_v", 120); m.poke("gauge", 0);
+  m.press(0, "RIGHT");
+  m.tap(0, "B", 1, 0);
+  const u0 = m.peek("pl_u");
+  let hitFree = true;
+  m.frame(14, (mm) => {
+    // projectile force sur le vaisseau pendant la surcharge
+    mm.poke("eb_on", 1, 0); mm.poke("eb_u", mm.peek("pl_u") + 4, 0); mm.poke("eb_v", mm.peek("pl_v") + 4, 0);
+    mm.poke("eb_duhi", 0, 0); mm.poke("eb_dulo", 0, 0); mm.poke("eb_dvhi", 0, 0); mm.poke("eb_dvlo", 0, 0);
+    if (!mm.peek("pl_alive")) hitFree = false;
+  });
+  m.poke("eb_on", 0, 0);
+  const du = m.peek("pl_u") - u0;
+  m.releaseAll();
+  const cd = m.peek("pl_abil_cd");
+  m.tap(0, "B", 1, 0);
+  const cd2 = m.peek("pl_abil_cd");
+  return { ok: du >= 60 && hitFree && cd > 0 && cd2 === cd - 1, detail: `deplacement ${du}px en 14 images (normal 35), indemne=${hitFree}, recharge=${cd} images, 2e appui pendant la recharge ignore=${cd2 === cd - 1}` };
+});
+
+test("T24", "Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles", () => {
+  const m = startGame({ players: 2 });
+  m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
+  m.poke("pl_u", 60, 1); m.poke("pl_v", 120, 1); m.poke("gauge", 0); m.poke("pl_invul", 0, 1);
+  m.tap(1, "B", 1, 0);
+  const on = m.peek("pl_abil_t", 1);
+  let absorbed = 0;
+  for (let k = 0; k < 5; k++) {
+    m.poke("eb_on", 1, k); m.poke("eb_u", 90, k); m.poke("eb_v", 124, k);
+    m.poke("eb_duhi", 0xff, k); m.poke("eb_dulo", 0, k); m.poke("eb_dvhi", 0, k); m.poke("eb_dvlo", 0, k);
+    m.frame(6, (mm) => { mm.poke("pl_u", 60, 1); mm.poke("pl_v", 120, 1); for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i); });
+    if (k === 1) m.screenshot(path.join(SHOTS, "08_bouclier_egide.png"));
+    if (m.peek("pl_alive", 1) === 1 && k < 4) absorbed++;
+  }
+  // 5e projectile : bouclier epuise, il atteint le vaisseau
+  m.frame(40, (mm) => { mm.poke("pl_u", 60, 1); mm.poke("pl_v", 120, 1); for (let i = 0; i < 10; i++) mm.poke("en_type", 0, i); });
+  const diedAfter = m.peek("pl_alive", 1) === 0;
+  return { ok: on > 0 && absorbed === 4 && diedAfter, detail: `bouclier actif=${on > 0}, absorbes=${absorbed}/4, 5e projectile touche=${diedAfter}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

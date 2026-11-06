@@ -279,6 +279,7 @@ set_bg_color:
 collisions:
     jsr col_pb_enemies
     jsr col_pb_boss
+    jsr col_shield
     jsr col_eb_players
     jsr col_en_players
     jsr col_items
@@ -370,6 +371,46 @@ col_pb_boss:
     ldy tmp4
 @nb:
     dey
+    dey
+    bpl @b
+@r:
+    rts
+
+; Bouclier frontal d'EGIDE : zone 8x24 devant le vaisseau (centre u+20, v+8).
+; Teste avant col_eb_players : un projectile absorbe ne touche plus personne.
+col_shield:
+    lda pl_abil_t+1
+    beq @r
+    lda pl_alive+1
+    beq @r
+    ldy #MAX_EB-1
+@b:
+    lda eb_on,y
+    beq @nb
+    lda eb_u,y
+    sec
+    sbc pl_u+1
+    clc
+    adc #<(6+4-20)          ; R = 2+4
+    cmp #12
+    bcs @nb
+    lda eb_v,y
+    sec
+    sbc pl_v+1
+    clc
+    adc #14+4-8             ; R = 2+12
+    cmp #28
+    bcs @nb
+    lda #0
+    sta eb_on,y
+    lda #SFX_HIT
+    jsr sfx_play
+    dec shield_hp
+    bne @nb
+    lda #0
+    sta pl_abil_t+1         ; bouclier epuise
+    rts
+@nb:
     dey
     bpl @b
 @r:

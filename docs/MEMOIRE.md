@@ -15,14 +15,14 @@ RESULTATS_TESTS.md).
 | `$6000-$7FFF` | PRG-RAM sur pile (sauvegarde) | 64 / 8192 octets |
 | `$8000-$9FFF` | Banc R6 = PRG 0 : cartes des secteurs | 6140 / 8192 octets |
 | `$A000-$BFFF` | Banc R7 = PRG 1 : musique, SFX, tables de périodes, directions, sinus | 2873 / 8192 octets |
-| `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 7803 / 8192 octets |
-| `$E000-$FFFF` | PRG 7 fixe : démarrage, NMI, IRQ, audio, sauvegarde, vecteurs | 1751 / 8192 octets |
+| `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 6064 / 8192 octets |
+| `$E000-$FFFF` | PRG 7 fixe : démarrage, NMI, IRQ, audio, sauvegarde, titre, HUD, palettes/scripts, vecteurs | 3558 / 8192 octets |
 
 Bancs PRG 2 à 5 : libres (32 Kio) — réservés aux secteurs suivants.
 
-> **Point d'attention** : le banc `$C000` est rempli à 95 %. La Phase 2 doit
-> déplacer du code vers `$E000` (6,3 Kio libres) et les données de secteur
-> vers les bancs commutables.
+> Phase 2 : titre, HUD et données de niveau déplacés vers `$E000` ; le banc
+> `$C000` est passé de 95 % à 74 %. Les secteurs suivants iront dans les
+> bancs commutables 2 à 5.
 
 ## Page zéro (principales variables)
 
