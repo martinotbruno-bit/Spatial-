@@ -92,6 +92,8 @@ ST_OVER   = 3
 ST_END    = 4
 ST_STORY  = 5
 ST_CONT   = 6
+ST_ENCY   = 7
+ST_RANK   = 8
 
 ; --- Pools d'entites -----------------------------------------------------------
 MAX_EN = 10     ; ennemis

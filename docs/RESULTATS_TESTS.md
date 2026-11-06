@@ -3,7 +3,7 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **45/45** reussis.
+Resultat : **47/47** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
@@ -25,8 +25,8 @@ Resultat : **45/45** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=21 P2=87 TRI=37 BRUIT=36, declenchements DPCM=14, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 7 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27452 moy=23677 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=18868 moy=12883, images perdues=0, vblank utilise max=1530/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=27502 moy=23732 (budget NTSC 29780 = 92 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1, 1900 images a 2 joueurs) | OK | cycles/image max=19047 moy=12949, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -51,7 +51,9 @@ Resultat : **45/45** reussis.
 | T43 | Secteur 7 Front de la Concordance : decor, Amiral-machine (kamikazes lances) | OK | secteur charge=true, VRAM 0/0 erreurs, kamikazes lances par le boss (max)=1, boss vaincu=true, arrivee secteur 8=true |
 | T44 | Secteur 8 Coeur du Lien : Concordance en 3 phases, deux fins (LIAISON / RUPTURE) | OK | credits=3 : phases vues=1,2,3, page de fin=8 (LIAISON), retour titre=true, EXPERT=1 ; credits=2 : phases vues=1,2,3, page de fin=9 (RUPTURE), retour titre=true, EXPERT=1 |
 | T45 | Campagne complete enchainee : secteurs 1 a 8, histoire, deblocages, fin | OK | secteurs joues=0,1,2,3,4,5,6,7, page finale=8 (LIAISON), secteurs debloques=11111111, retour titre=true |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=b6177724b1c2dbb4... |
+| T46 | Encyclopedie : fiches decouvertes en jeu, sauvegardees, consultables | OK | sauvegarde vierge : fiches=11 ; apres 200 images de jeu : 111 ; fiche 1="LANCE", fiche 3="DRONE", fiche 4 (non vue)="????", retour titre=true |
+| T47 | Classements : insertion triee, secteur et difficulte, sauvegarde, ecran | OK | classement solo=042420 > 005000 > 004500 > 004000 > 003000, secteur/difficulte 1re entree=1/1, ecran : "1.  042420  S1   PILOT" |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=78715e26ca32d61f... |
 
 ## Mesures
 
@@ -60,19 +62,19 @@ Resultat : **45/45** reussis.
   "cam_h_end": 7840,
   "maxEnemies": 10,
   "maxEnemyBullets": 6,
-  "stressMaxCycles": 27452,
-  "stressAvgCycles": 23677,
+  "stressMaxCycles": 27502,
+  "stressAvgCycles": 23732,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1530,
-  "normalMaxCycles": 18868,
-  "normalAvgCycles": 12883,
+  "normalMaxCycles": 19047,
+  "normalAvgCycles": 12949,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "b6177724b1c2dbb4dcd4237d84dd44e443ff4a9245785428a684524eec7f3ed1",
+  "sha256": "78715e26ca32d61fc5752d35da4df5b95f01386d779299cc47d1c74810a427aa",
   "romSize": 327696
 }
 ```

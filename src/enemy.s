@@ -20,6 +20,10 @@ enemy_spawn:
 @ok:
     lda tmp2
     sta en_type,x
+    clc
+    adc #1
+    jsr ency_mark           ; fiche d'encyclopedie : type + 1
+    lda tmp2
     tay
     lda en_hp_tbl,y
     sta en_hp,x

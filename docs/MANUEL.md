@@ -8,6 +8,11 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 
 ## Menu
 
+Lignes ENCYCLOPEDIE et CLASSEMENTS : START pour les ouvrir. Dans
+l'encyclopédie, GAUCHE / DROITE parcourent les fiches (découvertes en jeu) ;
+B revient au titre.
+
+
 - **HAUT / BAS** (ou SELECT) : choisir une ligne.
 - **GAUCHE / DROITE** : changer la valeur.
   - JOUEURS : 1 ou 2.

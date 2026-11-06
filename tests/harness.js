@@ -128,7 +128,7 @@ class Machine {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, PNG.sync.write(png));
   }
-  sram(n = 64) { return Array.from({ length: n }, (_, i) => this.nes.cpu.mem[0x6000 + i]); }
+  sram(n = 256) { return Array.from({ length: n }, (_, i) => this.nes.cpu.mem[0x6000 + i]); }
 }
 
 module.exports = { Machine, BTN, ROOT };

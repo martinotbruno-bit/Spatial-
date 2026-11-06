@@ -56,21 +56,24 @@ Organisation en tableaux parallèles (une table par champ, indexée par X/Y) :
 | Score, records, menu, divers | — | ~40 |
 | Audio | 4 canaux musique + 2 canaux SFX | ~35 |
 
-## Sauvegarde (PRG-RAM `$6000`)
+## Sauvegarde (PRG-RAM `$6000`, version 3)
 
-Deux copies identiques de 32 octets (`$6000` = A, `$6020` = B) :
+Deux copies de 128 octets (`$6000` = A, `$6080` = B). Une copie :
 
 | Octets | Contenu |
 |---|---|
 | 0-3 | Signature `SPTL` |
-| 4 | Version (1) |
-| 5-10 | Record solo (6 chiffres) |
-| 11-16 | Record coopération |
-| 17 | Déblocages (bit 0 réservé au mode Expert) |
-| 18 | Somme des octets 4-17, XOR `$A5` |
+| 4 | Version (3) |
+| 5 | Déblocages (bit 0 = mode EXPERT) |
+| 6 | Secteurs débloqués (bit k = secteur k+1) |
+| 7-9 | Fiches d'encyclopédie découvertes (19 bits) |
+| 10-49 | Classement solo : 5 × (6 chiffres de score, secteur atteint 1-8 ou 9 = fin, difficulté) |
+| 50-89 | Classement coop (même format) |
+| 90 | Somme des octets 4-89, XOR `$A5` |
 
-Écriture : copie B puis copie A, PRG-RAM déverrouillée uniquement pendant
-l'écriture. Lecture : A si valide, sinon B, sinon valeurs par défaut.
+Le bloc 5-89 est l'image du bloc `persist` de la RAM ; les records affichés
+(`hi_solo`, `hi_coop`) sont la 1re entrée de chaque classement. Écriture :
+copie B puis copie A, PRG-RAM déverrouillée uniquement pendant l'écriture.
 
 ## CHR-ROM (8 Kio utiles, ×4)
 

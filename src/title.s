@@ -40,31 +40,6 @@ title_enter:
     tax
     bne @s
 @done:
-    ; records
-    lda #$22
-    sta PPUADDR
-    lda #$93
-    sta PPUADDR
-    ldx #0
-@h1:
-    lda hi_solo,x
-    ora #'0'
-    sta PPUDATA
-    inx
-    cpx #6
-    bne @h1
-    lda #$22
-    sta PPUADDR
-    lda #$B3
-    sta PPUADDR
-    ldx #0
-@h2:
-    lda hi_coop,x
-    ora #'0'
-    sta PPUDATA
-    inx
-    cpx #6
-    bne @h2
     ; etoiles du fond anime (pool d'explosions reutilise)
     ldx #MAX_FX-1
 @st:
@@ -93,7 +68,7 @@ title_strings:
     ;      adresse VRAM, chaine
     .dbyt $20A9
     .word str_t_logo
-    .dbyt $20E1
+    .dbyt $20E5
     .word str_t_sub
     .dbyt $2186
     .word str_t_m1
@@ -104,22 +79,22 @@ title_strings:
     .dbyt $2246
     .word str_t_m4
     .dbyt $2286
-    .word str_t_r1
-    .dbyt $22A6
-    .word str_t_r2
+    .word str_t_m5
+    .dbyt $22C6
+    .word str_t_m6
     .dbyt $2366
     .word str_t_copy
     .dbyt $0000
     .word 0
 
 str_t_logo: .byte "S P A T I A L", 0
-str_t_sub:  .byte "  PROTOTYPE JOUABLE - 3 SECTEURS", 0
+str_t_sub:  .byte "CAMPAGNE EN 8 SECTEURS", 0
 str_t_m1:   .byte "  JOUEURS  :", 0
 str_t_m2:   .byte "  VAISSEAU :", 0
 str_t_m3:   .byte "  SECTEUR  :", 0
 str_t_m4:   .byte "  NIVEAU   :", 0
-str_t_r1:   .byte "RECORD SOLO", 0
-str_t_r2:   .byte "RECORD COOP", 0
+str_t_m5:   .byte "  ENCYCLOPEDIE", 0
+str_t_m6:   .byte "  CLASSEMENTS", 0
 str_t_copy: .byte "2026 - PROJET SPATIAL", 0
 str_start:  .byte "APPUYEZ SUR START", 0
 str_blank:  .byte "                 ", 0
@@ -148,7 +123,7 @@ menu_write:
     inx
     jsr vbuf_close
     iny
-    cpy #4
+    cpy #6
     bne @cur
     ; nombre de joueurs
     lda #$93
@@ -240,7 +215,7 @@ str_d1: .byte "PILOTE     "
 str_d2: .byte "VETERAN    "
 str_d3: .byte "EXPERT !   "
 
-menu_cursor_lo: .byte $86, $C6, $06, $46
+menu_cursor_lo: .byte $86, $C6, $06, $46, $86, $C6
 
 ; Copie 11 caracteres de ptr0 vers ptr1 via le tampon VRAM
 vbuf_str11:
@@ -293,6 +268,15 @@ title_update:
     beq @nostart
     lda #SFX_MENU
     jsr sfx_play
+    lda menu_sel
+    cmp #4
+    bne @nenc
+    jmp ency_enter
+@nenc:
+    cmp #5
+    bne @nrk
+    jmp rank_enter
+@nrk:
     jmp game_start
 @nostart:
     lda tmp0
@@ -300,7 +284,7 @@ title_update:
     beq @nd
     inc menu_sel
     lda menu_sel
-    cmp #4
+    cmp #6
     bcc @chg0
     lda #0
     sta menu_sel
@@ -311,7 +295,7 @@ title_update:
     beq @nu
     dec menu_sel
     bpl @chg0
-    lda #3
+    lda #5
     sta menu_sel
 @chg0:
     jmp @chg
@@ -321,6 +305,11 @@ title_update:
     bne @lr
     jmp @r
 @lr:
+    lda menu_sel            ; lignes ENCYCLOPEDIE / CLASSEMENTS : START seul
+    cmp #4
+    bcc @lrok
+    jmp @r
+@lrok:
     lda menu_sel
     bne @n1
     lda nplayers            ; 1 <-> 2

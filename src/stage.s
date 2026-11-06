@@ -1060,6 +1060,9 @@ check_game_over:
     lda #200
     sta state_t
     jsr stop_music
+    ldx stage
+    inx
+    txa
     jmp save_update_hi
 @r:
     rts
@@ -1119,7 +1122,6 @@ clear_update:
 @nobonus:
     dec state_t
     bne @r
-    jsr save_update_hi
     lda stage
     clc
     adc #1
@@ -1132,11 +1134,13 @@ clear_update:
     cmp sectors_unl
     beq @known
     sta sectors_unl
-    jsr save_write
 @known:
+    jsr save_write          ; deblocages et encyclopedie
     lda stage
     jmp story_enter_far
 @end:
+    lda #9                  ; campagne terminee : classement
+    jsr save_update_hi
     lda #NUM_SECTORS        ; epilogue
     jmp story_enter_far
 @r:

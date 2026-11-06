@@ -196,6 +196,11 @@ tirs visés (les motifs des boss restent complets).
 
 ## 8. Score et rejouabilité
 
+*[prototype]* Classements solo et coop de 5 entrées (score, secteur atteint
+ou « FIN », difficulté), mis à jour à chaque fin de partie ; encyclopédie de
+19 fiches (vaisseaux, 10 familles d'ennemis, 7 boss) découvertes à la
+première rencontre.
+
 Score d'équipe à 6 chiffres. Records solo et coop sauvegardés *[prototype]*.
 *[à produire]* : sélection des secteurs débloqués, classement à 5 entrées
 par mode, multiplicateur de chaîne pour les destructions rapides.

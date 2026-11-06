@@ -4,8 +4,7 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 [cahier des charges maître](Cdc%20spatial.md).
 
 > **État : campagne complète jouable (8 secteurs, 2 fins), testée en émulation.**
-> Restent : encyclopédie, classements complets, finition, fabrication de la
-> cartouche et tests sur matériel réel. Aucun test sur matériel réel n'a été effectué : voir
+> Restent : finition, fabrication de la cartouche et tests sur matériel réel. Aucun test sur matériel réel n'a été effectué : voir
 > [docs/CONFORMITE.md](docs/CONFORMITE.md) pour l'état exact de chaque exigence.
 
 ![Planche de captures (émulation)](docs/captures/planche.png)
@@ -35,6 +34,8 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
   **Premier Ancrage** (vertical, émetteurs cristallins, Gardien d'Ancrage),
   **Front de la Concordance** (horizontal, Amiral-machine), **Cœur du Lien**
   (horizontal, boss final la Concordance en 3 phases)
+- **Encyclopédie** (19 fiches découvertes en jeu) et **classements** solo et
+  coop (5 entrées), sauvegardés dans la cartouche
 - **Deux fins** : *Fin de Liaison* (campagne terminée sans « Continuer ») ou
   *Fin de Rupture*
 - Secteurs débloqués sauvegardés et rejouables, secteur 2 en **défilement vertical**,

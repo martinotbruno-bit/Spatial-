@@ -46,13 +46,13 @@ Légende :
 | 4 | Armement riche et évolutif | ✅ ÉMU | Arme d'origine ×2, laser perçant, missiles guidés (3 niveaux chacun), bombes à munitions, bouclier, capsules changeantes, salve synchronisée, pouvoirs coop (T15, T37-T39) ; options d'escorte à envisager |
 | 5.1 | Grande variété d'ennemis | ✅ ÉMU | Les 8 familles du CDC : drones, chasseurs, unités lourdes, tourelles, soutiens, kamikazes, spécialisés (poseurs de mines + mines), structures défensives (émetteurs cristallins) + décor destructible (T12, T33, T36, T41, T42) |
 | 5.2 | Boss multi-phases | ✅ ÉMU | 7 boss : 6 à 2 phases dont un à **parties destructibles** (Croiseur, T41), boss final à 3 phases (T44) |
-| 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Scénario sur 8 secteurs, séquences narratives avec musique (T26), **2 fins selon la performance** (T44) ; encyclopédie à produire |
+| 6 | Scénario, séquences, 2 fins, encyclopédie | ✅ ÉMU | Scénario sur 8 secteurs, séquences narratives avec musique (T26), 2 fins selon la performance (T44), **encyclopédie** de 19 fiches débloquées à la rencontre et sauvegardées (T46) |
 | 7 | Direction artistique | 🟡 | 4 environnements, 3 palettes de décor par secteur en H comme en V (T29, T11, T36), décor destructible (T30) |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM, 6 instruments ; 5 musiques (menu, histoire, niveau, boss, fin de secteur), WAV dans `docs/audio/` |
 | 9.1 | Difficultés sélectionnables, mode expert | ✅ ÉMU | RECRUE/PILOTE/VÉTÉRAN + EXPERT débloqué en fin de campagne et sauvegardé (T32) ; progression mesurée par pilote automatique (EQUILIBRAGE.md) |
-| 9.2 | Classements et sauvegarde non volatile | 🟡 | Records solo/coop, secteurs débloqués et rejouables, mode EXPERT sauvegardés (T18, T32, T34) ; classement à 5 entrées à produire |
-| 10 | Menus et présentation | 🟡 | Titre animé, menu, présentation des vaisseaux, écran de bilan de fin de secteur (T28) ; sélection de difficulté, encyclopédie, classements à produire |
+| 9.2 | Classements et sauvegarde non volatile | ✅ ÉMU | Classements solo et coop de 5 entrées (score, secteur atteint, difficulté), secteurs débloqués et rejouables, mode EXPERT, encyclopédie : tout en PRG-RAM double copie (T18, T32, T34, T46, T47) |
+| 10 | Menus et présentation | ✅ ÉMU | Titre animé, menu (joueurs, vaisseau, secteur, difficulté), encyclopédie, classements, séquences, bilan, game over / continuer, 2 fins (T02, T26, T28, T44, T46, T47) |
 | 11 | Compatibilité NES d'origine, sans matériel additionnel | 🟡 | Conçu pour MMC3 standard ; **❌ MAT** |
 | 11.2 | Mapper choisi et justifié | ✅ | ARCHITECTURE §1 |
 | 11.3 | Scrolling prototypé dès le début | ✅ ÉMU | T10, T11 |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 45/45 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 47/47 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

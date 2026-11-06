@@ -27,7 +27,7 @@ function test(id, name, fn) {
   console.log(`${ok ? "OK   " : "ECHEC"} ${id} ${name}${detail ? "  -- " + detail : ""}`);
 }
 
-const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5, CONT: 6 };
+const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5, CONT: 6, ENCY: 7, RANK: 8 };
 
 // En-tete du secteur courant (copie RAM sec_hdr) et conversion position -> carte
 const hdr = (m, o) => m.peek("sec_hdr", o);
@@ -377,21 +377,21 @@ test("T18", "Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie cor
   m.poke("lives", 0); m.poke("pl_invul", 0);
   m.poke("eb_on", 1, 0); m.poke("eb_u", m.peek("pl_u") + 4, 0); m.poke("eb_v", m.peek("pl_v") + 4, 0);
   m.frame(400);
-  const sram = m.sram(64);
+  const sram = m.sram(256);
   const magic = String.fromCharCode(...sram.slice(0, 4));
   // "coupure" : nouvelle machine avec le contenu de la PRG-RAM
   const m2 = new Machine({ sram });
   m2.frame(30);
-  const hi = m2.peekBytes("hi_solo", 6).join("");
+  const hi = m2.peekBytes("rank_solo", 6).join("");
   // corruption de la copie A -> la copie B doit etre utilisee
   const bad = sram.slice(); bad[7] ^= 0xff;
   const m3 = new Machine({ sram: bad });
   m3.frame(30);
-  const hi3 = m3.peekBytes("hi_solo", 6).join("");
+  const hi3 = m3.peekBytes("rank_solo", 6).join("");
   // aucune sauvegarde : valeurs par defaut
-  const m4 = new Machine({ sram: new Array(64).fill(0) });
+  const m4 = new Machine({ sram: new Array(256).fill(0) });
   m4.frame(30);
-  const hi4 = m4.peekBytes("hi_solo", 6).join("");
+  const hi4 = m4.peekBytes("rank_solo", 6).join("");
   return { ok: magic === "SPTL" && hi === "042420" && hi3 === "042420" && hi4 === "005000", detail: `signature=${magic}, relu=${hi}, copie A corrompue -> ${hi3}, vierge -> ${hi4}` };
 });
 
@@ -661,7 +661,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
   m.poke("story_page", 8); m.tap(0, "START"); m.frame(10);
-  const sram = m.sram(64);
+  const sram = m.sram(256);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
   const expert = m2.peek("diff") === 3 && m2.peek("unlocked") === 1;
@@ -725,7 +725,7 @@ test("T34", "Secteurs debloques : sauvegardes, seuls les debloques sont proposes
   m.poke("boss_on", 3); m.poke("boss_t", 99);
   m.frame(252);
   const unl = m.peek("sectors_unl");
-  const sram = m.sram(64);
+  const sram = m.sram(256);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT");
   const s2 = m2.peek("sector_sel");
@@ -1045,6 +1045,62 @@ test("T45", "Campagne complete enchainee : secteurs 1 a 8, histoire, deblocages,
   m.frame(900);
   return { ok: seq.join("") === "01234567" && page === 8 && unl === 255 && m.peek("state") === ST.TITLE,
     detail: `secteurs joues=${seq.join(",")}, page finale=${page} (LIAISON), secteurs debloques=${unl.toString(2)}, retour titre=${m.peek("state") === ST.TITLE}` };
+});
+
+// Texte en VRAM (table $2000) a la rangee r, colonne c
+function ntText(m, r, c, n) { let t = ""; for (let i = 0; i < n; i++) t += String.fromCharCode(m.nt(0x2000 + r * 32 + c + i)); return t; }
+// Force un game over (score donne) et renvoie la PRG-RAM sauvegardee
+function gameOverWith(m, digits) {
+  digits.forEach((v, i) => m.poke("score", v, i));
+  m.poke("lives", 0);
+  for (const p of [0, 1]) { m.poke("pl_alive", 0, p); m.poke("pl_resp", 0, p); }
+  m.frame(10);
+  return m.sram(256);
+}
+
+test("T46", "Encyclopedie : fiches decouvertes en jeu, sauvegardees, consultables", () => {
+  const m0 = new Machine();
+  m0.frame(30);
+  const e0 = m0.peekBytes("ency", 3);
+  const m = startGame({ players: 2 });
+  m.frame(200, invul);                                 // les premiers drones apparaissent
+  const e1 = m.peekBytes("ency", 3);
+  const sram = gameOverWith(m, [0, 0, 0, 0, 0, 0]);
+  const m2 = new Machine({ sram });
+  m2.frame(40);
+  for (let i = 0; i < 4; i++) m2.tap(0, "DOWN");
+  m2.tap(0, "START"); m2.frame(4);
+  const st = m2.peek("state");
+  const n0 = ntText(m2, 6, 8, 5);
+  m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT"); m2.frame(4);
+  const n2 = ntText(m2, 6, 8, 5);
+  m2.screenshot(path.join(SHOTS, "25_encyclopedie.png"));
+  m2.tap(0, "RIGHT"); m2.frame(4);
+  const n3 = ntText(m2, 6, 8, 4);
+  m2.tap(0, "B"); m2.frame(4);
+  return { ok: e0[0] === 3 && (e1[0] & 4) !== 0 && st === ST.ENCY && n0 === "LANCE" && n2 === "DRONE" && n3 === "????" && m2.peek("state") === ST.TITLE,
+    detail: `sauvegarde vierge : fiches=${e0[0].toString(2)} ; apres 200 images de jeu : ${e1[0].toString(2)} ; fiche 1="${n0}", fiche 3="${n2}", fiche 4 (non vue)="${n3}", retour titre=${m2.peek("state") === ST.TITLE}` };
+});
+
+test("T47", "Classements : insertion triee, secteur et difficulte, sauvegarde, ecran", () => {
+  const m = startGame({ players: 1 });
+  m.frame(5);
+  let sram = gameOverWith(m, [0, 4, 2, 4, 2, 0]);     // 042 420
+  m.frame(900);                                       // retour au titre
+  const m2 = new Machine({ sram });
+  m2.frame(40);
+  m2.tap(0, "START"); m2.frame(2); m2.tap(0, "START"); m2.frame(4);
+  sram = gameOverWith(m2, [0, 0, 4, 5, 0, 0]);         // 004 500
+  const m3 = new Machine({ sram });
+  m3.frame(40);
+  const r = m3.peekBytes("rank_solo", 40);
+  const scores = [0, 1, 2, 3, 4].map((k) => r.slice(k * 8, k * 8 + 6).join(""));
+  for (let i = 0; i < 5; i++) m3.tap(0, "DOWN");
+  m3.tap(0, "START"); m3.frame(4);
+  const line1 = ntText(m3, 8, 4, 22);
+  m3.screenshot(path.join(SHOTS, "26_classements.png"));
+  const ok = JSON.stringify(scores) === JSON.stringify(["042420", "005000", "004500", "004000", "003000"]) && r[6] === 1 && r[7] === 1 && m3.peek("state") === ST.RANK && line1.startsWith("1.  042420  S1");
+  return { ok, detail: `classement solo=${scores.join(" > ")}, secteur/difficulte 1re entree=${r[6]}/${r[7]}, ecran : "${line1.trim()}"` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

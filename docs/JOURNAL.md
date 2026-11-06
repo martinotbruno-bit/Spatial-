@@ -235,6 +235,17 @@
 - Incident de génération : deux scripts écrits à la racine du dépôt au lieu
   de `assets/`, détecté au contrôle et supprimé (contenu identique).
 
+## 2026-11-06 — Encyclopédie et classements
+
+- Sauvegarde v3 : bloc persistant (déblocages, secteurs, encyclopédie,
+  2 classements de 5 entrées) en double copie de 128 octets.
+- Encyclopédie (19 fiches, sprite + 3 lignes, sprites de boss pris dans le
+  banc CHR de leur secteur) et écran des classements, dans le banc
+  interface. Classement mis à jour en fin de partie (game over ou fin de
+  campagne), plus à chaque fin de secteur.
+- Défauts trouvés à la capture : lignes de classement qui se chevauchaient,
+  sous-titre coupé. Tests T46, T47 ; 47/47.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

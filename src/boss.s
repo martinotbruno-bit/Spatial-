@@ -5,6 +5,10 @@
 ; =============================================================================
 
 boss_spawn:
+    lda sec_hdr+SH_BOSS     ; fiche d'encyclopedie du boss : 11 + type
+    clc
+    adc #11
+    jsr ency_mark
     lda #1
     sta boss_on
     lda boss_hp0

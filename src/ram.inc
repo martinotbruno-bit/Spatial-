@@ -106,7 +106,6 @@ sc_loop_ptr: .res 2     ; 1re entree du script dans le corps repete
 sc_last:     .res 1     ; derniere position de carte vue par le script
 bc_map:      .res 1
 sp0:         .res 2     ; position de depart (cam / 8) au chargement
-sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
 vattr_sh:    .res 64    ; copie des attributs de la table $2400 (secteurs V)
 av_row:      .res 1
 av_base:     .res 1
@@ -114,7 +113,6 @@ av_half:     .res 1
 av_tmp:      .res 1
 test_access: .res 1     ; $FF = acces libre a tous les secteurs (session)
 diff:        .res 1     ; 0 RECRUE, 1 PILOTE, 2 VETERAN, 3 EXPERT
-unlocked:    .res 1     ; bit 0 : mode EXPERT debloque (sauvegarde)
 aim_speed:   .res 1     ; 0 = tirs vises lents, 16 = rapides
 turret_mask: .res 1
 boss_hp0:    .res 1
@@ -215,8 +213,21 @@ msg_id:      .res 1
 menu_sel:    .res 1
 menu_dirty:  .res 1
 sector_sel:  .res 1
-hi_solo:     .res 6
-hi_coop:     .res 6
+; --- bloc persistant (copie en PRG-RAM par save.s, dans cet ordre) ---
+persist:
+unlocked:    .res 1     ; bit 0 : mode EXPERT debloque
+sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
+ency:        .res 3     ; fiches d'encyclopedie decouvertes (bit k = fiche k)
+rank_solo:   .res 40    ; 5 entrees : score (6 chiffres), secteur, difficulte
+rank_coop:   .res 40
+PERSIST_LEN = * - persist
+hi_solo = rank_solo     ; record du mode = 1re entree du classement
+hi_coop = rank_coop
+rk_pos:      .res 1
+rk_sector:   .res 1
+rk_t:        .res 2
+ency_sel:    .res 1
+ency_dirty:  .res 1
 kills:       .res 1
 diff_bonus:  .res 1
 
@@ -238,5 +249,5 @@ sfx_lasthi:  .res 1
 
 ; --- sauvegarde (PRG-RAM sur pile, $6000-$7FFF) ---
 .segment "SAVE"
-save_a:      .res 32
-save_b:      .res 32
+save_a:      .res 128
+save_b:      .res 128
