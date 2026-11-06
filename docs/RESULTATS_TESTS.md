@@ -3,12 +3,12 @@
 > Fichier genere par `tests/run_tests.js`. **Tous ces tests sont realises en EMULATION (jsnes 1.2.1, NTSC).**
 > Aucun test sur materiel reel n'a ete effectue a ce stade.
 
-Resultat : **35/35** reussis.
+Resultat : **36/36** reussis.
 
 | ID | Test | Resultat | Details |
 |---|---|---|---|
 | T01 | Demarrage : ecran titre stable, NMI actif, region NTSC detectee | OK | etat=0 nmi/60img=60 region=0 lag=0 |
-| T02 | Menu : choix 1/2 joueurs, vaisseau, secteur | OK | joueurs 1->2->1, vaisseau=1, secteur (GAUCHE depuis 1, boucle)=3 |
+| T02 | Menu : choix 1/2 joueurs, vaisseau, secteur | OK | joueurs 1->2->1, vaisseau=1, secteur (GAUCHE depuis 1, boucle)=4 |
 | T03 | Deux manettes : deplacements independants et simultanes | OK | LANCE du=50 (2.5px x 20), EGIDE dv=35 (1.75px x 20) |
 | T04 | Tirs simultanes des deux vaisseaux (et deplacement pendant le tir) | OK | projectiles LANCE max=4, EGIDE max=6 |
 | T05 | Collision entre joueurs : contact physique, aucun degat, aucun blocage | OK | separation min=12px (corps 12px), vies 5->5, recul libre=25px |
@@ -25,8 +25,8 @@ Resultat : **35/35** reussis.
 | T16 | Musique : sequence jouee sur pulse 1/2, triangle, bruit et DPCM | OK | ecritures periode P1=21 P2=87 TRI=37 BRUIT=36, declenchements DPCM=14, registres APU utilises=19 |
 | T17 | Effets sonores : plusieurs SFX distincts declenches en jeu | OK | 8 effets distincts : SHOT_A, SHOT_B, HIT, EXPLODE, POWERUP, BEAM, SYNC, COOPREADY |
 | T18 | Sauvegarde : record ecrit en PRG-RAM, relu apres coupure, copie corrompue toleree | OK | signature=SPTL, relu=042420, copie A corrompue -> 042420, vierge -> 005000 |
-| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=26740 moy=23239 (budget NTSC 29780 = 90 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
-| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19064 moy=13364, images perdues=0, vblank utilise max=1530/2273 cycles |
+| T19 | Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs ennemis, boss, faisceau) | OK | vblank utilise max=1530/2273 cycles, cycles/image max=26763 moy=23222 (budget NTSC 29780 = 90 %), images perdues=0, sprites/ligne max=10, images avec >8 sprites/ligne=298/595, OAM saturee=599 |
+| T20 | Performances : partie normale (secteur 1 complet a 2 joueurs) | OK | cycles/image max=19065 moy=13361, images perdues=0, vblank utilise max=1530/2273 cycles |
 | T21 | PAL : compensation 6/5 de la logique (cadence de jeu identique a 60 Hz) | OK | camera +600 px en 500 images a 50 Hz (attendu 600 = 10 s de jeu). Logique seule : jsnes emule uniquement le NTSC. |
 | T23 | Capacite propre LANCE : surcharge (vitesse x1.8, esquive), recharge | OK | deplacement 63px en 14 images (normal 35), indemne=true, recharge=76 images, 2e appui pendant la recharge ignore=true |
 | T24 | Capacite propre EGIDE : bouclier frontal absorbant 4 projectiles | OK | bouclier actif=true, absorbes=4/4, 5e projectile touche=true |
@@ -41,7 +41,8 @@ Resultat : **35/35** reussis.
 | T33 | Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim-mere, epilogue | OK | secteur charge=true, erreurs VRAM decor=0 attributs=0, unites lourdes=true (tirent=true), drones laches par le boss=3, projectiles max=16, boss vaincu=true, epilogue=true |
 | T34 | Secteurs debloques : sauvegardes, seuls les debloques sont proposes au menu | OK | sauvegarde vierge : secteur 2 inaccessible=true ; apres secteur 1 : masque=3, menu -> secteur 2 puis 1 |
 | T35 | Acces libre (B au titre) : secteur 3 jouable sans sauvegarde, sauvegarde inchangee | OK | sans acces libre : verrouille=true ; avec B : secteur 3, texte="ACCES LIBRE : ACTIF", partie secteur 3 lancee=true, sauvegarde intacte=true |
-| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=a5ec67b288b12b27... |
+| T36 | Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparent, Garde-ciel, epilogue | OK | secteur charge=true, erreurs VRAM (tuiles+attributs)=0, vblank max=1341/2273, soutiens=true, reparation observee=true, directions de spirale distinctes=13, boss vaincu=true, epilogue=true |
+| T22 | Compilation reproductible : deux constructions identiques octet pour octet | OK | sha256=8f9faf7edbbb6c99... |
 
 ## Mesures
 
@@ -50,19 +51,19 @@ Resultat : **35/35** reussis.
   "cam_h_end": 1760,
   "maxEnemies": 10,
   "maxEnemyBullets": 6,
-  "stressMaxCycles": 26740,
-  "stressAvgCycles": 23239,
+  "stressMaxCycles": 26763,
+  "stressAvgCycles": 23222,
   "stressLag": 0,
   "spLineMax": 10,
   "framesOver": 298,
   "sprFull": 599,
   "stressFrames": 595,
   "stressVblankMax": 1530,
-  "normalMaxCycles": 19064,
-  "normalAvgCycles": 13364,
+  "normalMaxCycles": 19065,
+  "normalAvgCycles": 13361,
   "normalLag": 0,
   "normalVblankMax": 1530,
-  "sha256": "a5ec67b288b12b27bf119b46a4fe832e2b3bfc28e6bcea993701f1367fed3811",
+  "sha256": "8f9faf7edbbb6c992952a97005b5c268c50a521ceff3ce22062cde7c7cbba813",
   "romSize": 98320
 }
 ```

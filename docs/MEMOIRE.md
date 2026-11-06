@@ -18,7 +18,7 @@ RESULTATS_TESTS.md).
 | `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 6064 / 8192 octets |
 | `$E000-$FFFF` | PRG 7 fixe : démarrage, NMI, IRQ, audio, sauvegarde, titre, HUD, palettes/scripts, vecteurs | 3558 / 8192 octets |
 
-Bancs PRG 4 et 5 : libres (16 Kio). La ROM finale (256-512 Kio) donnera un banc
+Banc PRG 4 : secteur 4. Banc PRG 5 : libre (8 Kio). La ROM finale (256-512 Kio) donnera un banc
 par secteur restant.
 
 > Phase 2 : titre, HUD et données de niveau déplacés vers `$E000` ; le banc

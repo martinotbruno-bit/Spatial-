@@ -98,6 +98,7 @@ EN_TURRET   = 3
 EN_KAMIKAZE = 4
 EN_POD      = 5     ; objet de decor destructible (conteneur, rocher...)
 EN_HEAVY    = 6     ; unite lourde
+EN_SUPPORT  = 7     ; appareil de soutien (repare les ennemis proches)
 EN_BOSS     = 15    ; marqueur de script uniquement
 
 ; --- Regles --------------------------------------------------------------------

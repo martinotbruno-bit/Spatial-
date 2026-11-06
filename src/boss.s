@@ -106,6 +106,10 @@ boss_fight:
     bne @k1
     jmp boss2_fire
 @k1:
+    cmp #3
+    bne @k2
+    jmp boss3_fire
+@k2:
     lda boss_hp
     cmp boss_ph2
     bcc @phase2
@@ -212,6 +216,75 @@ boss2_fire:
 ;                RECRUE PILOTE VETERAN EXPERT
 boss2_p1_mask: .byte 63,  31,  31,  31
 boss2_p2_len:  .byte 64,  44,  36,  30
+
+; -----------------------------------------------------------------------------
+; Boss 3 : GARDE-CIEL (secteur 4) - spirales
+;   Phase 1 : spirale simple (direction +1 a chaque tir) + tir vise / 64 img
+;   Phase 2 : double spirale opposee + tirs vises
+; -----------------------------------------------------------------------------
+boss3_fire:
+    ldx diff
+    lda boss_hp
+    cmp boss_ph2
+    bcc @p2
+    lda boss_t
+    and #63
+    cmp #32
+    bne @s1
+    jmp boss_aim
+@s1:
+    lda boss_t
+    and boss3_m1,x
+    bne @r
+    jsr boss3_origin
+    lda boss_burst
+    and #15
+    sta tmp2
+    inc boss_burst
+    jmp eb_spawn
+@p2:
+    lda boss_t
+    and #63
+    cmp #20
+    beq @aim
+    ldy boss_p2_aims,x
+    cpy #2
+    bcc @s2
+    cmp #44
+    bne @s2
+@aim:
+    jmp boss_aim
+@s2:
+    lda boss_t
+    and boss3_m2,x
+    bne @r
+    jsr boss3_origin
+    lda boss_burst
+    and #15
+    sta tmp2
+    jsr eb_spawn
+    lda tmp2
+    eor #8                  ; direction opposee
+    sta tmp2
+    inc boss_burst
+    jmp eb_spawn
+@r:
+    rts
+
+boss3_origin:
+    lda boss_u
+    clc
+    adc #12
+    sta tmp3
+    lda boss_v
+    clc
+    adc #12
+    sta tmp4
+    rts
+
+;              RECRUE PILOTE VETERAN EXPERT
+boss3_m1: .byte 15,    7,     7,      3     ; periode de la spirale (masque)
+boss3_m2: .byte 15,    7,     3,      3
 
 ; Anneau de 8 projectiles, directions A, A+2, ..., A+14 (A+16 : rapides)
 boss_ring:

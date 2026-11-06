@@ -37,17 +37,17 @@ Légende :
 | 2.2 | Niveaux horizontaux et verticaux | ✅ ÉMU | 1 secteur de chaque |
 | 2.3 | Coop 2 joueurs, vaisseaux différents, vies communes | ✅ ÉMU | T03-T09 |
 | 2.3 | Solo complet, sans passage imposant 2 joueurs | 🟡 | Solo jouable avec les 2 vaisseaux, Nova de remplacement ; campagne non produite |
-| 2.4 | Campagne de 1 à 2 h | 🟡 | 3 secteurs jouables sur 8 (≈ 1-1,5 min chacun) ; architecture par bancs prête pour les suivants |
+| 2.4 | Campagne de 1 à 2 h | 🟡 | 4 secteurs jouables sur 8 (≈ 1-1,5 min chacun) ; architecture par bancs prête pour les suivants |
 | 3.1 | 8 directions, contrôles précis | ✅ ÉMU | Déplacement sub-pixel 8.8, sans inertie |
 | 3.2 | Vaisseaux distincts et complémentaires | ✅ ÉMU | Vitesse, armes, cadence, capacités propres (Surcharge / Bouclier, T23-T24) |
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |
 | 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | ✅ ÉMU | Faisceau, Transfert d'énergie, Salve synchronisée (T27), Nova solo |
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
 | 4 | Armement riche et évolutif | 🟡 | 2 × 3 niveaux (frontal, concentré, éventail, latéral, diagonal) ; bombes/armes défensives à produire |
-| 5.1 | Grande variété d'ennemis | 🟡 | 5 familles (dont unités lourdes) + décor destructible ; 8 familles visées |
-| 5.2 | Boss multi-phases | 🟡 | 2 boss à 2 phases (KORVAX, Essaim-mère qui lâche des drones, T33) ; parties destructibles à produire |
+| 5.1 | Grande variété d'ennemis | 🟡 | 6 familles (drones, chasseurs, tourelles, kamikazes, unités lourdes, soutiens) + décor destructible ; 8 familles visées |
+| 5.2 | Boss multi-phases | 🟡 | 3 boss à 2 phases (KORVAX, Essaim-mère, Garde-ciel à spirales ; T13, T33, T36) ; parties destructibles à produire |
 | 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Séquences narratives (intro, transition, épilogue) avec musique dédiée (T26) ; 2 fins et encyclopédie à produire |
-| 7 | Direction artistique | 🟡 | Secteur 1 en 3 palettes de décor par blocs 16×16 (T29), décor destructible (T30) ; secteur 2 encore en palette unique |
+| 7 | Direction artistique | 🟡 | 4 environnements, 3 palettes de décor par secteur en H comme en V (T29, T11, T36), décor destructible (T30) |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM, 6 instruments ; 5 musiques (menu, histoire, niveau, boss, fin de secteur), WAV dans `docs/audio/` |
 | 9.1 | Difficultés sélectionnables, mode expert | ✅ ÉMU | RECRUE/PILOTE/VÉTÉRAN + EXPERT débloqué en fin de campagne et sauvegardé (T32) ; progression mesurée par pilote automatique (EQUILIBRAGE.md) |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 35/35 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 36/36 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

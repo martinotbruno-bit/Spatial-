@@ -52,8 +52,8 @@ story_enter:
     jmp ppu_on
 
 ; page k = arrivee dans le secteur k ; page NUM_SECTORS = epilogue
-story_lo: .lobytes story_p0, story_p1, story_p2, story_end
-story_hi: .hibytes story_p0, story_p1, story_p2, story_end
+story_lo: .lobytes story_p0, story_p1, story_p2, story_p3, story_end
+story_hi: .hibytes story_p0, story_p1, story_p2, story_p3, story_end
 
 story_update:
     lda pad_new
@@ -158,11 +158,19 @@ story_p2:
     .byte "L'ESSAIM-MERE.", $0A, $0A
     .byte "TRAVERSEE DU CHAMP", $0A
     .byte "D'ASTEROIDES...", 0
-story_end:
+story_p3:
     .byte "LA CEINTURE EST FRANCHIE.", $0A, $0A
+    .byte "LA CONCORDANCE A PRIS", $0A
+    .byte "LA CITE DE LUMEN.", $0A, $0A
+    .byte "SES APPAREILS DE SOUTIEN", $0A
+    .byte "REPARENT LES ESCADRES.", $0A
+    .byte "ABATTEZ-LES EN PREMIER !", $0A, $0A
+    .byte "AU SOMMET : LE GARDE-CIEL.", 0
+story_end:
+    .byte "LUMEN EST LIBEREE.", $0A, $0A
     .byte "MAIS AU LOIN, LES ANCRAGES", $0A
     .byte "S'EVEILLENT UN A UN...", $0A, $0A, $0A
-    .byte "  A SUIVRE : SECTEUR 4", $0A, $0A
+    .byte "  A SUIVRE : SECTEUR 5", $0A, $0A
     .byte "   MERCI D'AVOIR JOUE !", 0
 
 ; -----------------------------------------------------------------------------

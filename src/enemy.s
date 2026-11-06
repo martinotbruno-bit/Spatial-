@@ -3,10 +3,10 @@
 ; Positions en virgule fixe 8.8, vitesses signees 8.8.
 ; =============================================================================
 
-;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE
-en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12
-en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8  ; centaines de points
-en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5
+;                   -    DRONE   CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN
+en_hp_tbl:    .byte 0,   1,      4,       6,       2,       3,    12,    5
+en_score_tbl: .byte 0,   1,      3,       5,       2,       2,    8,     6  ; centaines de points
+en_gauge_tbl: .byte 0,   2,      3,       4,       2,       1,    5,     3
 
 ; Apparition : tmp2 = type, tmp3 = v, tmp4 = parametre
 enemy_spawn:
@@ -44,9 +44,9 @@ enemy_spawn:
     sta en_duhi,x
     rts
 
-;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE
-en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40
-en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF ; -1.25 -3 -1 -2 -1 -0.75
+;                     -     DRONE  CHASSEUR TOURELLE KAMIKAZE DECOR LOURDE SOUTIEN
+en_init_du_lo: .byte 0,    $C0,   $00,     $00,     $00,     $00,  $40,   $00
+en_init_du_hi: .byte 0,    $FE,   $FD,     $FF,     $FE,     $FF,  $FF,   $FF ; ... -1
 
 enemies_update:
     ldx #MAX_EN-1
@@ -72,7 +72,7 @@ enemies_update:
     rts
 
 en_ai_tbl:
-    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1
+    .word 0, ai_drone-1, ai_fighter-1, ai_turret-1, ai_kamikaze-1, ai_pod-1, ai_heavy-1, ai_support-1
 
 ; Integration de la position, puis retour a la boucle. Detruit l'ennemi s'il
 ; sort du champ (debordement 8 bits).
@@ -272,6 +272,77 @@ ai_heavy:
     cmp #60
     bne @mv
     jsr fire_aimed
+@mv:
+    jmp en_move
+
+; --- APPAREIL DE SOUTIEN : s'arrete a u = parametre ; toutes les 48 images
+; il repare (+2 PV, max 20) les ennemis a moins de 40 px, qui clignotent ;
+; repart apres 12 cycles. Cible prioritaire ---
+ai_support:
+    lda en_st,x
+    bne @hold
+    lda en_u,x
+    cmp en_p0,x
+    bcc @stop
+    jmp en_move
+@stop:
+    lda #1
+    sta en_st,x
+    lda #0
+    sta en_t,x
+    sta en_p0,x
+    sta en_dulo,x
+    sta en_duhi,x
+@hold:
+    cmp #2
+    beq @mv
+    lda en_t,x
+    cmp #48
+    bcc @mv
+    lda #0
+    sta en_t,x
+    inc en_p0,x
+    lda en_p0,x
+    cmp #12
+    bcc @rep
+    lda #2                  ; depart
+    sta en_st,x
+    lda #$80
+    sta en_dulo,x
+    lda #$FE
+    sta en_duhi,x
+    jmp en_move
+@rep:
+    ldy #MAX_EN-1
+@l:
+    lda en_type,y
+    beq @n
+    cmp #EN_SUPPORT
+    beq @n
+    lda en_u,y
+    sec
+    sbc en_u,x
+    clc
+    adc #40
+    cmp #80
+    bcs @n
+    lda en_v,y
+    sec
+    sbc en_v,x
+    clc
+    adc #40
+    cmp #80
+    bcs @n
+    lda en_hp,y
+    cmp #19
+    bcs @n
+    adc #2
+    sta en_hp,y
+    lda #8
+    sta en_flash,y          ; signal visuel de reparation
+@n:
+    dey
+    bpl @l
 @mv:
     jmp en_move
 

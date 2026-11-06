@@ -70,7 +70,7 @@ const invul = (m) => { m.poke("pl_invul", 10); m.poke("pl_invul", 10, 1); };
 function startGame({ players = 2, ship = 0, sector = 0, sound = false } = {}) {
   const m = new Machine({ sound });
   m.frame(40);
-  m.poke("sectors_unl", 7);                        // tous les secteurs accessibles
+  m.poke("sectors_unl", 255);                      // tous les secteurs accessibles
   if (players === 2) m.tap(0, "RIGHT");
   m.tap(0, "DOWN");
   if (ship === 1 && players === 1) m.tap(0, "RIGHT");
@@ -99,7 +99,7 @@ test("T01", "Demarrage : ecran titre stable, NMI actif, region NTSC detectee", (
 test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   const m = new Machine();
   m.frame(40);
-  m.poke("sectors_unl", 7);
+  m.poke("sectors_unl", 255);
   m.tap(0, "RIGHT");
   const np = m.peek("nplayers");
   m.tap(0, "RIGHT");
@@ -110,7 +110,7 @@ test("T02", "Menu : choix 1/2 joueurs, vaisseau, secteur", () => {
   m.tap(0, "DOWN");
   m.tap(0, "LEFT");
   const sec = m.peek("sector_sel");
-  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 2, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
+  return { ok: np === 2 && np2 === 1 && ship === 1 && sec === 3, detail: `joueurs 1->${np}->${np2}, vaisseau=${ship}, secteur (GAUCHE depuis 1, boucle)=${sec + 1}` };
 });
 
 test("T03", "Deux manettes : deplacements independants et simultanes", () => {
@@ -672,7 +672,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
   const locked = m.peek("diff") === 0;
   // fin de campagne : epilogue -> deblocage ecrit en PRG-RAM
   m.tap(0, "START"); m.frame(2);
-  m.poke("story_page", 3); m.tap(0, "START"); m.frame(10);
+  m.poke("story_page", m.romByte ? 4 : 4); m.tap(0, "START"); m.frame(10);
   const sram = m.sram(64);
   const m2 = new Machine({ sram });
   m2.frame(40); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "DOWN"); m2.tap(0, "RIGHT"); m2.tap(0, "RIGHT");
@@ -720,7 +720,7 @@ test("T33", "Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim
   m.releaseAll();
   const cleared = m.peek("state") === ST.CLEAR;
   m.frame(252, invul);
-  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 3;
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 3;   // arrivee secteur 4
   return { ok: okSector && vbad === 0 && abad === 0 && heavy && heavyShot && drones > 0 && ring >= 8 && cleared && epi,
     detail: `secteur charge=${okSector}, erreurs VRAM decor=${vbad} attributs=${abad}, unites lourdes=${heavy} (tirent=${heavyShot}), drones laches par le boss=${drones}, projectiles max=${ring}, boss vaincu=${cleared}, epilogue=${epi}` };
 });
@@ -757,6 +757,48 @@ test("T35", "Acces libre (B au titre) : secteur 3 jouable sans sauvegarde, sauve
   m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(4);
   const playing = m.peek("state") === ST.PLAY && m.peek("stage") === 2;
   return { ok: locked && sel === 2 && txt.startsWith("ACCES LIBRE") && playing && m.peek("sectors_unl") === 1, detail: `sans acces libre : verrouille=${locked} ; avec B : secteur ${sel + 1}, texte="${txt.trim()}", partie secteur 3 lancee=${playing}, sauvegarde intacte=${m.peek("sectors_unl") === 1}` };
+});
+
+test("T36", "Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparent, Garde-ciel, epilogue", () => {
+  const m = startGame({ players: 2, sector: 3 });
+  const ok0 = m.peek("stage") === 3 && m.peek("orient") === 1;
+  m.vblankUse.length = 0;
+  let vbad = 0, repaired = false, support = false;
+  for (let k = 0; k < 16; k++) {
+    m.frame(101, (mm) => {
+      invul(mm);
+      for (let i = 0; i < 10; i++) if (mm.peek("en_type", i) === 7) {
+        support = true;
+        // place un drone blesse a cote du soutien : il doit etre repare
+        if (mm.peek("en_st", i) === 1 && mm.peek("en_t", i) === 40) {
+          for (let j = 0; j < 10; j++) if (!mm.peek("en_type", j)) {
+            mm.poke("en_type", 1, j); mm.poke("en_hp", 1, j); mm.poke("en_u", mm.peek("en_u", i) + 10, j); mm.poke("en_v", mm.peek("en_v", i), j);
+            mm.poke("en_duhi", 0, j); mm.poke("en_dulo", 0, j); mm.poke("en_dvhi", 0, j); mm.poke("en_dvlo", 0, j); mm.poke("en_p0", 0, j);
+            mm._probe = j; break;
+          }
+        }
+      }
+      if (mm._probe !== undefined && mm.peek("en_type", mm._probe) === 1 && mm.peek("en_hp", mm._probe) >= 3) repaired = true;
+    });
+    vbad += vramErrors(m);
+    if (k === 8) m.screenshot(path.join(SHOTS, "14_secteur4_lumen.png"));
+  }
+  const vb = Math.max(...m.vblankUse);
+  let dirs = new Set();
+  m.press(0, "A"); m.press(1, "A");
+  for (let i = 0; i < 1500 && m.peek("state") === ST.PLAY; i++) {
+    m.frame(1, invul);
+    const bv = m.peek("boss_v");
+    m.poke("pl_v", Math.max(8, bv)); m.poke("pl_v", Math.min(232, bv + 16), 1); m.poke("pl_u", 60); m.poke("pl_u", 60, 1);
+    if (m.peek("boss_on") === 2) for (let e = 0; e < 16; e++) if (m.peek("eb_on", e)) dirs.add(m.peek("eb_duhi", e) * 256 + m.peek("eb_dvhi", e));
+    if (i === 400) m.screenshot(path.join(SHOTS, "15_garde_ciel.png"));
+  }
+  m.releaseAll();
+  const cleared = m.peek("state") === ST.CLEAR;
+  m.frame(252, invul);
+  const epi = m.peek("state") === ST.STORY && m.peek("story_page") === 4;
+  return { ok: ok0 && vbad === 0 && support && repaired && dirs.size >= 6 && cleared && epi && vb < 2273,
+    detail: `secteur charge=${ok0}, erreurs VRAM (tuiles+attributs)=${vbad}, vblank max=${vb}/2273, soutiens=${support}, reparation observee=${repaired}, directions de spirale distinctes=${dirs.size}, boss vaincu=${cleared}, epilogue=${epi}` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

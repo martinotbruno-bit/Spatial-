@@ -98,6 +98,11 @@ Miroir **vertical** dans les deux orientations :
 - Split par la méthode `$2006/$2005/$2005/$2006`, seule façon de changer Y en
   cours d'image. Les 4 valeurs sont précalculées par la logique : l'IRQ ne
   fait que 4 écritures (~40 cycles).
+- Attributs des secteurs verticaux : chaque paire de rangées de carte
+  (2m, 2m+1) forme une rangée de blocs 16×16 ; quand la rangée impaire est
+  écrite, la moitié correspondante de la rangée d'attributs est recomposée
+  dans une copie RAM (`vattr_sh`, 64 o) puis envoyée (8 octets). Vérifié
+  bloc par bloc (T11, T31, T36).
 - Attributs : rangée 0 = palette HUD. Secteur horizontal : 3 palettes de
   décor par blocs 16×16, précalculées par l'outil (7 octets par groupe de
   4 colonnes, `map_h_attr`) et envoyées avec la 1re colonne de chaque groupe

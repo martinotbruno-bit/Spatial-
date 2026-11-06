@@ -147,6 +147,17 @@
   sauvegarde intacte, test T35) ; ROM renommée `dist/spatial.nes` ;
   sous-titre de l'écran titre mis à jour.
 
+## 2026-11-06 — Phase 3 : palettes verticales, secteur 4
+
+- Palettes multiples en niveau vertical (copie RAM des attributs) ; le
+  secteur 2 en profite (murs acier, aires d'atterrissage). Cratères laissés
+  dans la palette du sol (sinon blocs rouges grossiers).
+- Secteur 4 « Cité de Lumen » (V) : ville vue de dessus, appareils de
+  soutien (réparation des ennemis proches), boss Garde-ciel (spirales),
+  musique « Lumen », page narrative. Palettes revues après capture : les
+  toits saturés nuisaient à la lisibilité. Test T36 (vblank V : 1341 cycles).
+- 36/36 tests en émulation.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

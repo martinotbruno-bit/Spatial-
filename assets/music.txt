@@ -63,3 +63,14 @@ P2: [D4/1 F4/1 A4/1 F4/1]x4 [C4/1 E4/1 G4/1 E4/1]x4 [As3/1 D4/1 F4/1 D4/1]x4 [A3
 TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
 TR: [D2/2 D3/2]x4 [C2/2 C3/2]x4 [As1/2 As2/2]x4 [A1/2 A2/2]x4
 NO: [K/2 H/2 S/2 H/2 K/2 H/2 S/2 K/2]x8
+
+# Theme du secteur 4 "Lumen" - Mi mineur, synthetique
+@song lumen tempo=6
+P1: @pluck E5/2 E5/2 G5/2 E5/2 B5/4 A5/2 G5/2  Fs5/2 Fs5/2 A5/2 Fs5/2 D6/4 C6/2 B5/2
+P1: C6/2 B5/2 A5/2 G5/2 A5/4 E5/4  Fs5/4 G5/4 Fs5/4 Ds5/4
+P1: @lead E5/6 G5/2 B5/8  D6/6 C6/2 B5/8  C6/4 B5/4 A5/4 G5/4  Fs5/8 B4/8
+P2: [E4/1 B4/1]x8 [D4/1 A4/1]x8 [C4/1 G4/1]x8 [B3/1 Fs4/1]x8
+P2: [E4/1 B4/1]x8 [D4/1 A4/1]x8 [C4/1 G4/1]x8 [B3/1 Ds4/1]x8
+TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
+TR: [E2/2 E3/2]x4 [D2/2 D3/2]x4 [C2/2 C3/2]x4 [B1/2 B2/2]x4
+NO: [K/2 H/1 H/1 S/2 H/2 K/1 K/1 H/2 S/2 H/2]x8

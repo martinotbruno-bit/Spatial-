@@ -87,9 +87,10 @@ Piste restante : *bouclier partagé* (deuxième usage du LIEN à demi-jauge).
 | Tourelle | Liée au décor, tir visé toutes les 64 images | 6 | 500 |
 | Kamikaze | Fonce et se recale latéralement sur le joueur le plus proche | 2 | 200 |
 | Unité lourde | S'avance, se maintient en dérivant, gerbe de 3 + tir visé, repart après ~11 s | 12 | 800 |
+| Soutien | S'arrête, répare (+2 PV) les ennemis à moins de 40 px toutes les 48 images (ils clignotent) ; cible prioritaire | 5 | 600 |
 | Décor destructible | Conteneur (secteur 1) / rocher minéralier (secteur 3) ancré au décor | 3 | 200 |
 
-*[à produire]* : appareils de soutien (réparation, bouclier
+*[à produire]* : poseurs de mines, barrages (réparation, bouclier
 de groupe), ennemis spécialisés (mines, poseurs de barrage), structures
 défensives destructibles du décor.
 
@@ -103,6 +104,9 @@ tir visé ; phase 2 sous 50 % : oscillation rapide, gerbe de 5 et rafales de
 **Essaim-mère** *[secteur 3]* : organisme-ruche ; phase 1 : anneaux de 8
 projectiles et lâcher de drones ; phase 2 : anneaux alternés (rapides au-delà
 de RECRUE) et tirs visés.
+
+**Garde-ciel** *[secteur 4]* : forteresse octogonale à 4 canons ; phase 1 :
+spirale simple ; phase 2 : double spirale opposée et tirs visés.
 
 ## 6. Campagne proposée (durée cible 1 à 2 h)
 

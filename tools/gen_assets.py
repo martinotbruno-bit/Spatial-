@@ -217,7 +217,8 @@ def build_common(consts):
     big = [("heavy", 0x60, True),
            ("ship_a", 0x80, True), ("ship_b", 0x88, True), ("drone", 0x90, True),
            ("fighter", 0x98, True), ("turret", 0xA0, True), ("kamikaze", 0xA8, True),
-           ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False)]
+           ("explo1", 0xB0, False), ("explo2", 0xB4, False), ("explo3", 0xB8, False),
+           ("support", 0x68, True)]
     for name, base, orient in big:
         put_big(spr, consts, art, name, base, orient)
     return bg, spr
@@ -445,6 +446,71 @@ def gen_map_v(c):
     return rows
 
 
+def gen_map_city(c):
+    """Secteur 4 : Cite de Lumen (vertical). Quadrillage de rues ; ilots
+    d'immeubles tires dans un petit catalogue (toits, ventilations, tours,
+    parcs, enseignes) pour limiter le nombre de gabarits."""
+    rng = random.Random(2468)
+    nrows = 232
+    # ilots de 10 colonnes x 10 rangees, separes par des rues
+    def block(kind):
+        b = [[c["T_ROOF"]] * 10 for _ in range(10)]
+        if kind == 0:     # toit avec lumieres
+            for y in (2, 7):
+                for x in (2, 7):
+                    b[y][x] = c["T_ROOF_LIGHT"]
+        elif kind == 1:   # ventilations
+            for y in range(3, 7):
+                for x in range(3, 7):
+                    b[y][x] = c["T_VENT"]
+        elif kind == 2:   # tour centrale
+            b[4][4], b[4][5], b[5][4], b[5][5] = c["T_TOWER_TL"], c["T_TOWER_TR"], c["T_TOWER_BL"], c["T_TOWER_BR"]
+        elif kind == 3:   # parc
+            b = [[c["T_PARK"]] * 10 for _ in range(10)]
+        elif kind == 4:   # enseignes
+            for x in range(10):
+                b[0][x] = c["T_NEON"]
+                b[9][x] = c["T_NEON"]
+        return b
+    blocks = [block(k) for k in range(5)]
+    kinds = [[rng.randrange(5) for _ in range(4)] for _ in range(nrows // 12 + 2)]
+    rows = []
+    for y in range(nrows):
+        row = [0] * 32
+        if y < 24:        # approche : ciel nocturne au-dessus de la cite
+            if (y * 13) % 7 == 0:
+                row[(y * 11) % 32] = c["T_STAR1"]
+            rows.append(row)
+            continue
+        yy = (y - 24) % 12
+        brow = (y - 24) // 12
+        for x in range(32):
+            xx = x % 16
+            if yy >= 10 and (xx == 0 or xx == 1 or xx >= 12 and xx < 14):
+                row[x] = c["T_CROSS"]
+            elif yy >= 10:
+                row[x] = c["T_ROAD_H"]
+            elif xx in (0, 1) or xx in (12, 13):
+                row[x] = c["T_ROAD_V"]
+            else:
+                bx = 0 if xx < 12 else 1
+                kind = kinds[brow][(x // 16) * 2 + bx]
+                lx = (xx - 2) if xx < 12 else 0
+                row[x] = blocks[kind][yy][min(9, lx)]
+        rows.append(row)
+    return rows
+
+
+def pal_s4(c, rows, x, y):
+    """0 = toits sombres, 2 = neons et eclairages (magenta), 3 = parcs (vert)."""
+    t = rows[y][x]
+    if t in (c["T_NEON"], c["T_ROOF_LIGHT"]):
+        return 2
+    if t == c["T_PARK"]:
+        return 3
+    return 0
+
+
 # Definition des secteurs (ordre de la campagne)
 SECTORS = [
     dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
@@ -459,11 +525,16 @@ SECTORS = [
          sprites="sprites_s3.txt", spr_set=1, gen=gen_map_belt, palfn=pal_s3,
          cam_stop=1760, cp=896, song="belt", boss=2,
          pal=[0x0F, 0x07, 0x17, 0x27, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x00, 0x2D, 0x10, 0x0F, 0x0C, 0x1C, 0x3C]),
+    dict(name="s4", title="Cite de Lumen", orient=1, bank=4, tiles="tiles_s4.txt",
+         sprites="sprites_s4.txt", spr_set=2, gen=gen_map_city, palfn=pal_s4,
+         cam_stop=1536, cp=768, song="lumen", boss=3,
+         pal=[0x0F, 0x00, 0x01, 0x11, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x03, 0x14, 0x35, 0x0F, 0x09, 0x19, 0x2A]),
 ]
 # Palettes de sprites communes
 SPR_PAL = [0x0F, 0x02, 0x21, 0x30, 0x0F, 0x06, 0x27, 0x38, 0x0F, 0x04, 0x14, 0x2A, 0x0F, 0x30, 0x27, 0x16]
 
-ENEMY_NAMES = {"DRONE": 1, "CHASSEUR": 2, "TOURELLE": 3, "KAMIKAZE": 4, "DECOR": 5, "LOURDE": 6, "BOSS": 15}
+ENEMY_NAMES = {"DRONE": 1, "CHASSEUR": 2, "TOURELLE": 3, "KAMIKAZE": 4, "DECOR": 5, "LOURDE": 6,
+               "SOUTIEN": 7, "BOSS": 15}
 
 
 def load_script(name):
