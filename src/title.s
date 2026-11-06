@@ -113,7 +113,7 @@ title_strings:
     .word 0
 
 str_t_logo: .byte "S P A T I A L", 0
-str_t_sub:  .byte " PROTOTYPE TECHNIQUE - PHASE 1", 0
+str_t_sub:  .byte "  PROTOTYPE JOUABLE - 3 SECTEURS", 0
 str_t_m1:   .byte "  JOUEURS  :", 0
 str_t_m2:   .byte "  VAISSEAU :", 0
 str_t_m3:   .byte "  SECTEUR  :", 0
@@ -203,7 +203,35 @@ menu_write:
     sta ptr0+1
     lda #$53
     sta ptr1
-    jmp vbuf_str11
+    jsr vbuf_str11
+    ; ligne d'aide : acces libre
+    lda #<str_free_off
+    ldy #>str_free_off
+    ldx test_access
+    beq @fo
+    lda #<str_free_on
+    ldy #>str_free_on
+@fo:
+    sta ptr0
+    sty ptr0+1
+    lda #$27
+    sta ptr1
+    lda #$23
+    sta ptr1+1
+    lda #22
+    jsr vbuf_open
+    ldy #0
+@fl:
+    lda (ptr0),y
+    sta vbuf,x
+    inx
+    iny
+    cpy #22
+    bne @fl
+    jmp vbuf_close
+
+str_free_off: .byte "B : TOUS LES SECTEURS "
+str_free_on:  .byte "ACCES LIBRE : ACTIF   "
 
 diff_str_lo: .lobytes str_d0, str_d1, str_d2, str_d3
 diff_str_hi: .hibytes str_d0, str_d1, str_d2, str_d3
@@ -244,6 +272,18 @@ title_update:
     bne @input
     jmp @r
 @input:
+    and #BTN_B
+    beq @nob
+    ; B : acces libre a tous les secteurs pour la session (non sauvegarde)
+    lda test_access
+    eor #$FF
+    sta test_access
+    lda #SFX_MENU
+    jsr sfx_play
+    jsr menu_write
+    jmp @r
+@nob:
+    lda tmp0
     and #BTN_START
     beq @nostart
     lda #SFX_MENU
@@ -314,6 +354,7 @@ title_update:
     ldx sector_sel
     lda sector_bit,x
     and sectors_unl
+    ora test_access         ; acces libre (B) : tous les secteurs
     bne @secok
     dey
     bne @sec

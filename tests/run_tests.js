@@ -733,6 +733,21 @@ test("T34", "Secteurs debloques : sauvegardes, seuls les debloques sont proposes
   return { ok: lockedOnly1 && unl === 3 && s2 === 1 && back === 0, detail: `sauvegarde vierge : secteur 2 inaccessible=${lockedOnly1} ; apres secteur 1 : masque=${unl}, menu -> secteur ${s2 + 1} puis ${back + 1}` };
 });
 
+test("T35", "Acces libre (B au titre) : secteur 3 jouable sans sauvegarde, sauvegarde inchangee", () => {
+  const m = new Machine();
+  m.frame(40);
+  m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT");
+  const locked = m.peek("sector_sel") === 0;
+  m.tap(0, "B");
+  m.tap(0, "RIGHT"); m.tap(0, "RIGHT");
+  const sel = m.peek("sector_sel");
+  let txt = ""; for (let i = 0; i < 20; i++) txt += String.fromCharCode(m.nt(0x2327 + i));
+  m.screenshot(path.join(SHOTS, "01_titre.png"));
+  m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(4);
+  const playing = m.peek("state") === ST.PLAY && m.peek("stage") === 2;
+  return { ok: locked && sel === 2 && txt.startsWith("ACCES LIBRE") && playing && m.peek("sectors_unl") === 1, detail: `sans acces libre : verrouille=${locked} ; avec B : secteur ${sel + 1}, texte="${txt.trim()}", partie secteur 3 lancee=${playing}, sauvegarde intacte=${m.peek("sectors_unl") === 1}` };
+});
+
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {
   const { execSync } = require("child_process");
   const rom = path.join(ROOT, "build", "spatial.nes");

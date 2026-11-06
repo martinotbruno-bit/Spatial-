@@ -22,7 +22,7 @@ $(ROM): build/main.o cfg/mmc3.cfg
 
 # ROM livrable versionnee
 dist: $(ROM)
-	mkdir -p dist && cp $(ROM) dist/spatial-proto-phase1.nes
+	mkdir -p dist && rm -f dist/*.nes && cp $(ROM) dist/spatial.nes
 
 test: $(ROM)
 	cd tests && npm install --silent && node run_tests.js && node make_sheet.js

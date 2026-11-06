@@ -2,7 +2,7 @@
 
 ## Lancer le jeu
 
-Ouvrir `dist/spatial-proto-phase1.nes` dans un émulateur NES compatible
+Ouvrir `dist/spatial.nes` dans un émulateur NES compatible
 mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
 émulation à ce stade.
 
@@ -17,6 +17,9 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
   - NIVEAU : RECRUE, PILOTE (par défaut) ou VÉTÉRAN ; EXPERT apparaît
     après avoir terminé la campagne. Débutant ? Essayez ÉGIDE en RECRUE.
 - **START** : lancer la partie.
+- **B** (prototype) : **accès libre** à tous les secteurs pour la session,
+  sans modifier la sauvegarde. Sans lui, un secteur n'est proposé qu'après
+  avoir terminé le précédent.
 
 ## En vol
 

@@ -137,6 +137,16 @@
 - Équilibrage secteur 3 mesuré : point ouvert documenté (EQUILIBRAGE.md).
 - 34/34 tests en émulation ; stress 90 % CPU.
 
+## 2026-11-06 — Retour utilisateur : « le .nes ne contient pas le secteur 3 »
+
+- Vérifié : la ROM contenait le secteur 3, mais il était **verrouillé**
+  (débloqué seulement après les secteurs 1 et 2 ; une sauvegarde vierge ou
+  d'une version précédente ne propose que le secteur 1). Le nom de fichier
+  « proto-phase1 » prêtait aussi à confusion.
+- Corrections : accès libre par B à l'écran titre (session uniquement,
+  sauvegarde intacte, test T35) ; ROM renommée `dist/spatial.nes` ;
+  sous-titre de l'écran titre mis à jour.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

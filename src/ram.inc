@@ -98,6 +98,7 @@ cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
 continues:   .res 1
 sec_hdr:     .res SH_SIZE
 sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
+test_access: .res 1     ; $FF = acces libre a tous les secteurs (session)
 diff:        .res 1     ; 0 RECRUE, 1 PILOTE, 2 VETERAN, 3 EXPERT
 unlocked:    .res 1     ; bit 0 : mode EXPERT debloque (sauvegarde)
 aim_speed:   .res 1     ; 0 = tirs vises lents, 16 = rapides
