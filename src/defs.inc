@@ -79,6 +79,7 @@ ST_PLAY   = 1
 ST_CLEAR  = 2
 ST_OVER   = 3
 ST_END    = 4
+ST_STORY  = 5
 
 ; --- Pools d'entites -----------------------------------------------------------
 MAX_EN = 10     ; ennemis
@@ -106,6 +107,9 @@ DASH_CD       = 90
 SHIELD_TIME   = 120     ; EGIDE : bouclier frontal
 SHIELD_CD     = 240
 SHIELD_HP     = 4
+SYNC_WINDOW   = 8       ; ecart max (images) entre les deux appuis sur A
+SYNC_CD       = 60
+SYNC_DMG      = 4
 NOVA_TIME     = 24
 INVUL_TIME    = 120
 RESPAWN_TIME  = 80

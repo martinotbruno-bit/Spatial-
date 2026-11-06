@@ -70,6 +70,10 @@ coop_update:
     lda #1
     jsr gauge_add
 @beam:
+    lda sync_cd
+    beq @nsc
+    dec sync_cd
+@nsc:
     lda nova_t
     beq @nonova
     dec nova_t
@@ -323,10 +327,12 @@ col_pb_enemies:
     cmp #16
     bcs @ne
     ; touche
+    jsr pb_damage
+    pha
     lda #0
     sta pb_on,y
     sty tmp4
-    lda #1
+    pla
     jsr enemy_damage
     ldy tmp4
     jmp @nb
@@ -337,6 +343,16 @@ col_pb_enemies:
     dey
     dey
     bpl @b
+    rts
+
+; A = degats du projectile joueur Y (1, ou SYNC_DMG pour une salve synchronisee)
+pb_damage:
+    lda pb_on,y
+    cmp #3
+    lda #1
+    bcc @r
+    lda #SYNC_DMG
+@r:
     rts
 
 col_pb_boss:
@@ -363,10 +379,12 @@ col_pb_boss:
     adc #14-12              ; R = 3+11
     cmp #28
     bcs @nb
+    jsr pb_damage
+    pha
     lda #0
     sta pb_on,y
     sty tmp4
-    lda #1
+    pla
     jsr boss_damage
     ldy tmp4
 @nb:

@@ -70,13 +70,24 @@ hud_init:
     jsr hud_update_now
     jmp flush_vbuf_direct
 
-; Mise a jour limitee a une image sur 4 (budget du retour de trame)
+; Mise a jour au plus une image sur 4, et jamais dans la meme image qu'une
+; colonne/rangee de decor (budget du retour de trame : voir BUDGETS.md)
 hud_update:
+    lda hud_wait
+    cmp #4
+    bcs @w
+    inc hud_wait
+@w:
     lda hud_dirty
     beq @no
-    lda frame
-    and #3
-    beq hud_update_now
+    lda hud_wait
+    cmp #4
+    bcc @no
+    lda vbuf_len
+    bne @no                 ; decor deja en attente : HUD a l'image suivante
+    lda #0
+    sta hud_wait
+    jmp hud_update_now
 @no:
     rts
 hud_update_now:

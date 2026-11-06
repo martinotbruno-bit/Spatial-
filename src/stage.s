@@ -44,7 +44,7 @@ game_start:
 @go:
     lda sector_sel
     sta stage
-    jmp stage_start
+    jmp story_enter         ; page = secteur de depart (0 = introduction)
 
 ; -----------------------------------------------------------------------------
 ; Initialisation d'un niveau (ecran coupe pendant le chargement)
@@ -58,6 +58,7 @@ stage_start:
     sta boss_on
     sta beam_t
     sta nova_t
+    sta sync_cd
     sta kills
     lda #1
     sta scroll_du
@@ -558,27 +559,70 @@ check_game_over:
     rts
 
 ; Etat NIVEAU LIBERE (le jeu continue de tourner sans ennemis)
+; Etat NIVEAU LIBERE : 300 images
+;   250-231 : message "SECT. LIBRE", les vaisseaux restent en place
+;   230-191 : les vaisseaux quittent l'ecran par l'avant (6 px/image)
+;   190-0   : bilan (cibles, vies, bonus de 1000 points par vie a 170)
 clear_update:
+    lda msg_t
+    beq @nm
+    dec msg_t
+@nm:
     jsr players_update
     jsr pbullets_update
     jsr fx_update
+    lda state_t
+    cmp #230
+    bcs @nofly
+    ldx #1
+@fly:
+    lda pl_alive,x
+    beq @nf
+    lda pl_u,x
+    clc
+    adc #6
+    bcs @out
+    sta pl_u,x
+    cmp #236
+    bcc @nf
+@out:
+    lda #0
+    sta pl_alive,x
+    beq @nf
+    cmp #236
+    bcc @nf
+    lda #0
+    sta pl_alive,x
+@nf:
+    dex
+    bpl @fly
+@nofly:
+    lda state_t
+    cmp #170
+    bne @nobonus
+    lda lives
+    beq @nobonus
+    cmp #10
+    bcc @lv
+    lda #9
+@lv:
+    ldy #2                  ; milliers
+    jsr add_score
+    lda #SFX_POWERUP
+    jsr sfx_play
+@nobonus:
     dec state_t
     bne @r
+    jsr save_update_hi
     lda stage
     cmp #1
     bcs @end
     inc stage
-    jmp stage_start
+    lda #1
+    jmp story_enter
 @end:
-    lda #ST_END
-    sta state
-    lda #MSG_END
-    sta msg_id
-    lda #255
-    sta msg_t
-    lda #240
-    sta state_t
-    jsr save_update_hi
+    lda #2                  ; epilogue du prototype
+    jmp story_enter
 @r:
     rts
 
@@ -604,10 +648,11 @@ stage_cleared:
     sta state
     lda #MSG_CLEAR
     sta msg_id
-    lda #255
+    lda #30
     sta msg_t
-    lda #240
+    lda #250
     sta state_t
+    jsr bilan_build
     ldx #MAX_EB-1
     lda #0
 @b:

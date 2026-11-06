@@ -64,6 +64,11 @@ player_update:
     beq @nc
     dec pl_cool,x
 @nc:
+    lda pl_lasta,x
+    cmp #255
+    beq @nla
+    inc pl_lasta,x
+@nla:
     lda pl_abil_cd,x
     beq @ncd
     dec pl_abil_cd,x
@@ -185,6 +190,15 @@ player_update:
     lda lim_vmin,y
     sta pl_v,x
 @nm:
+    ; --- attaque synchronisee : appuis sur A des deux pilotes a moins de
+    ; SYNC_WINDOW images d'intervalle ---
+    lda tmp6
+    and #BTN_A
+    beq @nosync
+    lda #0
+    sta pl_lasta,x
+    jsr sync_check
+@nosync:
     ; --- tir (A maintenu) ---
     lda tmp7
     and #BTN_A
@@ -207,6 +221,65 @@ player_update:
     jmp ability_trigger
 @nob:
     rts
+
+; Verifie et declenche la SALVE SYNCHRONISEE (X = joueur qui vient d'appuyer)
+sync_check:
+    lda nplayers
+    cmp #2
+    bne @r
+    jsr both_alive
+    bcc @r
+    lda sync_cd
+    bne @r
+    txa
+    eor #1
+    tay
+    lda pl_lasta,y
+    cmp #SYNC_WINDOW
+    bcs @r
+    lda #SYNC_CD
+    sta sync_cd
+    lda #255
+    sta pl_lasta
+    sta pl_lasta+1
+    stx tmp4
+    ldx #1
+@pl:
+    lda #2
+    sta tmp2
+@shot:
+    jsr pb_alloc
+    bcc @nx
+    ldy tmp1
+    lda #3                  ; 3 = projectile synchronise (degats SYNC_DMG)
+    sta pb_on,y
+    lda #6
+    sta pb_du,y
+    stx tmp3
+    ldx tmp2
+    lda sync_dv,x
+    ldx tmp3
+    sta pb_dv,y
+    lda pl_u,x
+    clc
+    adc #8
+    sta pb_u,y
+    lda pl_v,x
+    clc
+    adc #4
+    sta pb_v,y
+    dec tmp2
+    bpl @shot
+@nx:
+    dex
+    bpl @pl
+    ldx tmp4
+    lda #SFX_SYNC
+    jmp sfx_play
+@r:
+    rts
+
+sync_dv: .byte <-1, 0, 1
 
 ; Capacite propre du vaisseau X
 ability_trigger:

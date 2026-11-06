@@ -43,6 +43,18 @@ Elle se remplit en détruisant des ennemis et en **volant en formation**
   en jeu ;
 - en solo : **Nova**, une onde de choc qui balaie l'écran.
 
+## Salve synchronisée
+
+À deux, appuyez sur A **en même temps** que votre partenaire (moins de
+8 images d'écart) : les deux vaisseaux tirent une salve lourde. Une salve
+par seconde au maximum.
+
+## Entre les secteurs
+
+Un texte raconte la mission (START pour passer). À la fin d'un secteur, les
+vaisseaux quittent l'écran et un bilan s'affiche : cibles détruites et bonus
+de 1000 points par vie restante.
+
 ## HUD
 
 `SCORE` — `HI` (record du mode) — `VIES` / `LIEN` (jauge) — `A:` `B:`

@@ -231,6 +231,7 @@ draw_text:
 play_draw:
     jsr oam_begin
     jsr draw_message
+    jsr draw_bilan
     jsr draw_players
     jsr draw_beam
     jsr draw_ebullets
@@ -347,13 +348,18 @@ draw_pbullets:
     tay
     lda shot_tiles,y
     sta d_tile
+    cpy #4
+    bcc @own
+    lda #3                  ; salve synchronisee : palette blanc/orange
+    sta d_attr
+@own:
     jsr draw_obj
 @n:
     dex
     bpl @l
     rts
 
-shot_tiles: .byte S_SHOT_A_H, S_SHOT_A_V, S_SHOT_B_H, S_SHOT_B_V
+shot_tiles: .byte S_SHOT_A_H, S_SHOT_A_V, S_SHOT_B_H, S_SHOT_B_V, S_BEAM_H, S_BEAM_H
 
 draw_enemies:
     lda #2

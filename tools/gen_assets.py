@@ -473,6 +473,7 @@ def sfx_tables():
     sfx["ALERT"] = pulse([pf(2, 10, 0xA0 if (i // 8) % 2 == 0 else 0xD5) for i in range(64)])
     sfx["DASH"] = pulse([pf(1, 10 - i // 2, 0x200 - i * 0x18) for i in range(14)])
     sfx["SHIELD"] = pulse([pf(3, 9, 0x120 if i % 4 < 2 else 0x100) for i in range(16)])
+    sfx["SYNC"] = pulse([pf(2, 15 - i // 2, 0x60 + (i % 3) * 0x30) for i in range(20)])
     sfx["COOPREADY"] = pulse([pf(1, 9, p) for p in (0xD5, 0xD5, 0xA9, 0xA9, 0x8E, 0x8E, 0x6A, 0x6A, 0x6A, 0x6A)])
     return sfx
 

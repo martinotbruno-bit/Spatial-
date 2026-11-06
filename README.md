@@ -19,6 +19,8 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - Capacités propres : **Surcharge** (LANCE, esquive rapide) et **Bouclier
   frontal** (ÉGIDE, absorbe 4 projectiles)
 - Collisions physiques entre joueurs, sans dégâts ni blocage
+- **Salve synchronisée** : les deux pilotes appuient sur A ensemble
+- Séquences narratives entre les secteurs, écran de bilan de fin de secteur
 - Ressource coopérative **LIEN** et trois pouvoirs : **Faisceau de Liaison**
   (attaque combinée dépendant du placement des deux vaisseaux),
   **Transfert d'énergie** (ramène un partenaire sans vie), **Nova** (solo)
@@ -27,7 +29,7 @@ Jeu original pour Nintendo Entertainment System d'origine, réalisé selon le
 - 4 familles d'ennemis (drones, chasseurs, tourelles, kamikazes), tirs visés
   sur 16 directions, mini-boss à 2 phases
 - Moteur audio sur les 5 canaux (2 pulse, triangle, bruit, DPCM),
-  3 musiques originales, 14 effets sonores
+  4 musiques originales, 15 effets sonores
 - Sauvegarde des records sur PRG-RAM à pile (double copie + somme de contrôle)
 - Détection NTSC/PAL et compensation de cadence 6/5 en 50 Hz
 

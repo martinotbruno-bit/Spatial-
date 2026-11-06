@@ -71,9 +71,12 @@ pleine (jauge pleine : B déclenche le pouvoir coopératif) :
 - **Collisions entre vaisseaux** : contact physique (corps 12×12 px),
   séparation immédiate selon l'axe de moindre pénétration, jamais de dégâts.
 
-Pistes retenues pour la Phase 2 : *attaque synchronisée* (tir simultané des
-deux joueurs à ±4 images = salve renforcée), *bouclier partagé* (deuxième
-utilisation du LIEN à demi-jauge).
+- **Salve synchronisée** *[prototype]* : les deux pilotes appuient sur A à
+  moins de 8 images d'intervalle → chaque vaisseau tire 3 projectiles
+  lourds (4 dégâts chacun). Recharge 1 s, aucune jauge consommée : le
+  pouvoir récompense le timing, pas l'accumulation.
+
+Piste restante : *bouclier partagé* (deuxième usage du LIEN à demi-jauge).
 
 ## 4. Ennemis *[prototype : 4 familles]*
 

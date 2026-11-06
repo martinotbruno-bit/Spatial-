@@ -64,13 +64,29 @@
 - Push vers GitHub toujours refusé (403, accès de l'application Claude au
   dépôt) : commits conservés en local.
 
+## 2026-11-06 — Phase 2 (suite)
+
+- Correction : tuiles des vaisseaux erronées en niveau vertical (index de
+  table décalé) ; test T25 contrôlant les tuiles OAM ajouté.
+- Salve synchronisée (2e pouvoir coopératif), projectiles à dégâts
+  variables ; test T27.
+- Séquences narratives (introduction, transition, épilogue), affichage
+  lettre par lettre, musique « Liens » ; nouvel état ST_STORY ; test T26.
+- Fin de secteur : sortie des vaisseaux, bilan (cibles, vies, bonus
+  1000 points par vie) ; test T28.
+- Budget du retour de trame : une colonne de décor et le HUD complet dans
+  la même image prenaient 1704 cycles (> budget 1800 avec peu de marge) ;
+  le HUD est désormais différé d'une image quand le décor est en attente
+  (retour à 1237 cycles max).
+- 28/28 tests en émulation. Stress : 94 % CPU, 0 image perdue.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,
    DPCM/manettes, sauvegarde après coupure).
 2. Secteur 1 complet : décor définitif (attributs par paire de colonnes,
    2-3 palettes), décor interactif/destructible, checkpoint.
-3. ~~Capacités propres à chaque vaisseau~~ (fait) ; deuxième pouvoir coopératif.
-4. Séquence narrative d'introduction, écran de fin de secteur avec bilan.
+3. ~~Capacités propres à chaque vaisseau~~ ~~deuxième pouvoir coopératif~~ (faits).
+4. ~~Séquence narrative d'introduction, écran de fin de secteur avec bilan~~ (faits).
 5. Moteur audio : enveloppes par instrument, musique de menu dédiée.
 6. ~~Réorganisation des bancs~~ (fait).

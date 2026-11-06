@@ -27,7 +27,7 @@ function test(id, name, fn) {
   console.log(`${ok ? "OK   " : "ECHEC"} ${id} ${name}${detail ? "  -- " + detail : ""}`);
 }
 
-const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4 };
+const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5 };
 const camOf = (m) => m.peek("cam_lo") + 256 * m.peek("cam_hi");
 const invul = (m) => { m.poke("pl_invul", 10); m.poke("pl_invul", 10, 1); };
 
@@ -42,6 +42,7 @@ function startGame({ players = 2, ship = 0, sector = 0, sound = false } = {}) {
   if (sector === 1) m.tap(0, "RIGHT");
   m.tap(0, "START");
   m.frame(2);
+  if (m.peek("state") === ST.STORY) { m.tap(0, "START"); m.frame(2); }   // passe la sequence narrative
   return m;
 }
 
@@ -256,9 +257,11 @@ test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () =
   }
   m.releaseAll();
   const st = m.peek("state");
-  // enchainement vers le secteur 2 (vertical)
-  m.frame(260, invul);
-  const next = m.peek("state") === ST.PLAY && m.peek("stage") === 1 && m.peek("orient") === 1;
+  // bilan puis sequence narrative puis secteur 2 (vertical)
+  m.frame(252, invul);
+  const story = m.peek("state") === ST.STORY && m.peek("story_page") === 1;
+  m.tap(0, "START"); m.frame(4);
+  const next = story && m.peek("state") === ST.PLAY && m.peek("stage") === 1 && m.peek("orient") === 1;
   return { ok: appeared && state2 && phase2 && st === ST.CLEAR && next, detail: `apparu=${appeared}, phase2=${phase2}, projectiles max=${fanSeen}, etat apres destruction=${st}, enchainement secteur 2=${next}` };
 });
 
@@ -320,7 +323,7 @@ test("T17", "Effets sonores : plusieurs SFX distincts declenches en jeu", () => 
   m.press(0, "A"); m.press(1, "A");
   m.frame(1200, (mm, i) => { if (i < 1100) invul(mm); if (i === 500) mm.poke("gauge", 64); if (i === 502) mm.press(0, "B"); if (i === 506) mm.release(0, "B"); });
   cpu.emulate = emu;
-  const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "DASH", "SHIELD", "COOPREADY"];
+  const names = ["SHOT_A", "SHOT_B", "HIT", "EXPLODE", "BIGEXPLODE", "POWERUP", "BEAM", "NOVA", "DEATH", "MENU", "ALERT", "DASH", "SHIELD", "SYNC", "COOPREADY"];
   const seen = [...sfx.keys()].sort((a, b) => a - b).map((k) => names[k] || k);
   return { ok: sfx.size >= 6, detail: `${sfx.size} effets distincts : ${seen.join(", ")}` };
 });
@@ -480,6 +483,65 @@ test("T25", "Affichage : tuiles des vaisseaux conformes a l'orientation (H et V)
     if (sector) m.screenshot(path.join(SHOTS, "05_secteur2_vertical.png"));
   }
   return { ok: res.every((r) => r.ok), detail: res.map((r) => `${r.o}: LANCE $${r.a.toString(16)} EGIDE $${r.b.toString(16)} ${r.ok ? "ok" : "ERREUR"}`).join(", ") };
+});
+
+test("T26", "Sequence narrative : texte affiche lettre par lettre, START pour passer", () => {
+  const m = new Machine();
+  m.frame(40);
+  m.tap(0, "START");
+  m.frame(2);
+  const st = m.peek("state");
+  m.frame(400);
+  // premiere ligne en table de noms : rangee 6, colonne 3
+  const want = "AN 2291 - BRAS D'ORION";
+  let line = "";
+  for (let i = 0; i < want.length; i++) line += String.fromCharCode(m.nt(0x20c3 + i));
+  m.screenshot(path.join(SHOTS, "09_sequence_narrative.png"));
+  const music = m.peek("mus_on");
+  m.tap(0, "START"); m.frame(4);
+  return { ok: st === ST.STORY && line === want && music === 1 && m.peek("state") === ST.PLAY, detail: `etat=${st}, 1re ligne="${line}", musique=${music}, apres START etat=${m.peek("state")}` };
+});
+
+test("T27", "Attaque synchronisee : appuis sur A a moins de 8 images -> salve puissante", () => {
+  const m = startGame({ players: 2 });
+  m.frame(80, (mm) => { for (let i = 0; i < 16; i++) mm.poke("eb_on", 0, i); });
+  // appuis decales de 3 images
+  m.press(0, "A"); m.frame(3); m.press(1, "A"); m.frame(1);
+  const syncShots = m.peekBytes("pb_on", 16).filter((x) => x === 3).length;
+  const cd = m.peek("sync_cd");
+  m.releaseAll(); m.frame(70);
+  // appuis decales de 20 images : pas de salve
+  m.press(0, "A"); m.frame(20); m.press(1, "A"); m.frame(1);
+  const none = m.peekBytes("pb_on", 16).filter((x) => x === 3).length;
+  m.releaseAll();
+  // degats : un ennemi a 8 PV detruit par 2 projectiles synchronises
+  m.frame(70);
+  for (let i = 0; i < 16; i++) m.poke("pb_on", 0, i);
+  m.poke("en_type", 1, 0); m.poke("en_hp", 8, 0); m.poke("en_u", m.peek("pl_u") + 30, 0); m.poke("en_v", m.peek("pl_v"), 0);
+  m.poke("en_duhi", 0, 0); m.poke("en_dulo", 0, 0);
+  m.press(0, "A"); m.press(1, "A"); m.frame(1); m.release(0, "A"); m.release(1, "A");
+  let killed = false;
+  m.frame(12, (mm) => { if (!mm.peek("en_type", 0)) killed = true; mm.poke("en_dvhi", 0, 0); mm.poke("en_dvlo", 0, 0); });
+  return { ok: syncShots === 6 && cd > 0 && none === 0 && killed, detail: `salve=${syncShots} projectiles, recharge=${cd}, appuis trop espaces -> ${none}, ennemi 8 PV detruit=${killed}` };
+});
+
+test("T28", "Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vies", () => {
+  const m = startGame({ players: 2 });
+  m.frame(5);
+  m.poke("kills", 42); m.poke("lives", 3);
+  [0, 0, 0, 0, 0, 0].forEach((v, i) => m.poke("score", v, i));
+  // destruction immediate du boss
+  m.poke("boss_on", 3); m.poke("boss_t", 99);
+  m.frame(2);
+  const cleared = m.peek("state") === ST.CLEAR;
+  m.frame(58);                                   // state_t ~ 190 : debut du bilan
+  const gone = m.peek("pl_alive") === 0 && m.peek("pl_alive", 1) === 0;
+  const txt = String.fromCharCode(...m.peekBytes("bilan_buf", 9));
+  const s0 = m.peekBytes("score", 6).join("");
+  m.frame(40);
+  m.screenshot(path.join(SHOTS, "10_bilan.png"));
+  const s1 = m.peekBytes("score", 6).join("");
+  return { ok: cleared && gone && txt === "CIBLES 42" && s1 === "013000" && s0 === "010000", detail: `etat bilan=${cleared}, vaisseaux sortis=${gone}, texte="${txt}", score ${s0} -> ${s1} (+3 vies x 1000)` };
 });
 
 test("T22", "Compilation reproductible : deux constructions identiques octet pour octet", () => {

@@ -35,3 +35,10 @@ P1: A4/2 C5/2 E5/2 A5/6 G5/2 A5/2 B5/2 C6/8 r/128
 P2: E4/2 A4/2 C5/2 E5/6 D5/2 E5/2 Gs5/2 A5/8 r/128
 TR: A2/2 A3/2 A2/2 A3/6 G2/2 G3/2 E3/2 A2/8 r/128
 NO: K/2 r/2 K/2 S/6 r/2 S/2 S/2 K/8 r/128
+
+# Theme des sequences narratives "Liens" - La mineur, lent
+@song story tempo=8
+P1: E5/8 D5/8 C5/12 B4/4 A4/8 C5/8 E5/16 F5/8 E5/8 D5/12 C5/4 B4/16 Gs4/16
+P2: [A3/2 C4/2 E4/2 A4/2]x4 [F3/2 A3/2 C4/2 F4/2]x4 [D3/2 F3/2 A3/2 D4/2]x4 [E3/2 Gs3/2 B3/2 E4/2]x4
+TR: A2/32 F2/32 D2/32 E2/32
+NO: r/128

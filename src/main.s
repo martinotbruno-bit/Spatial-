@@ -506,12 +506,15 @@ state_draw:
 
 state_upd_tbl:
     .word title_update-1, play_update-1, clear_update-1, over_update-1, end_update-1
+    .word story_update-1
 state_drw_tbl:
     .word title_draw-1, play_draw-1, play_draw-1, play_draw-1, play_draw-1
+    .word story_draw-1
 
 .include "audio.s"
 .include "save.s"
 .include "title.s"
+.include "story.s"
 .include "hud.s"
 .include "data.s"
 

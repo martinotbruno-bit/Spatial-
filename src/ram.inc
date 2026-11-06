@@ -50,6 +50,7 @@ spr_left:    .res 1
 rng:         .res 2
 vbuf_len:    .res 1
 script_ptr:  .res 2
+story_ptr:   .res 2
 ; parametres du dessin de metasprite
 d_xlo:       .res 1
 d_xhi:       .res 1
@@ -87,6 +88,13 @@ pl_invul:    .res 2
 pl_resp:     .res 2
 pl_abil_t:   .res 2     ; capacite propre active (images restantes)
 pl_abil_cd:  .res 2     ; temps de recharge de la capacite
+pl_lasta:    .res 2     ; images depuis le dernier appui sur A (sature a 255)
+sync_cd:     .res 1
+story_page:  .res 1
+story_wait:  .res 1
+story_va:    .res 2
+story_line:  .res 2
+bilan_buf:   .res 24
 shield_hp:   .res 1     ; projectiles encore absorbables par le bouclier d'EGIDE
 
 ; --- ennemis ---
@@ -158,6 +166,7 @@ beam_v:      .res BEAM_PTS
 score:       .res 6     ; chiffres decimaux, poids fort en premier
 lives:       .res 1
 hud_dirty:   .res 1
+hud_wait:    .res 1
 scroll_du:   .res 1     ; vitesse de defilement (px/image), 0 pendant le boss
 msg_t:       .res 1
 msg_id:      .res 1

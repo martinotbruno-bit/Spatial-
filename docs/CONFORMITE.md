@@ -41,18 +41,18 @@ Légende :
 | 3.1 | 8 directions, contrôles précis | ✅ ÉMU | Déplacement sub-pixel 8.8, sans inertie |
 | 3.2 | Vaisseaux distincts et complémentaires | ✅ ÉMU | Vitesse, armes, cadence, capacités propres (Surcharge / Bouclier, T23-T24) |
 | 3.3 | Collisions entre joueurs sans blocage | ✅ ÉMU | T05 |
-| 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | 🟡 | Faisceau, Transfert d'énergie (+ Nova solo) ; attaque synchronisée à produire |
+| 3.4 | Plusieurs pouvoirs coopératifs, jauge identifiable | ✅ ÉMU | Faisceau, Transfert d'énergie, Salve synchronisée (T27), Nova solo |
 | 3.5 | Vies communes équilibrées | 🟡 | Réserve commune + Transfert d'énergie ; équilibrage à faire |
 | 4 | Armement riche et évolutif | 🟡 | 2 × 3 niveaux (frontal, concentré, éventail, latéral, diagonal) ; bombes/armes défensives à produire |
 | 5.1 | Grande variété d'ennemis | 🟡 | 4 familles sur 8 demandées |
 | 5.2 | Boss multi-phases | 🟡 | 1 mini-boss 2 phases ; parties destructibles à produire |
-| 6 | Scénario, séquences, 2 fins, encyclopédie | ⬜ | Univers proposé (GDD §1) |
+| 6 | Scénario, séquences, 2 fins, encyclopédie | 🟡 | Séquences narratives (intro, transition, épilogue) avec musique dédiée (T26) ; 2 fins et encyclopédie à produire |
 | 7 | Direction artistique | 🟡 | Palettes par faction/secteur, sprites originaux ; décors de prototype |
 | 7.4 | HUD complet | ✅ ÉMU | Vies, score, record, jauge, armes, boss |
 | 8 | Musique et SFX sur 5 canaux | ✅ ÉMU | Moteur maison, DPCM |
 | 9.1 | Difficultés sélectionnables, mode expert | ⬜ | Bit réservé en sauvegarde |
 | 9.2 | Classements et sauvegarde non volatile | 🟡 | Records solo/coop sauvegardés (T18) ; classement complet à produire |
-| 10 | Menus et présentation | 🟡 | Titre animé, menu, présentation des vaisseaux ; autres écrans à produire |
+| 10 | Menus et présentation | 🟡 | Titre animé, menu, présentation des vaisseaux, écran de bilan de fin de secteur (T28) ; sélection de difficulté, encyclopédie, classements à produire |
 | 11 | Compatibilité NES d'origine, sans matériel additionnel | 🟡 | Conçu pour MMC3 standard ; **❌ MAT** |
 | 11.2 | Mapper choisi et justifié | ✅ | ARCHITECTURE §1 |
 | 11.3 | Scrolling prototypé dès le début | ✅ ÉMU | T10, T11 |
@@ -74,7 +74,7 @@ Légende :
 
 | Plateforme | État |
 |---|---|
-| jsnes 1.2.1 (NTSC) | ✅ 24/24 tests |
+| jsnes 1.2.1 (NTSC) | ✅ 28/28 tests |
 | Mesen / FCEUX / Nestopia | ⬜ non testé |
 | NES NTSC (toutes révisions) | ❌ non testé |
 | NES PAL | ❌ non testé |

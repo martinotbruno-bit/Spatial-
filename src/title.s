@@ -331,7 +331,11 @@ title_draw:
     lda #S_SHIP_B_H
     sta d_tile
     jsr draw_obj
-    ; etoiles defilantes
+    jsr draw_starfield
+    jmp oam_end
+
+; Etoiles defilantes (pool d'explosions reutilise hors du jeu)
+draw_starfield:
     ldx #MAX_FX-1
 @st:
     txa
@@ -360,4 +364,4 @@ title_draw:
     dec spr_left
     dex
     bpl @st
-    jmp oam_end
+    rts
