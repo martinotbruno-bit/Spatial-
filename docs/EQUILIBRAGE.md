@@ -13,19 +13,26 @@
 | Joueur moyen | 12 images (~200 ms) | 25 % des décisions | Joueur habitué aux shoot'em up |
 | Débutant | 18 images (~300 ms) | 40 % des décisions | Premier contact avec le genre |
 
-## Paramètres par difficulté
+## Paramètres par difficulté (révisés après l'allongement des secteurs)
+
+Les secteurs ayant été rallongés d'un facteur ≈ 4 (corps répété 5-6 fois)
+sans changer la réserve de vies, la difficulté a été revue à la baisse :
 
 | Paramètre | RECRUE | PILOTE | VÉTÉRAN | EXPERT* |
 |---|---|---|---|---|
-| Vies solo / coop | 5 / 7 | 3 / 5 | 2 / 4 | 2 / 3 |
-| Tirs visés | lents (1,25 px/img) | rapides (2 px/img) | rapides | rapides |
-| Tourelles | 1 tir / 128 img | 1 / 64 | 1 / 64 | 1 / 32 |
+| Vies solo / coop | 7 / 9 (avant 5 / 7) | 5 / 7 (avant 3 / 5) | 3 / 5 (avant 2 / 4) | 2 / 3 |
+| Vie bonus au relais (max 9) | oui | oui | oui | non |
+| Tirs visés | lents | **lents** (avant rapides) | rapides | rapides |
+| Tourelles | 1 tir / 128 img | **1 / 128** (avant 64) | 1 / 64 | 1 / 32 |
 | Chasseurs | 2 tirs | 2 tirs | 3 tirs | 3 tirs |
-| PV du boss / seuil phase 2 | 180 / 90 | 250 / 125 | 250 / 125 | 250 / 170 |
-| Boss phase 1 : gerbe de 3 tous les | 128 img | 64 img | 64 img | 64 img |
-| Boss phase 2 : cycle / gerbe / tirs visés | 72 / 3 / 1 | 56 / 5 / 2 | 40 / 5 / 3 | 34 / 5 / 3 |
+| PV du boss / seuil phase 2 | **150 / 75** (avant 180 / 90) | **200 / 100** (avant 250 / 125) | 250 / 125 | 250 / 170 |
+| Motifs des boss | voir `boss.s` (tables par difficulté) | | | |
 
-\* EXPERT : débloqué en terminant la campagne (enregistré dans la cartouche).
+\* EXPERT : débloqué en terminant la campagne ; inchangé.
+
+> Les mesures ci-dessous datent d'avant l'allongement (secteurs de ≈ 30 s)
+> et servent de référence historique ; la mesure sur les secteurs longs est
+> en section « Secteurs longs ».
 
 ## Mesures — joueur moyen
 

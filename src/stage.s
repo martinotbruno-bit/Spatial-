@@ -267,12 +267,15 @@ set_full_lives:
     rts
 
 ; Tables de difficulte :        RECRUE PILOTE VETERAN EXPERT
-diff_lives_solo: .byte          5,     3,     2,      2
-diff_lives_coop: .byte          7,     5,     4,      3
-diff_aim:        .byte          0,     16,    16,     16   ; vitesse des tirs vises
-diff_tmask:      .byte          127,   63,    63,     31   ; periode des tourelles
-diff_bosshp:     .byte          180,   250,   250,    250
-diff_bossph2:    .byte          90,    125,   125,    170  ; seuil de la phase 2
+; (revues a la baisse apres l'allongement des secteurs : voir EQUILIBRAGE.md)
+diff_lives_solo: .byte          7,     5,     3,      2
+diff_lives_coop: .byte          9,     7,     5,      3
+diff_aim:        .byte          0,     0,     16,     16   ; vitesse des tirs vises
+diff_tmask:      .byte          127,   127,   63,     31   ; periode des tourelles
+diff_bosshp:     .byte          150,   200,   250,    250
+diff_bossph2:    .byte          75,    100,   125,    170  ; seuil de la phase 2
+; vie bonus au relais (sauf EXPERT)
+diff_cp_life:    .byte          1,     1,     1,      0
 diff_fx3:        .byte          0,     0,     1,      1    ; 3e tir des chasseurs
 
 ; -----------------------------------------------------------------------------
@@ -843,6 +846,15 @@ scroll_update:
     sta msg_t
     lda #SFX_COOPREADY
     jsr sfx_play
+    ldx diff                ; vie bonus au relais (max 9)
+    lda diff_cp_life,x
+    beq @nocp
+    lda lives
+    cmp #9
+    bcs @nocp
+    inc lives
+    lda #1
+    sta hud_dirty
 @nocp:
     lda cam_lo
     and #7

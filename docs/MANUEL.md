@@ -39,7 +39,8 @@ mapper 4 (MMC3), ou sur une cartouche flash compatible. Testé uniquement en
   **P** niveau d'arme +1, **L** laser perçant, **M** missiles à tête
   chercheuse, **B** bombe supplémentaire. Ramassez-les au bon moment !
   Une vie perdue fait perdre un niveau d'arme.
-- **Vies** : réserve commune (5 en coopération, 3 en solo).
+- **Vies** : réserve commune, selon le niveau (PILOTE : 7 en coopération,
+  5 en solo) ; **une vie bonus à chaque relais**.
 
 ## La jauge LIEN
 

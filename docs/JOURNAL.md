@@ -187,6 +187,14 @@
 - Banc `$C000` à 98 % : **l'extension de la ROM est maintenant le
   préalable à toute nouvelle fonction**.
 
+## 2026-11-06 — Difficulté réduite (demande utilisateur)
+
+- Après l'allongement des secteurs : vies +2 en RECRUE/PILOTE, +1 en
+  VÉTÉRAN ; vie bonus au relais (sauf EXPERT) ; PILOTE avec tirs visés lents
+  et tourelles deux fois moins rapides ; PV des boss réduits en RECRUE et
+  PILOTE. Tests T14, T31 (vie bonus), T32 mis à jour : 39/39.
+- Module coopération déplacé en `$E000` (banc `$C000` : 98 % → 83 %).
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

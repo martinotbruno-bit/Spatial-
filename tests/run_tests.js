@@ -323,7 +323,7 @@ test("T14", "Perte de vie, reapparition invulnerable, game over et retour au tit
   m.frame(260);
   const cont = m.peek("state") === ST.CONT;
   m.frame(620);                                   // compte a rebours ecoule sans START
-  return { ok: lives0 === 3 && deaths === 4 && over && cont && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, ecran CONTINUER=${cont}, retour titre=${m.peek("state") === 0}` };
+  return { ok: lives0 === 5 && deaths === 6 && over && cont && m.peek("state") === ST.TITLE, detail: `vies initiales=${lives0}, pertes=${deaths}, game over=${over}, ecran CONTINUER=${cont}, retour titre=${m.peek("state") === 0}` };
 });
 
 test("T15", "Armes evolutives : capsule ramassee -> niveau +1, perte de vie -> niveau -1", () => {
@@ -620,8 +620,10 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
   for (const sector of [0, 1]) {
     const m = startGame({ players: 2, sector });
     const cp = cpOf(m);
-    let msg = false;
+    let msg = false, bonus = false;
+    const l0 = m.peek("lives");
     m.frame(cp + 30, (mm) => { invul(mm); if (mm.peek("msg_id") === 6 && mm.peek("msg_t") > 0) msg = true; });
+    bonus = m.peek("lives") === l0 + 1;
     const cpCam = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);
     m.frame(200, invul);
     // game over force
@@ -635,8 +637,8 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
     let bad = 0;
     for (let k = 0; k < 6; k++) { m.frame(37, invul); bad += vramErrors(m); }
     const score = m.peekBytes("score", 6).join("");
-    res.push({ sector, ok: msg && cpCam === cp && inCont && camAfter >= cp && camAfter < cp + 8 && bad0 + bad === 0 && m.peek("lives") === 5 && m.peek("continues") === 2,
-      txt: `${sector ? "V" : "H"}: relais=${cpCam} msg=${msg} CONTINUER=${inCont} reprise cam=${camAfter} erreurs VRAM=${bad0 + bad} vies=${m.peek("lives")} credits=${m.peek("continues")} score=${score}` });
+    res.push({ sector, ok: msg && bonus && cpCam === cp && inCont && camAfter >= cp && camAfter < cp + 8 && bad0 + bad === 0 && m.peek("lives") === 7 && m.peek("continues") === 2,
+      txt: `${sector ? "V" : "H"}: relais=${cpCam} msg=${msg} vie bonus=${bonus} CONTINUER=${inCont} reprise cam=${camAfter} erreurs VRAM=${bad0 + bad} vies=${m.peek("lives")} credits=${m.peek("continues")} score=${score}` });
     if (sector === 1) m.screenshot(path.join(SHOTS, "11_reprise_vertical.png"));
   }
   return { ok: res.every((r) => r.ok), detail: res.map((r) => r.txt).join(" ; ") };
@@ -651,7 +653,7 @@ test("T32", "Difficultes : RECRUE/PILOTE/VETERAN, EXPERT verrouille puis debloqu
     m.tap(0, "START"); m.frame(2); m.tap(0, "START"); m.frame(2);
     out.push([m.peek("diff"), m.peek("lives"), m.peek("aim_speed"), m.peek("turret_mask"), m.peek("boss_hp0")]);
   }
-  const ok1 = JSON.stringify(out) === JSON.stringify([[0, 5, 0, 127, 180], [1, 3, 16, 63, 250], [2, 2, 16, 63, 250]]);
+  const ok1 = JSON.stringify(out) === JSON.stringify([[0, 7, 0, 127, 150], [1, 5, 0, 127, 200], [2, 3, 16, 63, 250]]);
   // EXPERT indisponible sans deblocage : DROITE depuis VETERAN revient a RECRUE
   const m = new Machine();
   m.frame(40); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "DOWN"); m.tap(0, "RIGHT"); m.tap(0, "RIGHT");
