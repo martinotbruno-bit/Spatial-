@@ -41,9 +41,10 @@ record("3_niveau_ascension", start(0, true), 22);
 // Boss : saute a la fin du secteur 1, le script declenche l'apparition et le theme
 record("4_boss_sentinelle", (m) => {
   start(0, true)(m);
-  let p = m.s("s1_script"); while (m.romByte(p) !== 220) p += 4;
-  m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
-  m.poke("cam_lo", 1744 & 255); m.poke("cam_hi", 1744 >> 8);
+  const h = (o) => m.peek("sec_hdr", o), stop = (h(2) | (h(3) << 8)) - 16;
+  let p = h(14) | (h(15) << 8); while (m.romByte(p + 1) !== 15) p += 4;
+  m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1); m.poke("sc_last", 0);
+  m.poke("cam_lo", stop & 255); m.poke("cam_hi", stop >> 8);
   m.frame(30, (mm) => { mm.poke("pl_invul", 10); mm.poke("pl_invul", 10, 1); });
   m.poke("boss_hp", 250);
 }, 16);

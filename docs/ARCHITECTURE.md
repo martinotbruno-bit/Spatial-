@@ -51,6 +51,14 @@ CHR-ROM (unités de 1 Kio) :
 | 16-18 | sprites communs `$00-$BF` (vaisseaux, ennemis, tirs, explosions) | R2-R4 |
 | 19+j | jeu de sprites j, `$C0-$FF` (boss H/V, objet de décor) | R5 |
 
+**Longueur des secteurs** : la carte est découpée en intro (jouée une fois),
+corps (joué `SH_REPS` fois) et fin (arène du boss). `map_pos` convertit la
+position réelle (16 bits) en index de carte ; le script d'apparition revient
+à sa première entrée du corps à chaque nouveau passage. Le corps est aligné
+sur les blocs d'attributs (4 colonnes / 2 rangées) ; la fin de défilement
+et le relais (milieu) sont calculés par le générateur, qui vérifie que le
+déclencheur du boss coïncide avec la fin.
+
 Ajouter un secteur = un fichier de tuiles, un script, une entrée `SECTORS`
 dans `tools/gen_assets.py` (et un jeu de sprites si le boss est nouveau).
 

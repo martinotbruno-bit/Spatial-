@@ -519,19 +519,19 @@ def pal_s4(c, rows, x, y):
 SECTORS = [
     dict(name="s1", title="Station Vesta", orient=0, bank=0, tiles="tiles_s1.txt",
          sprites="sprites_s1.txt", spr_set=0, gen=gen_map_h, palfn=pal_s1,
-         cam_stop=1760, cp=896, song="stage", boss=1,
+         loop=(48, 152), reps=6, song="stage", boss=1,
          pal=[0x0F, 0x00, 0x10, 0x3C, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x07, 0x17, 0x27, 0x0F, 0x01, 0x11, 0x31]),
     dict(name="s2", title="Surface de Kera", orient=1, bank=2, tiles="tiles_s2.txt",
          sprites="sprites_s1.txt", spr_set=0, gen=gen_map_v, palfn=pal_s2,
-         cam_stop=1536, cp=768, song="stage", boss=1,
+         loop=(34, 156), reps=5, song="stage", boss=1,
          pal=[0x0F, 0x08, 0x18, 0x38, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x06, 0x16, 0x27, 0x0F, 0x00, 0x10, 0x30]),
     dict(name="s3", title="Ceinture brisee", orient=0, bank=3, tiles="tiles_s3.txt",
          sprites="sprites_s3.txt", spr_set=1, gen=gen_map_belt, palfn=pal_s3,
-         cam_stop=1760, cp=896, song="belt", boss=2,
+         loop=(24, 192), reps=5, song="belt", boss=2,
          pal=[0x0F, 0x07, 0x17, 0x27, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x00, 0x2D, 0x10, 0x0F, 0x0C, 0x1C, 0x3C]),
     dict(name="s4", title="Cite de Lumen", orient=1, bank=4, tiles="tiles_s4.txt",
          sprites="sprites_s4.txt", spr_set=2, gen=gen_map_city, palfn=pal_s4,
-         cam_stop=1536, cp=768, song="lumen", boss=3,
+         loop=(24, 168), reps=5, song="lumen", boss=3,
          pal=[0x0F, 0x00, 0x01, 0x11, 0x0F, 0x30, 0x21, 0x16, 0x0F, 0x03, 0x14, 0x35, 0x0F, 0x09, 0x19, 0x2A]),
 ]
 # Palettes de sprites communes
@@ -822,12 +822,24 @@ def main():
         width = 26 if sec["orient"] == 0 else 32
         out.append(f'.segment "{seg}"')
         out.append(f"; ---- Secteur {n} : {sec['title']} - {len(ids)} lignes, {len(tpl)} gabarits uniques")
+        # Longueur : intro + corps x passages + fin. Fin de defilement : la
+        # derniere colonne/rangee de carte est atteinte au bord de l'ecran.
+        la, ll = sec["loop"]
+        align = 4 if sec["orient"] == 0 else 2
+        assert la % align == 0 and ll % align == 0 and la + ll <= len(ids), (n, la, ll)
+        total = la + ll * sec["reps"] + (len(ids) - la - ll)
+        margin = 36 if sec["orient"] == 0 else 40
+        cam_stop = (total - margin) * 8
+        cp = (cam_stop // 2) // 32 * 32
+        boss_trig = len(ids) - margin
+        assert script[-5] == boss_trig and script[-4] == 15, (n, "declencheur du boss", script[-5], boss_trig)
         out.append(f"{n}_hdr:")
         out.append(f"    .byte {sec['orient']}, {len(ids) - 1}")
-        out.append(f"    .word {sec['cam_stop']}, {sec['cp']}")
+        out.append(f"    .word {cam_stop}, {cp}")
         out.append(f"    .word {n}_ids, {n}_tlo, {n}_thi, {n + '_attr' if attr else 0}, {n}_script, {n}_pal")
         k = SECTORS.index(sec)
         out.append(f"    .byte {2 + 2 * k}, {CHR_SPR_SECTOR + spr_sets.index(sec['sprites'])}, {songs_names.index(sec['song'])}, {sec['boss']}")
+        out.append(f"    .byte {la}, {ll}, {sec['reps']}")
         out.append(ca65_bytes(f"{n}_pal", sec["pal"] + SPR_PAL))
         out.append(ca65_bytes(f"{n}_ids", ids))
         if attr:
@@ -837,7 +849,8 @@ def main():
         for i, t in enumerate(tpl):
             out.append(ca65_bytes(f"{n}_t{i}", t, width))
         out.append(ca65_bytes(f"{n}_script", script, 4))
-        print(f"  secteur {n}: {len(ids)} lignes, {len(tpl)} gabarits, script {len(script) // 4} entrees")
+        print(f"  secteur {n}: {len(ids)} lignes, {len(tpl)} gabarits, script {len(script) // 4} entrees, "
+              f"{total} lignes jouees ({sec['reps']} passages), fin a {cam_stop} px (~{cam_stop / 60:.0f} s), relais {cp}")
     out.append("")
 
     # Musique

@@ -15,7 +15,7 @@ RESULTATS_TESTS.md).
 | `$6000-$7FFF` | PRG-RAM sur pile (sauvegarde) | 64 / 8192 octets |
 | `$8000-$9FFF` | Banc R6 = banc du secteur courant (0 = secteur 1, 2 = secteur 2, 3 = secteur 3) : en-tête, carte, attributs, script, palettes | ≤ 6,6 / 8 Kio par secteur |
 | `$A000-$BFFF` | Banc R7 = PRG 1 : musique, SFX, tables de périodes, directions, sinus | 2873 / 8192 octets |
-| `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 6064 / 8192 octets |
+| `$C000-$DFFF` | PRG 6 fixe : échantillon DPCM (273 o, aligné 64) + code de jeu | 8047 / 8192 octets (**98 %**) |
 | `$E000-$FFFF` | PRG 7 fixe : démarrage, NMI, IRQ, audio, sauvegarde, titre, HUD, palettes/scripts, vecteurs | 3558 / 8192 octets |
 
 Banc PRG 4 : secteur 4. Banc PRG 5 : libre (8 Kio). La ROM finale (256-512 Kio) donnera un banc

@@ -174,6 +174,19 @@
   la ROM devient nécessaire avant le secteur 5.**
 - 39/39 tests ; stress avec missiles : 96 % CPU, 0 image perdue.
 
+## 2026-11-06 — Secteurs rallongés (demande utilisateur)
+
+- Chaque secteur : intro + corps répété 5 à 6 fois + arène du boss.
+  Durées de défilement : Vesta 131 s, Kéra 109 s, Ceinture 132 s, Lumen
+  115 s (au lieu de 25-30 s), plus le combat de boss. Vagues d'ennemis
+  rejouées à chaque passage ; relais au milieu.
+- Conversion position → carte en 16 bits (`map_pos`), script réarmé à
+  chaque passage, attributs H/V alignés. Tests de défilement étendus au
+  secteur entier (T10, T11, T29 : 0 erreur VRAM) ; tests de boss par saut
+  en fin de secteur.
+- Banc `$C000` à 98 % : **l'extension de la ROM est maintenant le
+  préalable à toute nouvelle fonction**.
+
 ### Prochaines étapes proposées (Phase 2 — tranche verticale)
 
 1. Validation Mesen + console réelle de la ROM Phase 1 (séparation HUD,

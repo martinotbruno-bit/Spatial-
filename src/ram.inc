@@ -50,6 +50,8 @@ spr_left:    .res 1
 rng:         .res 2
 vbuf_len:    .res 1
 script_ptr:  .res 2
+map_p:       .res 2     ; position (colonne/rangee reelle) a convertir
+mp_t:        .res 2
 m_ids:       .res 2     ; pointeurs de carte du secteur courant
 m_tlo:       .res 2
 m_thi:       .res 2
@@ -99,6 +101,11 @@ sync_cd:     .res 1
 cp_cam:      .res 2     ; point de reprise atteint dans le secteur (0 = aucun)
 continues:   .res 1
 sec_hdr:     .res SH_SIZE
+loop_total:  .res 2     ; longueur du corps * passages
+sc_loop_ptr: .res 2     ; 1re entree du script dans le corps repete
+sc_last:     .res 1     ; derniere position de carte vue par le script
+bc_map:      .res 1
+sp0:         .res 2     ; position de depart (cam / 8) au chargement
 sectors_unl: .res 1     ; secteurs debloques (bit k = secteur k)
 vattr_sh:    .res 64    ; copie des attributs de la table $2400 (secteurs V)
 av_row:      .res 1

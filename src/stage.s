@@ -91,28 +91,56 @@ stage_start:
     ; 30 rangees reste dans la table B sans jamais toucher au HUD.
     lda #0
     sta MMC3_MIRROR
+    ; longueur totale du corps repete
+    lda #0
+    sta loop_total
+    sta loop_total+1
+    ldx sec_hdr+SH_REPS
+@lt:
+    clc
+    lda loop_total
+    adc sec_hdr+SH_LOOPL
+    sta loop_total
+    bcc @lt2
+    inc loop_total+1
+@lt2:
+    dex
+    bne @lt
+    ; 1re entree du script situee dans le corps (rejouee a chaque passage)
     lda sec_hdr+SH_SCRIPT
     sta script_ptr
     lda sec_hdr+SH_SCRIPT+1
     sta script_ptr+1
-    jsr cam_div8
-    sta tmp6                ; c0 = premiere colonne/rangee de carte
-    ; saute les apparitions deja passees
-@skip:
-    ldy #0
-    lda (script_ptr),y
-    cmp #$FF
-    beq @sk_done
-    cmp tmp6
-    bcs @sk_done
-    clc
+    lda sec_hdr+SH_LOOPA
+    jsr script_seek
     lda script_ptr
-    adc #4
+    sta sc_loop_ptr
+    lda script_ptr+1
+    sta sc_loop_ptr+1
+    ; position de depart (point de reprise eventuel) et script correspondant
+    lda #0
+    jsr cam_pos
+    lda map_p
+    sta sp0
+    lda map_p+1
+    sta sp0+1
+    jsr map_pos
+    sta sc_last
+    pha
+    lda sec_hdr+SH_SCRIPT
     sta script_ptr
-    bcc @skip
-    inc script_ptr+1
-    bne @skip
-@sk_done:
+    lda sec_hdr+SH_SCRIPT+1
+    sta script_ptr+1
+    pla
+    cmp sec_hdr+SH_LOOPA
+    bcc @intro
+    lda sc_loop_ptr         ; dans le corps ou la fin : on part du corps
+    sta script_ptr
+    lda sc_loop_ptr+1
+    sta script_ptr+1
+@intro:
+    lda sc_last
+    jsr script_seek
     lda sec_hdr+SH_PAL
     sta ptr0
     lda sec_hdr+SH_PAL+1
@@ -129,16 +157,23 @@ stage_start:
     jsr place_players
     lda orient
     bne @v
-    ; --- horizontal : 33 colonnes initiales a partir de c0 ---
+    ; --- horizontal : 33 colonnes initiales a partir de la position de depart
     lda #33
     sta tmp7
-    lda tmp6
-    sta tmp5
+    lda sp0
+    sta map_p
+    lda sp0+1
+    sta map_p+1
 @hc:
-    lda tmp5
+    lda map_p
+    sta tmp0
+    jsr map_pos
     jsr build_column_h
     jsr flush_vbuf_direct
-    inc tmp5
+    inc map_p
+    bne @hc2
+    inc map_p+1
+@hc2:
     dec tmp7
     bne @hc
     jmp @done
@@ -175,22 +210,30 @@ stage_start:
     sta vsy
     lda #30
     sta tmp7
-    lda tmp6
-    sta tmp5
+    lda sp0
+    sta map_p
+    lda sp0+1
+    sta map_p+1
 @vr:
-    lda tmp5
-    sta tmp4
-    jsr mod30
+    jsr map_pos
+    sta tmp4                ; rangee de carte
+    jsr mod30w
     eor #$FF
     sec
-    adc #29                 ; 29 - (R mod 30)
+    adc #29                 ; rangee de table : 29 - (R mod 30)
     jsr build_row_v
     jsr flush_vbuf_direct
-    inc tmp5
+    inc map_p
+    bne @vr2
+    inc map_p+1
+@vr2:
     dec tmp7
     bne @vr
-    lda tmp6                ; prochaine rangee : 29 - (c0 mod 30)
-    jsr mod30
+    lda sp0                 ; prochaine rangee : 29 - (R0 mod 30)
+    sta map_p
+    lda sp0+1
+    sta map_p+1
+    jsr mod30w
     eor #$FF
     sec
     adc #29
@@ -231,6 +274,114 @@ diff_tmask:      .byte          127,   63,    63,     31   ; periode des tourell
 diff_bosshp:     .byte          180,   250,   250,    250
 diff_bossph2:    .byte          90,    125,   125,    170  ; seuil de la phase 2
 diff_fx3:        .byte          0,     0,     1,      1    ; 3e tir des chasseurs
+
+; -----------------------------------------------------------------------------
+; Conversion position reelle -> index de carte (map_p 16 bits -> A).
+; La carte = intro [0, A) jouee une fois, corps [A, A+L) joue SH_REPS fois,
+; puis la fin [A+L, longueur) (arene du boss). A et L sont alignes sur les
+; blocs d'attributs (4 colonnes / 2 rangees) par le generateur.
+; -----------------------------------------------------------------------------
+map_pos:
+    lda map_p+1
+    bne @body
+    lda map_p
+    cmp sec_hdr+SH_LOOPA
+    bcs @body
+    rts                     ; intro
+@body:
+    sec
+    lda map_p
+    sbc sec_hdr+SH_LOOPA
+    sta mp_t
+    lda map_p+1
+    sbc #0
+    sta mp_t+1              ; k = P - A
+    lda mp_t+1
+    cmp loop_total+1
+    bcc @rep
+    bne @tail
+    lda mp_t
+    cmp loop_total
+    bcc @rep
+@tail:
+    sec                     ; fin : A + L + (k - total)
+    lda mp_t
+    sbc loop_total
+    clc
+    adc sec_hdr+SH_LOOPA
+    clc
+    adc sec_hdr+SH_LOOPL
+    bcs @max
+    cmp sec_hdr+SH_MAXIDX
+    bcc @ok
+@max:
+    lda sec_hdr+SH_MAXIDX
+@ok:
+    rts
+@rep:
+    ; k mod L (soustractions successives, k < ~1100)
+    lda mp_t+1
+    bne @sub
+    lda mp_t
+    cmp sec_hdr+SH_LOOPL
+    bcc @done
+@sub:
+    sec
+    lda mp_t
+    sbc sec_hdr+SH_LOOPL
+    sta mp_t
+    lda mp_t+1
+    sbc #0
+    sta mp_t+1
+    jmp @rep
+@done:
+    clc
+    adc sec_hdr+SH_LOOPA
+    rts
+
+; map_p = cam / 8 + A
+cam_pos:
+    sta map_p
+    lda cam_hi
+    sta map_p+1
+    lda cam_lo
+    lsr map_p+1
+    ror
+    lsr map_p+1
+    ror
+    lsr map_p+1
+    ror
+    clc
+    adc map_p
+    sta map_p
+    bcc @r
+    inc map_p+1
+@r:
+    rts
+
+; A = map_p mod 30 (16 bits)
+mod30w:
+    lda map_p
+    sta mp_t
+    lda map_p+1
+    sta mp_t+1
+@l:
+    lda mp_t+1
+    bne @s
+    lda mp_t
+    cmp #30
+    bcc @r
+@s:
+    sec
+    lda mp_t
+    sbc #30
+    sta mp_t
+    lda mp_t+1
+    sbc #0
+    sta mp_t+1
+    jmp @l
+@r:
+    rts
 
 ; A = cam / 8 (camera < 2048)
 cam_div8:
@@ -399,7 +550,7 @@ flush_vbuf_direct:
 ; tampon VRAM. Colonne de table = A mod 64 (tables $2000 | $2400), rangees 4-29.
 ; -----------------------------------------------------------------------------
 build_column_h:
-    sta tmp0                ; colonne de carte
+    sta bc_map              ; index de carte ; tmp0 = colonne reelle (octet bas)
     ; gabarit
     tay
     cpy sec_hdr+SH_MAXIDX
@@ -444,7 +595,7 @@ build_column_h:
     bne @r
     lda m_attr+1            ; secteur sans attributs : palette unique
     beq @r
-    lda tmp0
+    lda bc_map
     lsr
     lsr
     sta tmp1
@@ -698,33 +849,18 @@ scroll_update:
     bne @split
     lda orient
     bne @v
-    ; colonne de carte (cam/8) + 32
-    lda cam_hi
+    lda #32                 ; colonne reelle cam/8 + 32
+    jsr cam_pos
+    lda map_p
     sta tmp0
-    lda cam_lo
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    clc
-    adc #32
+    jsr map_pos
     jsr build_column_h
     jmp @split
 @v:
-    ; rangee de carte (cam/8) + 29 -> rangee de table vrow, puis vrow -= 1 mod 30
-    lda cam_hi
-    sta tmp0
-    lda cam_lo
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    clc
-    adc #29
+    ; rangee reelle cam/8 + 29 -> rangee de table vrow, puis vrow -= 1 mod 30
+    lda #29
+    jsr cam_pos
+    jsr map_pos
     sta tmp4
     lda vrow
     jsr build_row_v
@@ -767,17 +903,38 @@ update_split:
 ; Script d'apparition : entrees [declencheur (cam/8), type, v, parametre]
 ; terminees par $FF.
 ; -----------------------------------------------------------------------------
+; Avance le script jusqu'a la 1re entree de declencheur >= A
+script_seek:
+    sta tmp1
+@l:
+    ldy #0
+    lda (script_ptr),y
+    cmp #$FF
+    beq @r
+    cmp tmp1
+    bcs @r
+    clc
+    lda script_ptr
+    adc #4
+    sta script_ptr
+    bcc @l
+    inc script_ptr+1
+    bne @l
+@r:
+    rts
+
 script_update:
-    lda cam_hi
-    sta tmp0
-    lda cam_lo
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    lsr tmp0
-    ror
-    sta tmp1                ; position courante en unites de 8 px
+    lda #0
+    jsr cam_pos
+    jsr map_pos
+    sta tmp1                ; position courante dans la carte (unites de 8 px)
+    cmp sc_last
+    sta sc_last
+    bcs @next
+    lda sc_loop_ptr         ; nouveau passage dans le corps : vagues rejouees
+    sta script_ptr
+    lda sc_loop_ptr+1
+    sta script_ptr+1
 @next:
     ldy #0
     lda (script_ptr),y

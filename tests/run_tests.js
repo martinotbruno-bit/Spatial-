@@ -29,6 +29,38 @@ function test(id, name, fn) {
 
 const ST = { TITLE: 0, PLAY: 1, CLEAR: 2, OVER: 3, END: 4, STORY: 5, CONT: 6 };
 
+// En-tete du secteur courant (copie RAM sec_hdr) et conversion position -> carte
+const hdr = (m, o) => m.peek("sec_hdr", o);
+const camStop = (m) => hdr(m, 2) | (hdr(m, 3) << 8);
+const cpOf = (m) => hdr(m, 4) | (hdr(m, 5) << 8);
+function mapPos(m, P) {
+  const A = hdr(m, 22), L = hdr(m, 23), reps = hdr(m, 24), max = hdr(m, 1);
+  if (P < A) return P;
+  const k = P - A, total = L * reps;
+  if (k < total) return A + (k % L);
+  return Math.min(A + L + (k - total), max);
+}
+// Saute pres de la fin du secteur (decor non redessine) : apparition du boss
+function jumpToBoss(m) {
+  const stop = camStop(m) - 16;
+  m.poke("cam_lo", stop & 255); m.poke("cam_hi", stop >> 8);
+  let p = hdr(m, 14) | (hdr(m, 15) << 8);
+  while (m.romByte(p + 1) !== 15) p += 4;
+  m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
+  m.poke("sc_last", 0);
+}
+// Fait defiler tout le secteur en verifiant la VRAM toutes les `step` images
+function scrollWholeSector(m, step, onChunk) {
+  let bad = 0, chunks = 0;
+  while (m.peek("scroll_on") && chunks < 200) {
+    m.frame(step, invul);
+    bad += vramErrors(m);
+    if (onChunk) onChunk(m, chunks);
+    chunks++;
+  }
+  return { bad, chunks };
+}
+
 // Verifie que la zone de jeu visible correspond a la carte (H ou V) -> nb d'erreurs
 function vramErrors(m) {
   let bad = 0;
@@ -36,8 +68,8 @@ function vramErrors(m) {
   const pre = "s" + (m.peek("stage") + 1);
   if (m.peek("orient") === 0) {
     const ids = m.s(pre + "_ids"), tlo = m.s(pre + "_tlo"), thi = m.s(pre + "_thi");
-    for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8) && c < 256; c++) {
-      const id = m.romByte(ids + c), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+    for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8); c++) {
+      const id = m.romByte(ids + mapPos(m, c)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
       const nc = c & 63, base = (nc & 32 ? 0x2400 : 0x2000) + (nc & 31);
       for (let r = 0; r < 26; r++) if (m.romByte(tp + r) !== m.nt(base + (r + 4) * 32)) bad++;
     }
@@ -47,12 +79,13 @@ function vramErrors(m) {
       const ntrow = ((vsy >> 3) + s) % 30;
       let r = ((29 - ntrow) % 30 + 30) % 30;
       while (r < Math.floor(cam / 8) - 2) r += 30;
-      const id = m.romByte(ids + Math.min(r, 231)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
+      const rr = mapPos(m, r);
+      const id = m.romByte(ids + rr), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
       for (let c = 0; c < 32; c++) if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++;
       // attributs : bloc k (16 px) de la paire de rangees r>>1
       const attr = m.sym[pre + "_attr"];
       if (attr !== undefined) {
-        const rr = Math.min(r, 231), a = ntrow >> 2, half = (ntrow >> 1) & 1;
+        const a = ntrow >> 2, half = (ntrow >> 1) & 1;
         for (let k = 0; k < 16; k++) {
           const want = (m.romByte(attr + (rr >> 1) * 4 + (k >> 2)) >> (2 * (k & 3))) & 3;
           const got = (m.nt(0x27c0 + a * 8 + (k >> 1)) >> ((k & 1) * 2 + half * 4)) & 3;
@@ -213,47 +246,20 @@ test("T09", "Coop : TRANSFERT D'ENERGIE ramene un partenaire sans vie", () => {
   return { ok: m.peek("pl_alive", 1) === 1 && m.peek("state") === ST.PLAY, detail: `EGIDE en vol=${m.peek("pl_alive", 1)}` };
 });
 
-test("T10", "Scrolling horizontal : contenu VRAM conforme a la carte sur tout le niveau", () => {
+test("T10", "Scrolling horizontal : decor VRAM conforme a la carte sur tout le secteur (corps repete)", () => {
   const m = startGame({ players: 2 });
-  let bad = 0, checks = 0;
-  const ids = m.s("s1_ids"), tlo = m.s("s1_tlo"), thi = m.s("s1_thi");
-  for (let k = 0; k < 19; k++) {
-    m.frame(97, invul);
-    const cam = camOf(m);
-    // colonnes visibles uniquement (la colonne suivante est en cours d'envoi)
-    for (let c = Math.floor(cam / 8); c <= Math.floor((cam + 255) / 8) && c < 256; c++) {
-      const id = m.romByte(ids + c), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
-      const nc = c & 63, base = (nc & 32 ? 0x2400 : 0x2000) + (nc & 31);
-      for (let r = 0; r < 26; r++) { checks++; if (m.romByte(tp + r) !== m.nt(base + (r + 4) * 32)) bad++; }
-    }
-    if (k === 5) m.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png"));
-  }
+  const r = scrollWholeSector(m, 97, (mm, k) => { if (k === 5) mm.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png")); });
   metrics.cam_h_end = camOf(m);
-  return { ok: bad === 0 && camOf(m) === 1760, detail: `${checks} tuiles verifiees, ${bad} erreurs, camera finale=${camOf(m)}` };
+  return { ok: r.bad === 0 && camOf(m) === camStop(m), detail: `${r.chunks} controles, ${r.bad} erreurs, camera finale=${camOf(m)} (fin ${camStop(m)}, ${hdr(m, 24)} passages du corps)` };
 });
 
-test("T11", "Scrolling vertical : contenu VRAM conforme a la carte sur tout le niveau", () => {
+test("T11", "Scrolling vertical : decor et attributs VRAM conformes sur tout le secteur (corps repete)", () => {
   const m = startGame({ players: 2, sector: 1 });
-  let bad = 0, checks = 0, vattr = 0;
-  const ids = m.s("s2_ids"), tlo = m.s("s2_tlo"), thi = m.s("s2_thi");
-  for (let k = 0; k < 16; k++) {
-    m.frame(101, invul);
-    const cam = camOf(m), vsy = m.peek("vsy");
-    for (let s = 0; s < 26; s++) {
-      const ntrow = ((vsy >> 3) + s) % 30;
-      let r = ((29 - ntrow) % 30 + 30) % 30;
-      while (r < Math.floor(cam / 8) - 2) r += 30;
-      const id = m.romByte(ids + Math.min(r, 231)), tp = m.romByte(tlo + id) | (m.romByte(thi + id) << 8);
-      for (let c = 0; c < 32; c++) { checks++; if (m.romByte(tp + c) !== m.nt(0x2400 + ntrow * 32 + c)) bad++; }
-    }
-    if (k === 6) m.screenshot(path.join(SHOTS, "05_secteur2_vertical.png"));
-    vattr += vramErrors(m);
-  }
-  // le HUD ne doit jamais etre ecrase
+  const r = scrollWholeSector(m, 101, (mm, k) => { if (k === 6) mm.screenshot(path.join(SHOTS, "05_secteur2_vertical.png")); });
   let hudOk = true;
   const row1 = " SCORE ";
   for (let i = 0; i < row1.length; i++) if (m.nt(0x2020 + i) !== row1.charCodeAt(i)) hudOk = false;
-  return { ok: bad === 0 && vattr === 0 && hudOk && camOf(m) === 1536, detail: `${checks} tuiles verifiees, ${bad} erreurs, erreurs tuiles+attributs (verif. 2)=${vattr}, HUD intact=${hudOk}, camera=${camOf(m)}` };
+  return { ok: r.bad === 0 && hudOk && camOf(m) === camStop(m), detail: `${r.chunks} controles, ${r.bad} erreurs (tuiles + attributs), HUD intact=${hudOk}, camera=${camOf(m)} (fin ${camStop(m)})` };
 });
 
 test("T12", "Ennemis et projectiles : 4 familles + conteneurs destructibles, tirs ennemis", () => {
@@ -273,12 +279,7 @@ test("T12", "Ennemis et projectiles : 4 familles + conteneurs destructibles, tir
 
 test("T13", "Mini-boss : apparition, 2 phases, destruction, niveau libere", () => {
   const m = startGame({ players: 2 });
-  m.poke("cam_lo", 1744 & 255); m.poke("cam_hi", 1744 >> 8);
-  m.poke("script_ptr", 0); // le script se recale ci-dessous
-  // recale le script sur l'entree du boss
-  const sp = m.s("s1_script");
-  let p = sp; while (m.romByte(p) !== 220) p += 4;
-  m.poke("script_ptr", p & 255); m.poke("script_ptr", p >> 8, 1);
+  jumpToBoss(m);
   m.press(0, "B"); m.press(1, "B");
   let appeared = false, phase2 = false, state2 = false, fanSeen = 0;
   for (let i = 0; i < 4000 && m.peek("state") === ST.PLAY; i++) {
@@ -432,7 +433,7 @@ test("T19", "Performances : scene chargee (2 joueurs niv.3, 10 ennemis, 16 tirs 
   return { ok: lag === 0 && max < 29780 && vb < 2273, detail: `vblank utilise max=${vb}/2273 cycles, cycles/image max=${max} moy=${avg} (budget NTSC 29780 = ${(100 * max / 29780).toFixed(0)} %), images perdues=${lag}, sprites/ligne max=${spLineMax}, images avec >8 sprites/ligne=${framesOver}/${fc.length}, OAM saturee=${sprFull}` };
 });
 
-test("T20", "Performances : partie normale (secteur 1 complet a 2 joueurs)", () => {
+test("T20", "Performances : partie normale (secteur 1, 1900 images a 2 joueurs)", () => {
   const m = startGame({ players: 2 });
   m.press(0, "B"); m.press(1, "B");
   m.frame(5, invul);
@@ -586,30 +587,15 @@ test("T28", "Bilan de fin de secteur : sortie des vaisseaux, cibles, bonus de vi
 
 test("T29", "Decor multi-palettes : attributs VRAM conformes sur tout le secteur 1", () => {
   const m = startGame({ players: 2 });
-  const attr = m.s("s1_attr");
-  let bad = 0, checks = 0;
+  let abad = 0;
   const pals = new Set();
-  for (let k = 0; k < 19; k++) {
-    m.frame(97, invul);
-    const cam = camOf(m);
-    // groupes de 4 colonnes entierement ou partiellement visibles
-    for (let g = Math.floor(cam / 32); g <= Math.floor((cam + 255) / 32) && g < 64; g++) {
-      const nc = (g * 4) & 63, base = (nc & 32 ? 0x27c0 : 0x23c0) + ((nc & 31) >> 2);
-      for (let r = 1; r < 8; r++) {
-        checks++;
-        const want = m.romByte(attr + g * 7 + r - 1), got = m.nt(base + 8 * r);
-        if (want !== got) bad++;
-        for (let q = 0; q < 4; q++) pals.add((want >> (2 * q)) & 3);
-      }
-    }
-    if (k === 7) m.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png"));
-  }
-  // la rangee d'attributs du HUD n'est jamais modifiee
+  const r = scrollWholeSector(m, 97, (mm, k) => { abad += attrErrors(mm); if (k === 7) mm.screenshot(path.join(SHOTS, "04_secteur1_horizontal.png")); });
+  const attr = m.s("s1_attr");
+  for (let i = 0; i < 64 * 7; i++) { const b = m.romByte(attr + i); for (let q = 0; q < 4; q++) pals.add((b >> (2 * q)) & 3); }
   let hud = true;
   for (let i = 0; i < 8; i++) if (m.nt(0x23c0 + i) !== 0x55) hud = false;
-  return { ok: bad === 0 && hud && pals.size === 3, detail: `${checks} octets d'attributs verifies, ${bad} erreurs, palettes de decor utilisees=[${[...pals].sort()}], HUD intact=${hud}` };
+  return { ok: abad === 0 && r.bad === 0 && hud && pals.size === 3, detail: `${r.chunks} controles, erreurs d'attributs=${abad}, palettes de decor utilisees=[${[...pals].sort()}], HUD intact=${hud}` };
 });
-
 test("T30", "Decor destructible : conteneur ancre au decor, detruit en 3 impacts, butin", () => {
   const m = startGame({ players: 1 });
   m.frame(20, invul);
@@ -633,7 +619,7 @@ test("T31", "Point de reprise + CONTINUER : relance au relais (H et V), decor ex
   const res = [];
   for (const sector of [0, 1]) {
     const m = startGame({ players: 2, sector });
-    const cp = sector ? 768 : 896;
+    const cp = cpOf(m);
     let msg = false;
     m.frame(cp + 30, (mm) => { invul(mm); if (mm.peek("msg_id") === 6 && mm.peek("msg_t") > 0) msg = true; });
     const cpCam = m.peek("cp_cam") + 256 * m.peek("cp_cam", 1);
@@ -685,9 +671,10 @@ function attrErrors(m) {
   const attr = m.s("s" + (m.peek("stage") + 1) + "_attr");
   const cam = camOf(m);
   let bad = 0;
-  for (let g = Math.floor(cam / 32); g <= Math.floor((cam + 255) / 32) && g < 64; g++) {
+  for (let g = Math.floor(cam / 32); g <= Math.floor((cam + 255) / 32); g++) {
+    const mg = mapPos(m, g * 4) >> 2;
     const nc = (g * 4) & 63, base = (nc & 32 ? 0x27c0 : 0x23c0) + ((nc & 31) >> 2);
-    for (let r = 1; r < 8; r++) if (m.romByte(attr + g * 7 + r - 1) !== m.nt(base + 8 * r)) bad++;
+    for (let r = 1; r < 8; r++) if (m.romByte(attr + mg * 7 + r - 1) !== m.nt(base + 8 * r)) bad++;
   }
   return bad;
 }
@@ -706,6 +693,7 @@ test("T33", "Secteur 3 Ceinture brisee : decor/attributs, unites lourdes, Essaim
     if (k === 8) m.screenshot(path.join(SHOTS, "12_secteur3_ceinture.png"));
   }
   // boss : drones laches et anneaux de 8 projectiles
+  jumpToBoss(m);
   let drones = 0, ring = 0;
   m.press(0, "B"); m.press(1, "B");
   for (let i = 0; i < 1200 && m.peek("state") === ST.PLAY; i++) {
@@ -784,6 +772,7 @@ test("T36", "Secteur 4 Cite de Lumen (V) : decor/attributs, soutiens qui reparen
     if (k === 8) m.screenshot(path.join(SHOTS, "14_secteur4_lumen.png"));
   }
   const vb = Math.max(...m.vblankUse);
+  jumpToBoss(m);
   let dirs = new Set();
   m.press(0, "B"); m.press(1, "B");
   for (let i = 0; i < 1500 && m.peek("state") === ST.PLAY; i++) {

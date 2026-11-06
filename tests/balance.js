@@ -26,7 +26,7 @@ function run({ players, ship = 0, diff, seed, profile }) {
   const bot = new Bot(m, { seed, ...profile });
   const lives0 = m.peek("lives");
   let deaths = 0, prev = [1, 1], bossStart = 0, bossEnd = 0, frames = 0, ebSum = 0, ebMax = 0;
-  while (frames < 7000) {
+  while (frames < 20000) {
     bot.step();
     m.frame(1);
     frames++;
